@@ -26,17 +26,23 @@ const Combat = {
         // 难度强化（秘境强敌）
         const mult = isHard ? 1.5 : 1.0;
 
+        // 临时气血增益/减益（矿洞受伤等），用于本场战斗初始气血
+        const tempHpBuff = player.tempHpBuff || 0;
+        const tempHpDebuff = player.tempHpDebuff || 0;
+        const effHp = Math.max(1, stats.hp + tempHpBuff - tempHpDebuff);
+        if (tempHpDebuff) player.tempHpDebuff = 0; // 一次性减益，用掉即清
+
         this.state = {
             player: {
                 name: player.name,
                 avatar: ['道','仙','魔','佛'][player.avatar],
                 elem: player.element,
-                hp: stats.hp + (player.tempHpBuff || 0),
-                maxHp: stats.hp + (player.tempHpBuff || 0),
+                hp: effHp,
+                maxHp: effHp,
                 ling: stats.ling + (player.tempLingBuff || 0),
                 maxLing: stats.ling + (player.tempLingBuff || 0),
-                atk: stats.atk + (player.tempBuffAtk ? player.tempBuffAtk.value : 0),
-                def: stats.def + (player.tempBuffDef ? player.tempBuffDef.value : 0),
+                atk: stats.atk,
+                def: stats.def,
                 spd: stats.spd,
                 crit: stats.crit,
                 buffs: [],
@@ -47,7 +53,9 @@ const Combat = {
                 fabao: player.equipped.fabao ? getEquipTemplate(player.equipped.fabao.baseId) : null,
                 fabaoCd: 0,
                 reflect: 0,
-                shield: 0
+                shield: 0,
+                reflectTurns: 0,
+                shieldTurns: 0
             },
             enemy: {
                 name: enemyTpl.name,
@@ -70,6 +78,10 @@ const Combat = {
             playerFirst: stats.spd >= enemyTpl.spd,
             playerTurn: stats.spd >= enemyTpl.spd  // 回合标记：true=玩家可操作，false=敌方行动中
         };
+
+        // 将丹药临时增益转为可衰减buff（与“N回合”描述一致）
+        if (player.tempBuffAtk) this.state.player.buffs.push({ type: 'atk', value: player.tempBuffAtk.value, turns: player.tempBuffAtk.turns });
+        if (player.tempBuffDef) this.state.player.buffs.push({ type: 'def', value: player.tempBuffDef.value, turns: player.tempBuffDef.turns });
 
         // 显示战斗界面
         if (typeof UI !== 'undefined') UI.showBattle(this.state);
@@ -164,14 +176,21 @@ const Combat = {
         if (!skillId || !GameConfig.fabaoSkills[skillId]) return;
         const fs = GameConfig.fabaoSkills[skillId];
 
+        // 灵力校验，避免扣成负数
+        if (player.ling < fs.cost) {
+            if (typeof UI !== 'undefined') UI.toast('灵力不足', 'bad');
+            return;
+        }
         player.ling -= fs.cost;
         player.fabaoCd = fs.cd;
 
         if (fs.shield) {
             player.shield = Math.floor(player.maxHp * fs.shield);
+            player.shieldTurns = fs.turns || 2;
             this.addLog(`激发法宝${player.fabao.name}：${fs.name}，获得护盾`, 'heal');
         } else if (fs.reflect) {
             player.reflect = fs.reflect;
+            player.reflectTurns = fs.turns || 2;
             this.addLog(`激发法宝${player.fabao.name}：${fs.name}，反弹伤害`, 'heal');
         } else if (fs.dmgMult) {
             // 法宝攻击
@@ -267,6 +286,7 @@ const Combat = {
 
         if (petSkill.shield) {
             player.shield = Math.floor(player.maxHp * petSkill.shield);
+            player.shieldTurns = petSkill.cd || 3;
             this.addLog(`${player.pet.name}施展${petSkill.name}，护主加盾`, 'heal');
         } else if (petSkill.dmgMult) {
             const baseDmg = player.pet.atk * petSkill.dmgMult;
@@ -279,6 +299,7 @@ const Combat = {
                 this.state.enemy.debuffs.push({ ...petSkill.debuff });
             }
         }
+        this.checkEnd(); // 灵宠补刀击杀立即结算
     },
 
     /* ---------- 敌人回合 ---------- */
@@ -302,8 +323,11 @@ const Combat = {
         // 五行克制
         const elemMult = getElementMultiplier(enemy.elem, player.elem);
         dmg *= elemMult;
-        // 玩家防御
-        dmg = Math.max(1, dmg - player.def * 0.8);
+        // 玩家防御（含防御类buff/debuff，与dealDamage守方处理一致）
+        let pDef = player.def;
+        player.buffs.forEach(b => { if (b.type === 'def') pDef += Math.floor(b.value * (b.lvlMult || 1)); });
+        player.debuffs.forEach(d => { if (d.type === 'def') pDef = Math.floor(pDef * (1 - d.value)); });
+        dmg = Math.max(1, dmg - pDef * 0.8);
         // 暴击
         const isCrit = Math.random() < 0.08;
         if (isCrit) dmg *= 1.6;
@@ -354,6 +378,9 @@ const Combat = {
         p.debuffs = p.debuffs.filter(d => { d.turns--; return d.turns > 0; });
         this.state.enemy.buffs = this.state.enemy.buffs.filter(b => { b.turns--; return b.turns > 0; });
         this.state.enemy.debuffs = this.state.enemy.debuffs.filter(d => { d.turns--; return d.turns > 0; });
+        // 护盾/反弹回合递减（归零即清除），与“N回合”描述一致
+        if (p.shieldTurns > 0) { p.shieldTurns--; if (p.shieldTurns <= 0) p.shield = 0; }
+        if (p.reflectTurns > 0) { p.reflectTurns--; if (p.reflectTurns <= 0) p.reflect = 0; }
 
         // 灵宠自动行动
         if (this.state.player.pet && this.state.player.petCd === 0) {

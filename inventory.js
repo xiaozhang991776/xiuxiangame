@@ -169,8 +169,8 @@ const Inventory = {
         if (!tpl) return false;
 
         const curEnhance = eqInstance.enhance || 0;
-        if (curEnhance >= 10) {
-            if (typeof UI !== 'undefined') UI.toast('已达强化上限！', 'bad');
+        if (curEnhance >= 100) {
+            if (typeof UI !== 'undefined') UI.toast('已达强化上限+100！', 'bad');
             return false;
         }
         // 强化消耗灵石（随等级递增）

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0d0a14">
     <title>仙途·轮回诀</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- 开场加载遮罩 -->
@@ -16,6 +16,24 @@
             <p class="loading-subtitle">道法自然 · 逆天改命</p>
             <div class="loading-bar"><div class="loading-bar-fill"></div></div>
             <p class="loading-tip" id="loadingTip">凝神聚气，开启仙途...</p>
+        </div>
+    </div>
+
+    <!-- 开始界面 -->
+    <div id="start-screen" class="start-screen hidden">
+        <div class="start-bg-effects">
+            <div class="cc-cloud cc-cloud-1"></div>
+            <div class="cc-cloud cc-cloud-2"></div>
+            <div class="cc-cloud cc-cloud-3"></div>
+            <div class="start-glow"></div>
+        </div>
+        <div class="start-content">
+            <div class="start-taiji">☯</div>
+            <h1 class="start-title">仙途·轮回诀</h1>
+            <p class="start-subtitle">道法自然 · 逆天改命</p>
+            <p class="start-tagline">一念入道，轮回重写；问长生路，谁主沉浮</p>
+            <button class="start-btn" id="startGameBtn">开始游戏</button>
+            <p class="start-foot">作者是小张</p>
         </div>
     </div>
 
@@ -83,7 +101,7 @@
                 </div>
             </div>
 
-            <button class="cc-start-btn" id="startGameBtn">入道飞升</button>
+            <button class="cc-start-btn" id="createGameBtn">入道飞升</button>
         </div>
     </div>
 
@@ -136,6 +154,7 @@
                 </div>
             </div>
             <div class="top-bar-right">
+                <button class="icon-btn" id="tutorialBtn" title="新手教程">📖</button>
                 <button class="icon-btn" id="saveBtn" title="手动存档">💾</button>
                 <button class="icon-btn" id="settingsBtn" title="设置">⚙</button>
             </div>
@@ -234,7 +253,9 @@
                             </div>
                             <div class="cultivate-extra">
                                 <button class="seclusion-btn" id="seclusionBtn">闭关潜修</button>
-                                <span class="seclusion-hint" id="seclusionHint">寿元：100年 · 闭关可大幅增涨修为</span>
+                                <button class="seclusion-btn youli-btn" id="youliBtn">游历天下</button>
+                                <button class="seclusion-btn exchange-btn" id="exchangeBtn">兑换灵石</button>
+                                <span class="seclusion-hint" id="seclusionHint">寿元：100年 · 闭关增修为 · 游历获灵石材料</span>
                             </div>
                         </div>
                     </div>
@@ -357,6 +378,12 @@
         <footer class="bottom-bar">
             <div class="bb-marquee" id="bbMarquee">道法自然，清静无为。凝神修炼，方得始终。</div>
         </footer>
+
+        <!-- 打赏悬浮按钮 -->
+        <button class="reward-fab" id="rewardFab" title="打赏作者">
+            <span class="reward-fab-icon">🎁</span>
+            <span class="reward-fab-text">打赏</span>
+        </button>
     </div>
 
     <!-- 战斗界面 -->
@@ -453,15 +480,54 @@
         </div>
     </div>
 
+    <!-- 打赏/赞助弹窗 -->
+    <div id="reward-screen" class="reward-screen hidden">
+        <div class="reward-box">
+            <button class="reward-close" id="rewardClose">×</button>
+            <div class="reward-glow"></div>
+            <h3 class="reward-title">🎁 打赏道友</h3>
+            <p class="reward-desc">若道友觉得此作尚可，不妨施舍些许灵石，助我问道长生。</p>
+            <div class="reward-qrs">
+                <div class="reward-qr">
+                    <div class="reward-qr-img">
+                        <img src="wechat.png" alt="微信收款码"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="qr-placeholder">请将微信收款码<br>命名为 <b>wechat.png</b><br>放在游戏根目录</div>
+                    </div>
+                    <div class="reward-qr-name">💚 微信</div>
+                </div>
+            </div>
+            <p class="reward-note">扫码即付 · 感激不尽</p>
+        </div>
+    </div>
+
+    <!-- 新手教程引导浮层 -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden">
+        <div class="tutorial-spot" id="tutorialSpot"></div>
+        <div class="tutorial-card">
+            <div class="tutorial-head">
+                <span class="tutorial-badge">新手教程</span>
+                <span class="tutorial-step" id="tutorialStep">1 / 9</span>
+            </div>
+            <h3 class="tutorial-title" id="tutorialTitle">踏入仙途</h3>
+            <div class="tutorial-body" id="tutorialBody"></div>
+            <div class="tutorial-actions">
+                <button class="tutorial-btn tutorial-prev" id="tutorialPrev">上一步</button>
+                <button class="tutorial-btn tutorial-skip" id="tutorialSkip">跳过</button>
+                <button class="tutorial-btn tutorial-next" id="tutorialNext">下一步</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 脚本按顺序加载 -->
-    <script src="js/config.js"></script>
-    <script src="js/save.js"></script>
-    <script src="js/inventory.js"></script>
-    <script src="js/cultivate.js"></script>
-    <script src="js/combat.js"></script>
-    <script src="js/explore.js"></script>
-    <script src="js/shop.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script src="config.js"></script>
+    <script src="save.js"></script>
+    <script src="inventory.js"></script>
+    <script src="cultivate.js"></script>
+    <script src="combat.js"></script>
+    <script src="explore.js"></script>
+    <script src="shop.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>

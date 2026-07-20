@@ -1330,3 +1330,258 @@ input { font-family: inherit; }
     .content-area { padding-bottom: 70px; }
     .bottom-bar { display: none; }
 }
+
+/* ---------- 打赏悬浮按钮 ---------- */
+.reward-fab {
+    position: fixed; z-index: 800;
+    bottom: 46px; right: 22px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.28), rgba(244,63,94,0.22));
+    border: 1px solid var(--gold); border-radius: 30px;
+    color: var(--gold-light); font-size: 15px; font-weight: 600; letter-spacing: 2px;
+    box-shadow: 0 0 22px rgba(212,175,55,0.4);
+    backdrop-filter: blur(10px);
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+    animation: rewardPulse 2.4s ease-in-out infinite;
+}
+.reward-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 32px rgba(212,175,55,0.6); }
+.reward-fab:active { transform: scale(0.96); }
+.reward-fab-icon { font-size: 18px; }
+@keyframes rewardPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(212,175,55,0.35); }
+    50% { box-shadow: 0 0 30px rgba(244,63,94,0.55); }
+}
+
+/* ---------- 打赏弹窗 ---------- */
+.reward-screen {
+    position: fixed; inset: 0; z-index: 860;
+    background: rgba(0,0,0,0.82); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+}
+.reward-box {
+    position: relative; overflow: hidden;
+    background: linear-gradient(180deg, rgba(30,25,45,0.98), rgba(20,16,30,0.98));
+    border: 1px solid var(--gold); border-radius: 18px;
+    padding: 32px 30px 26px; width: 92%; max-width: 460px;
+    box-shadow: 0 0 60px rgba(212,175,55,0.25);
+    animation: modalIn 0.35s ease;
+}
+.reward-glow {
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 240px; height: 240px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,175,55,0.18), transparent 70%);
+    pointer-events: none;
+}
+.reward-close {
+    position: absolute; top: 12px; right: 14px; z-index: 2;
+    font-size: 24px; color: var(--text-dim); width: 32px; height: 32px;
+}
+.reward-close:hover { color: var(--q-shen); }
+.reward-title {
+    position: relative; z-index: 1;
+    text-align: center; font-size: 24px; color: var(--gold-light);
+    letter-spacing: 4px; margin-bottom: 10px;
+    text-shadow: 0 0 18px rgba(212,175,55,0.4);
+}
+.reward-desc {
+    position: relative; z-index: 1;
+    text-align: center; color: var(--text-dim); font-size: 13px; margin-bottom: 22px; line-height: 1.7;
+}
+.reward-qrs { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.reward-qr { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.reward-qr-img {
+    width: 260px; height: 260px; border-radius: 12px; overflow: hidden;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(201,169,106,0.35);
+    display: flex; align-items: center; justify-content: center;
+}
+.reward-qr-img img { width: 100%; height: 100%; object-fit: contain; }
+.qr-placeholder {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; font-size: 12px; color: var(--text-dim); line-height: 1.7; padding: 8px;
+}
+.qr-placeholder b { color: var(--gold-light); }
+.reward-qr-name { font-size: 14px; color: var(--gold-light); letter-spacing: 1px; }
+.reward-note {
+    position: relative; z-index: 1;
+    text-align: center; color: var(--jade); font-size: 12px; margin-top: 22px; letter-spacing: 1px;
+}
+@media (max-width: 760px) {
+    .reward-fab { bottom: 70px; right: 14px; padding: 10px 16px; font-size: 14px; }
+    .reward-qr-img { width: 68vw; height: 68vw; max-width: 260px; max-height: 260px; }
+}
+
+/* 游历天下（与闭关并列，青玉强调色区分） */
+.youli-btn {
+    background: linear-gradient(135deg, rgba(46,196,182,0.22), rgba(46,196,182,0.1));
+    border: 1px solid rgba(46,196,182,0.55);
+    color: #7fe9dc;
+}
+.youli-btn:hover { background: linear-gradient(135deg, rgba(46,196,182,0.35), rgba(46,196,182,0.18)); box-shadow: 0 4px 16px rgba(46,196,182,0.28); }
+
+/* 游历收获弹窗 */
+.loot-row { display: flex; align-items: flex-start; gap: 14px; padding: 9px 0; border-bottom: 1px dashed rgba(201,169,106,0.18); }
+.loot-row:last-child { border-bottom: none; }
+.loot-label { flex: 0 0 52px; color: var(--text-dim); font-size: 13px; padding-top: 4px; letter-spacing: 1px; }
+.loot-val { color: var(--gold-light); font-size: 16px; font-weight: 700; padding-top: 2px; }
+.loot-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.loot-chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 9px;
+    background: rgba(46,196,182,0.12); border: 1px solid rgba(46,196,182,0.3);
+    color: #9fe9df; font-size: 13px;
+}
+.loot-empty { color: var(--text-dim); font-size: 13px; }
+    .loot-fortune {
+        margin-top: 12px; padding: 9px 12px; border-radius: 10px;
+        background: linear-gradient(135deg, rgba(233,196,106,0.18), rgba(184,134,11,0.1));
+        border: 1px solid rgba(233,196,106,0.45); color: var(--gold-light); font-size: 13px; line-height: 1.6;
+    }
+
+    /* 兑换灵石（紫色调，区别于闭关蓝 / 游历青玉） */
+    .exchange-btn {
+        background: linear-gradient(135deg, rgba(168,85,247,0.22), rgba(168,85,247,0.1));
+        border: 1px solid rgba(168,85,247,0.55);
+        color: #e9d5ff;
+    }
+    .exchange-btn:hover { background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(168,85,247,0.18)); box-shadow: 0 0 18px rgba(168,85,247,0.35); }
+    .exchange-card {
+        border: 1px solid rgba(168,85,247,0.35);
+        background: linear-gradient(135deg, rgba(168,85,247,0.16), rgba(168,85,247,0.04));
+        color: #e9d5ff;
+    }
+    .exchange-card:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(168,85,247,0.30), rgba(168,85,247,0.10));
+        box-shadow: 0 0 18px rgba(168,85,247,0.30);
+        transform: translateY(-2px);
+    }
+    .exchange-allin {
+        border: 1px solid rgba(168,85,247,0.45);
+        background: linear-gradient(135deg, rgba(168,85,247,0.14), rgba(168,85,247,0.04));
+        color: #e9d5ff;
+    }
+    .exchange-allin:hover:not(.disabled) {
+        background: linear-gradient(135deg, rgba(168,85,247,0.24), rgba(168,85,247,0.08));
+        box-shadow: 0 0 14px rgba(168,85,247,0.25);
+    }
+
+/* ---------- 开始界面（封面） ---------- */
+.start-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    background:
+        radial-gradient(ellipse at 50% 30%, rgba(40,30,70,0.9) 0%, rgba(10,8,16,1) 65%),
+        var(--bg-deep);
+    overflow: hidden;
+    animation: startFadeIn 0.8s ease both;
+}
+.start-bg-effects { position: absolute; inset: 0; pointer-events: none; }
+.start-glow {
+    position: absolute; left: 50%; top: 36%;
+    width: 540px; height: 540px; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(192,132,252,0.20), rgba(125,211,192,0.08) 42%, transparent 70%);
+    filter: blur(18px);
+    animation: startGlowPulse 6s ease-in-out infinite;
+}
+.start-content {
+    position: relative; z-index: 2; text-align: center; padding: 24px;
+    animation: startRise 1s cubic-bezier(0.16,1,0.3,1) 0.15s both;
+}
+.start-taiji {
+    font-size: 66px; color: var(--gold);
+    text-shadow: 0 0 32px rgba(212,175,55,0.55);
+    margin-bottom: 8px; animation: startSpin 20s linear infinite;
+}
+.start-title {
+    font-size: 54px; letter-spacing: 10px; font-weight: 700; margin: 0 0 14px;
+    color: var(--gold-light);
+    text-shadow: 0 0 26px rgba(212,175,55,0.5), 0 2px 0 rgba(0,0,0,0.4);
+}
+.start-subtitle { font-size: 17px; letter-spacing: 6px; color: var(--jade); margin-bottom: 16px; }
+.start-tagline {
+    font-size: 13px; letter-spacing: 2px; color: var(--text-dim); line-height: 1.9;
+    max-width: 440px; margin: 0 auto 38px;
+}
+.start-btn {
+    font-family: var(--font-zh); font-size: 20px; font-weight: 700; letter-spacing: 8px;
+    padding: 14px 58px; border: none; border-radius: 999px; cursor: pointer;
+    color: #0d0a14;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    box-shadow: 0 8px 30px rgba(212,175,55,0.35);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+}
+.start-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 44px rgba(212,175,55,0.55); }
+.start-btn:active { transform: translateY(-1px) scale(1.0); }
+.start-foot {
+    position: absolute; left: 0; right: 0; bottom: 22px; text-align: center;
+    font-size: 12px; color: var(--text-dim); opacity: 0.6; letter-spacing: 1px;
+}
+@keyframes startFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes startRise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes startGlowPulse { 0%,100% { opacity: 0.7; transform: translate(-50%,-50%) scale(1); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); } }
+@keyframes startSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+    .start-title { font-size: 38px; letter-spacing: 6px; }
+    .start-taiji { font-size: 52px; }
+    .start-subtitle { font-size: 14px; letter-spacing: 4px; }
+    .start-tagline { font-size: 12px; margin-bottom: 30px; }
+    .start-btn { font-size: 17px; padding: 12px 44px; letter-spacing: 6px; }
+}
+
+/* ---------- 新手教程引导浮层 ---------- */
+.tutorial-overlay {
+    position: fixed; inset: 0; z-index: 3000; pointer-events: none;
+}
+.tutorial-spot {
+    position: fixed; display: none; z-index: 3000; pointer-events: none;
+    border: 2px solid var(--gold-light);
+    border-radius: 14px;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,0.62), 0 0 22px rgba(212,175,55,0.55);
+    transition: top 0.35s cubic-bezier(0.16,1,0.3,1), left 0.35s cubic-bezier(0.16,1,0.3,1),
+                width 0.35s cubic-bezier(0.16,1,0.3,1), height 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.tutorial-card {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+    width: 540px; max-width: 92vw; z-index: 3001; pointer-events: auto;
+    padding: 18px 22px 20px;
+    border-radius: 18px;
+    background: rgba(20,16,32,0.92);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(212,175,55,0.4);
+    box-shadow: 0 18px 60px rgba(0,0,0,0.55), 0 0 26px rgba(212,175,55,0.18);
+    animation: tutorialRise 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes tutorialRise { from { opacity: 0; transform: translate(-50%, 22px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.tutorial-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.tutorial-badge {
+    font-size: 12px; letter-spacing: 2px; padding: 3px 12px; border-radius: 999px;
+    color: #0d0a14; font-weight: 700; background: linear-gradient(135deg, var(--gold-light), var(--gold));
+}
+.tutorial-step { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+.tutorial-title { font-family: var(--font-zh); font-size: 19px; font-weight: 700; margin: 0 0 8px; color: var(--gold-light); text-shadow: 0 0 18px rgba(212,175,55,0.35); }
+.tutorial-body { font-size: 14px; line-height: 1.85; color: #d8d2c4; min-height: 52px; }
+.tutorial-body b { color: var(--jade); font-weight: 700; }
+.tutorial-actions { display: flex; gap: 10px; margin-top: 16px; }
+.tutorial-btn {
+    flex: 1; font-family: var(--font-zh); font-size: 14px; padding: 10px 0; border-radius: 10px;
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #e8e2d4;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.tutorial-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+.tutorial-prev { flex: 0 0 92px; }
+.tutorial-prev[style*="hidden"] { display: none; }
+.tutorial-skip { flex: 0 0 92px; color: var(--text-dim); }
+.tutorial-next {
+    flex: 1; border: none; color: #0d0a14; font-weight: 700; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    box-shadow: 0 6px 22px rgba(212,175,55,0.32);
+}
+.tutorial-next:hover { box-shadow: 0 10px 32px rgba(212,175,55,0.5); }
+
+@media (max-width: 760px) {
+    .tutorial-card { bottom: 14px; padding: 15px 16px 16px; }
+    .tutorial-title { font-size: 17px; }
+    .tutorial-body { font-size: 13px; line-height: 1.75; }
+    .tutorial-btn { font-size: 13px; padding: 9px 0; }
+}

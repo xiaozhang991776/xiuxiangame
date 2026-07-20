@@ -14,6 +14,7 @@
     };
     let pendingSlotId = 1; // 待创建的存档槽
     let ccBound = false;   // 角色创建事件是否已绑定（防重复）
+    let overlayBound = false; // 全局遮罩(弹窗/打赏)点击监听是否已绑定（防 enterGame 重复叠加）
     // 文本转义（防止存档名破坏 HTML）
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -41,9 +42,25 @@
             loading.style.opacity = '0';
             setTimeout(() => {
                 loading.style.display = 'none';
-                startGame();
+                showStartScreen();
             }, 800);
         }, 2200);
+    }
+
+    /* ---------- 显示开始界面 ---------- */
+    let startBound = false;
+    function showStartScreen() {
+        const el = document.getElementById('start-screen');
+        if (el) el.classList.remove('hidden');
+        if (!startBound) {
+            const btn = document.getElementById('startGameBtn');
+            if (btn) btn.onclick = () => {
+                const s = document.getElementById('start-screen');
+                if (s) s.classList.add('hidden');
+                startGame();
+            };
+            startBound = true;
+        }
     }
 
     /* ---------- 启动游戏 ---------- */
@@ -141,6 +158,7 @@
                     if (deletingCurrent) {
                         Game.stopAutoSave();
                         Game.stopCultivateLoop();
+                        Game.stopLifespanDecay();
                         Game.player = null;
                         Game.currentSlotId = null;
                         document.getElementById('game-main').classList.add('hidden');
@@ -208,13 +226,17 @@
             };
         });
         // 开始游戏（写入所选存档槽）
-        document.getElementById('startGameBtn').onclick = () => {
+        document.getElementById('createGameBtn').onclick = () => {
             const name = ccState.name.trim() || '无名修士';
             Game.newGame({ name, avatar: ccState.avatar, element: ccState.element }, pendingSlotId);
             document.getElementById('character-create').classList.add('hidden');
             enterGame();
             UI.toast(`欢迎踏入仙途，${name}！`, 'gold');
             UI.addLog(`你以${name}之名，踏入仙途`, 'evt');
+            // 新道途首次进入自动展开新手教程
+            if (Game.player && (!Game.player.stats || !Game.player.stats.tutorialDone)) {
+                UI.startTutorial();
+            }
         };
     }
 
@@ -245,6 +267,7 @@
         // 启动循环
         Game.startAutoSave();
         Game.startCultivateLoop();
+        Game.startLifespanDecay();
         // 绑定事件
         bindGameEvents();
         // 欢迎日志
@@ -269,6 +292,7 @@
         // 停掉循环，避免已故道途仍在修炼
         Game.stopCultivateLoop();
         Game.stopAutoSave();
+        Game.stopLifespanDecay();
         UI.showModal({
             title: '寿元已尽',
             body: `<p style="line-height:1.8">${esc(player.name)}道友闭关悟道，终至寿元耗尽，<b style="color:#d4af37">羽化归虚</b>。</p>
@@ -308,6 +332,12 @@
         // 闭关潜修
         document.getElementById('seclusionBtn').onclick = () => UI.openSeclusion();
 
+        // 游历天下
+        document.getElementById('youliBtn').onclick = () => UI.openYouli();
+
+        // 兑换灵石（拿修为换灵石）
+        document.getElementById('exchangeBtn').onclick = () => UI.openExchange();
+
         // 悟性·顿悟
         document.getElementById('enlightenBtn').onclick = () => UI.openEnlighten();
 
@@ -329,6 +359,12 @@
         document.getElementById('settingsBtn').onclick = () => {
             document.getElementById('settings-screen').classList.remove('hidden');
         };
+
+        // 新手教程（随时可看）
+        document.getElementById('tutorialBtn').onclick = () => UI.startTutorial();
+        document.getElementById('tutorialNext').onclick = () => UI.tutorialNext();
+        document.getElementById('tutorialPrev').onclick = () => UI.tutorialPrev();
+        document.getElementById('tutorialSkip').onclick = () => UI.endTutorial();
 
         // 背包分类切换
         document.querySelectorAll('.inv-tab').forEach(tab => {
@@ -376,14 +412,30 @@
 
         // 弹窗关闭
         document.getElementById('modalClose').onclick = () => UI.hideModal();
-        document.getElementById('modal-overlay').addEventListener('click', e => {
-            if (e.target.id === 'modal-overlay') UI.hideModal();
-        });
+        if (!overlayBound) {
+            overlayBound = true;
+            document.getElementById('modal-overlay').addEventListener('click', e => {
+                if (e.target.id === 'modal-overlay') UI.hideModal();
+            });
+        }
 
         // 设置面板
         document.getElementById('settingsClose').onclick = () => {
             document.getElementById('settings-screen').classList.add('hidden');
         };
+        // 打赏弹窗
+        document.getElementById('rewardFab').onclick = () => {
+            document.getElementById('reward-screen').classList.remove('hidden');
+        };
+        document.getElementById('rewardClose').onclick = () => {
+            document.getElementById('reward-screen').classList.add('hidden');
+        };
+        if (!window.__rewardBound) {
+            window.__rewardBound = true;
+            document.getElementById('reward-screen').addEventListener('click', e => {
+                if (e.target.id === 'reward-screen') document.getElementById('reward-screen').classList.add('hidden');
+            });
+        }
         // 选择存档（入道飞升 / 切换道途）
         document.getElementById('slotSelectBtn').onclick = () => {
             Game.save();
@@ -474,7 +526,8 @@
             const blocked = !document.getElementById('modal-overlay').classList.contains('hidden')
                 || !document.getElementById('event-screen').classList.contains('hidden')
                 || !document.getElementById('battle-screen').classList.contains('hidden')
-                || !document.getElementById('settings-screen').classList.contains('hidden');
+                || !document.getElementById('settings-screen').classList.contains('hidden')
+                || !document.getElementById('reward-screen').classList.contains('hidden');
             if (blocked) return;
             const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest' };
             if (keyMap[e.key]) UI.switchPanel(keyMap[e.key]);

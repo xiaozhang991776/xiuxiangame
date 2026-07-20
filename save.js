@@ -226,7 +226,7 @@ const SaveSystem = {
             if (eq) {
                 const tpl = getEquipTemplate(eq.baseId);
                 if (tpl) {
-                    const enhanceBonus = 1 + (eq.enhance || 0) * 0.1;
+                    const enhanceBonus = 1 + (eq.enhance || 0) * 0.15;
                     equipLing += (tpl.ling || 0) * enhanceBonus;
                 }
             }
@@ -247,6 +247,7 @@ const SaveSystem = {
             player.stats.totalXiu = (player.stats.totalXiu || 0) + reward.xiu;
         }
         player.lastOffline = Date.now();
+        player.lastSave = Date.now(); // 防止下次用旧lastSave重复结算离线收益
         return reward;
     },
 
@@ -467,10 +468,35 @@ const Game = {
         }
     },
 
+    /* 启动寿命衰减（真实时间每 60 秒 -1 寿元） */
+    startLifespanDecay() {
+        this.stopLifespanDecay();
+        this.lifespanTimer = setInterval(() => {
+            if (!this.player) return;
+            this.player.lifespan = (this.player.lifespan || 0) - 1;
+            if (typeof UI !== 'undefined' && UI.updateResourceBar) UI.updateResourceBar();
+            if (this.player.lifespan <= 0) {
+                this.player.lifespan = 0;
+                this.stopLifespanDecay();
+                if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
+                    Game.onLifespanZero(this.player);
+                }
+            }
+        }, 60000);
+    },
+
+    stopLifespanDecay() {
+        if (this.lifespanTimer) {
+            clearInterval(this.lifespanTimer);
+            this.lifespanTimer = null;
+        }
+    },
+
     /* 重置游戏（删除当前槽位） */
     reset() {
         this.stopAutoSave();
         this.stopCultivateLoop();
+        this.stopLifespanDecay();
         if (this.currentSlotId) SaveSystem.deleteSlot(this.currentSlotId);
         else SaveSystem.reset();
         this.player = null;

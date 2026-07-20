@@ -25,7 +25,7 @@ const Cultivate = {
             if (eq) {
                 const tpl = getEquipTemplate(eq.baseId);
                 if (tpl) {
-                    const enhanceBonus = 1 + (eq.enhance || 0) * 0.1;
+                    const enhanceBonus = 1 + (eq.enhance || 0) * 0.15;
                     equipLing += (tpl.ling || 0) * enhanceBonus;
                 }
             }
@@ -104,11 +104,16 @@ const Cultivate = {
             player.stone -= stoneCost;
             // 突破成功率
             let rate = realm.breakthroughRate;
-            // 破障丹加成
+            // 破障丹加成（库存自动消耗 + 手动使用累积）
+            let btBonus = player.breakBonus || 0;
             if (player.inventory.pill.p_breakthrough > 0) {
-                rate += 0.2;
+                btBonus += 0.2;
                 player.inventory.pill.p_breakthrough--;
                 if (typeof UI !== 'undefined') UI.toast('使用破障丹，成功率+20%', 'gold');
+            }
+            if (btBonus > 0) {
+                rate = Math.min(1, rate + btBonus);
+                player.breakBonus = 0;
             }
             player.xiu -= cost;
             if (Math.random() < rate) {
@@ -173,6 +178,8 @@ const Cultivate = {
     },
 
     SECLUDE_EFFICIENCY: 0.0015, // 闭关修为收益系数（从 0.15 再除以 100）
+    YOULI_BASE_STONE: 20000,   // 游历：每游历一年基础灵石（练气期）；×100 倍（原 200；曾×15→×10→再×10）
+    YOULI_GROWTH: 1.6,        // 游历灵石随境界增长系数
 
     // 悟性系统：顿悟消耗资源，永久提升每次点击修为与修炼速率
     WUXING_MAX: 50,            // 悟性上限（重）
@@ -244,6 +251,122 @@ const Cultivate = {
         if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
         if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}修为（耗寿元${years}年）`, 'evt');
         return { xiu: xiuGain, years };
+    },
+
+    /* ---------- 游历（消耗寿元，获得灵石/材料/丹药） ---------- */
+    // 按当前境界从配置池里挑一件（品质不超 allow）
+    _pickByRealm(list, realmIdx) {
+        const allow = Math.min(4, Math.floor((realmIdx || 0) / 3));
+        const pool = list.filter(x => (x.quality || 0) <= allow);
+        const src = pool.length ? pool : list;
+        return src[Math.floor(Math.random() * src.length)];
+    },
+
+    youli(player, years) {
+        years = Math.floor(years);
+        if (!years || years <= 0) {
+            if (typeof UI !== 'undefined') UI.toast('请选择游历时长', 'bad');
+            return null;
+        }
+        if (years > (player.lifespan || 0)) {
+            if (typeof UI !== 'undefined') UI.toast(`寿元不足，仅余${player.lifespan}年`, 'bad');
+            return null;
+        }
+        const realmIdx = player.realmIdx || 0;
+        const stonePerYear = this.YOULI_BASE_STONE * Math.pow(this.YOULI_GROWTH, realmIdx);
+        let stoneGain = Math.floor(years * stonePerYear * (0.85 + Math.random() * 0.3));
+
+        const gains = { stone: stoneGain, materials: [], pills: [] };
+        const matMap = {};
+        const pillMap = {};
+
+        // 材料：每年约 0.12 份，每份随机 1~3 个（封顶避免极端）
+        let matStacks = Math.min(300, Math.floor(years * 0.12) + (Math.random() < 0.4 ? 1 : 0));
+        for (let i = 0; i < matStacks; i++) {
+            const m = this._pickByRealm(GameConfig.materials, realmIdx);
+            matMap[m.id] = (matMap[m.id] || 0) + 1 + Math.floor(Math.random() * 3);
+        }
+        // 丹药：每 5 年约 25% 概率（封顶避免极端）
+        let pillRolls = Math.min(400, Math.floor(years / 5));
+        for (let i = 0; i < pillRolls; i++) {
+            if (Math.random() < 0.25) {
+                const p = this._pickByRealm(GameConfig.pills, realmIdx);
+                pillMap[p.id] = (pillMap[p.id] || 0) + 1;
+            }
+        }
+        // 奇遇：8% 概率大额灵石 + 一件稀有宝物（品质 +1）
+        let fortune = false, fortuneText = '';
+        if (Math.random() < 0.08) {
+            fortune = true;
+            const bonus = Math.floor(stoneGain * (2 + Math.random() * 3));
+            stoneGain += bonus;
+            gains.stone = stoneGain;
+            const allow = Math.min(4, Math.floor(realmIdx / 3));
+            const rarePool = GameConfig.materials.concat(GameConfig.pills)
+                .filter(x => (x.quality || 0) === Math.min(4, allow + 1));
+            if (rarePool.length) {
+                const r = rarePool[Math.floor(Math.random() * rarePool.length)];
+                if (GameConfig.materials.indexOf(r) >= 0) matMap[r.id] = (matMap[r.id] || 0) + 1;
+                else pillMap[r.id] = (pillMap[r.id] || 0) + 1;
+            }
+            fortuneText = `途中逢奇遇，额外获得 ${fmtNum(bonus)} 灵石及稀有宝物！`;
+        }
+
+        // 写入背包
+        Object.keys(matMap).forEach(id => {
+            const tpl = GameConfig.materials.find(m => m.id === id);
+            Inventory.addItem(player, id, matMap[id]);
+            gains.materials.push({ name: tpl.name, icon: tpl.icon, count: matMap[id] });
+        });
+        Object.keys(pillMap).forEach(id => {
+            const tpl = GameConfig.pills.find(m => m.id === id);
+            Inventory.addItem(player, id, pillMap[id]);
+            gains.pills.push({ name: tpl.name, icon: tpl.icon, count: pillMap[id] });
+        });
+
+        // 扣除寿元
+        player.lifespan -= years;
+        if (player.lifespan <= 0) {
+            player.lifespan = 0;
+            player.stone += stoneGain;
+            this.save(player);
+            if (typeof UI !== 'undefined') UI.addLog(`${player.name}游历${years}年，寿元已尽，羽化归虚……`, 'evt');
+            if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
+                Game.onLifespanZero(player);
+            }
+            return { years, dead: true, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
+        }
+        player.stone += stoneGain;
+        this.save(player);
+        if (typeof UI !== 'undefined') UI.addLog(`游历${years}年，收获${fmtNum(stoneGain)}灵石及诸多宝物`, 'evt');
+        return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
+    },
+
+    /* ---------- 拿修为换灵石 ---------- */
+    // 将富余修为兑换成灵石，缓解灵石卡突破/采买；兑换会消耗修为，可能拖慢突破，由玩家权衡
+    XIU_TO_STONE_RATE: 0.0005, // 汇率：约 2000 修为 ≈ 1 灵石（档位见 UI.openExchange）
+    exchangeXiuForStone(player, xiuAmount) {
+        xiuAmount = Math.floor(xiuAmount);
+        if (!xiuAmount || xiuAmount <= 0) {
+            if (typeof UI !== 'undefined') UI.toast('请输入兑换的修为数量', 'bad');
+            return null;
+        }
+        if (xiuAmount > (player.xiu || 0)) {
+            if (typeof UI !== 'undefined') UI.toast('修为不足', 'bad');
+            return null;
+        }
+        const stone = Math.floor(xiuAmount * this.XIU_TO_STONE_RATE);
+        if (stone <= 0) {
+            if (typeof UI !== 'undefined') UI.toast('兑换所得灵石过少', 'bad');
+            return null;
+        }
+        player.xiu -= xiuAmount;
+        player.stone += stone;
+        this.save(player);
+        if (typeof UI !== 'undefined') {
+            UI.addLog(`以${fmtNum(xiuAmount)}修为，兑换得${fmtNum(stone)}灵石`, 'evt');
+        }
+        return { xiuSpent: xiuAmount, stoneGot: stone };
     },
 
     /* ---------- 获取当前境界名 ---------- */

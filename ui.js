@@ -133,7 +133,7 @@ const UI = {
         document.getElementById('topRate').textContent = '+' + rate.toFixed(1) + '/s';
         document.getElementById('topStone').textContent = fmtNum(p.stone);
         const stats = Cultivate.calcFinalStats(p);
-        document.getElementById('topLing').textContent = `${stats.ling}/${stats.ling}`;
+        document.getElementById('topLing').textContent = fmtNum(stats.ling);
         const lifeEl = document.getElementById('topLife');
         if (lifeEl) lifeEl.textContent = fmtNum(p.lifespan);
     },
@@ -552,8 +552,8 @@ const UI = {
         const p = Game.player;
         if (!p) return;
         const stats = Cultivate.calcFinalStats(p);
-        document.getElementById('attrHp').textContent = `${stats.hp}/${stats.hp}`;
-        document.getElementById('attrLing').textContent = `${stats.ling}/${stats.ling}`;
+        document.getElementById('attrHp').textContent = fmtNum(stats.hp);
+        document.getElementById('attrLing').textContent = fmtNum(stats.ling);
         document.getElementById('attrAtk').textContent = stats.atk;
         document.getElementById('attrDef').textContent = stats.def;
         document.getElementById('attrSpd').textContent = stats.spd;
@@ -732,6 +732,88 @@ const UI = {
         else if (name === 'quest') this.renderQuests();
     },
 
+    /* ---------- 新手教程 ---------- */
+    TUTORIAL_STEPS: [
+        { title: '踏入仙途', body: '道友初临，且听我徐徐道来这方世界的门道。点击「下一步」即可层层展开，随时可点右上 📖 重看。', panel: 'cultivate' },
+        { title: '静心修炼', body: '<b>修为</b>乃修行根本。点「修炼（点击聚气）」可手动攒修为，平日亦会缓缓自增——顶部「气」即为修为。', panel: 'cultivate', target: '#cultivateTap' },
+        { title: '闭关 · 游历 · 兑换', body: '<b>闭关潜修</b>换大量修为；<b>游历天下</b>寻灵石、材料与丹药；<b>兑换灵石</b>以修为换灵石。三者皆耗<b>寿元</b>。', panel: 'cultivate', target: '#seclusionHint' },
+        { title: '突破境界', body: '修为攒满，便点「<b>突破</b>」精进境界、增寿元、强根基。境界越高，斗法历练所获愈丰。', panel: 'cultivate', target: '#breakBtn' },
+        { title: '寿元将尽', body: '留意右上「<b>寿元</b>」：每过真实<b>一分钟减一</b>，闭关游历亦折寿元。寿元耗尽便<b>羽化归虚</b>，故当抓紧修行。', panel: 'cultivate', target: '#topLife' },
+        { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得修为、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
+        { title: '三界历练', body: '「<b>历练</b>」可访名山、探秘境、遇奇遇，收获随机机缘，妙不可言。', panel: 'explore', target: '#panel-explore' },
+        { title: '乾坤 · 神通 · 坊市', body: '「<b>乾坤袋</b>」藏装备丹药；「<b>神通</b>」可修习法术；「<b>坊市</b>」买卖物资、搜罗法宝。', panel: 'shop', target: '#panel-shop' },
+        { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
+    ],
+    tutorialIndex: 0,
+
+    startTutorial() {
+        const p = Game.player;
+        if (!p) return;
+        this.tutorialIndex = 0;
+        const ov = document.getElementById('tutorial-overlay');
+        if (ov) ov.classList.remove('hidden');
+        this.renderTutorialStep();
+    },
+
+    renderTutorialStep() {
+        const p = Game.player;
+        if (!p) return;
+        const steps = this.TUTORIAL_STEPS;
+        const i = this.tutorialIndex;
+        const step = steps[i];
+        if (step.panel && Game.currentPanel !== step.panel) this.switchPanel(step.panel);
+        const titleEl = document.getElementById('tutorialTitle');
+        const bodyEl = document.getElementById('tutorialBody');
+        const stepEl = document.getElementById('tutorialStep');
+        if (titleEl) titleEl.innerHTML = step.title;
+        if (bodyEl) bodyEl.innerHTML = step.body || '';
+        if (stepEl) stepEl.textContent = (i + 1) + ' / ' + steps.length;
+        const prev = document.getElementById('tutorialPrev');
+        const next = document.getElementById('tutorialNext');
+        if (prev) prev.style.visibility = (i === 0) ? 'hidden' : 'visible';
+        if (next) next.textContent = (i === steps.length - 1) ? '完成' : '下一步';
+        // 聚光灯高亮
+        const spot = document.getElementById('tutorialSpot');
+        if (spot) {
+            if (step.target) {
+                const el = document.querySelector(step.target);
+                if (el) {
+                    requestAnimationFrame(() => {
+                        const r = el.getBoundingClientRect();
+                        spot.style.display = 'block';
+                        spot.style.top = (r.top - 8) + 'px';
+                        spot.style.left = (r.left - 8) + 'px';
+                        spot.style.width = (r.width + 16) + 'px';
+                        spot.style.height = (r.height + 16) + 'px';
+                    });
+                } else { spot.style.display = 'none'; }
+            } else { spot.style.display = 'none'; }
+        }
+    },
+
+    tutorialNext() {
+        if (this.tutorialIndex >= this.TUTORIAL_STEPS.length - 1) { this.endTutorial(); return; }
+        this.tutorialIndex++;
+        this.renderTutorialStep();
+    },
+
+    tutorialPrev() {
+        if (this.tutorialIndex > 0) { this.tutorialIndex--; this.renderTutorialStep(); }
+    },
+
+    endTutorial() {
+        const ov = document.getElementById('tutorial-overlay');
+        if (ov) ov.classList.add('hidden');
+        const spot = document.getElementById('tutorialSpot');
+        if (spot) spot.style.display = 'none';
+        const p = Game.player;
+        if (p) {
+            p.stats.tutorialDone = true;
+            if (typeof Game !== 'undefined' && typeof Game.save === 'function') Game.save();
+        }
+        this.toast('新手教程已毕，祝你仙途坦荡', 'gold');
+    },
+
     /* ---------- 闭关潜修界面 ---------- */
     /* ---------- 闭关选项确认 ---------- */
     secludeAction(y) {
@@ -744,6 +826,135 @@ const UI = {
             this.toast(`闭关${r.years}年，悟得${fmtNum(r.xiu)}修为`, 'gold');
             this.renderAll();
         }
+    },
+
+    /* ---------- 游历天下 ---------- */
+    openYouli() {
+        const p = Game.player;
+        if (!p) return;
+        const realmIdx = p.realmIdx || 0;
+        const stonePerYear = Cultivate.YOULI_BASE_STONE * Math.pow(Cultivate.YOULI_GROWTH, realmIdx);
+        const opts = [
+            { y: 1,     label: '一年',   sub: '初出茅庐' },
+            { y: 10,    label: '十年',   sub: '云游四海' },
+            { y: 50,    label: '五十年', sub: '遍历名山' },
+            { y: 100,   label: '百年',   sub: '访遍洞天' },
+            { y: 1000,  label: '千年',   sub: '行走红尘' },
+            { y: 10000, label: '万年',   sub: '沧海桑田' }
+        ];
+        const cards = opts.map(o => {
+            const disabled = o.y > (p.lifespan || 0);
+            const stone = Math.floor(o.y * stonePerYear);
+            return `
+                <button class="seclusion-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.youliAction(${o.y})"`}>
+                    <span class="secl-label">${o.label}</span>
+                    <span class="secl-sub">${o.sub}</span>
+                    ${disabled ? '<span class="secl-gain">寿元不足</span>' : `<span class="secl-gain">约+${fmtNum(stone)}灵石·含随机宝物</span>`}
+                </button>
+            `;
+        }).join('');
+        const allIn = p.lifespan || 0;
+        const allInStone = Math.floor(allIn * stonePerYear);
+        const allInDisabled = allIn <= 0;
+        this.showModal({
+            title: '游历天下',
+            body: `<p style="line-height:1.7;margin-bottom:12px">游历四方，寻宝访仙。<b>每游历一年，折损一年寿元</b>，但可获<b>灵石</b>、<b>材料</b>、乃至<b>丹药</b>与<b>奇遇</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（与闭关潜修相对：闭关换修为，游历换资源）</p>
+                   <div class="seclusion-scroll-wrap">
+                       <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('youliOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
+                       <div class="seclusion-options" id="youliOptions">${cards}</div>
+                       <button class="seclusion-arrow seclusion-arrow-right" aria-label="向右滑动" onclick="document.getElementById('youliOptions').scrollBy({left:170,behavior:'smooth'})">›</button>
+                   </div>
+                   <div class="seclusion-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.youliAction(${allIn})"`}>
+                       <span class="secl-allin-label">耗尽全部寿元</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无寿元可用' : `约+${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}年`}</span>
+                   </div>`,
+            footer: [
+                { text: '关闭', action: () => this.hideModal() }
+            ]
+        });
+    },
+
+    youliAction(y) {
+        const p = Game.player;
+        if (!p) return;
+        const r = Cultivate.youli(p, y);
+        if (r && r.dead) return; // 寿元耗尽，已进入羽化流程
+        if (!r) return;
+        this.hideModal();
+        const matHtml = r.materials.length
+            ? r.materials.map(m => `<span class="loot-chip">${m.icon} ${m.name}×${m.count}</span>`).join('')
+            : '<span class="loot-empty">无</span>';
+        const pillHtml = r.pills.length
+            ? r.pills.map(m => `<span class="loot-chip">${m.icon} ${m.name}×${m.count}</span>`).join('')
+            : '<span class="loot-empty">无</span>';
+        const fortHtml = r.fortune ? `<p class="loot-fortune">✨ ${r.fortuneText}</p>` : '';
+        this.showModal({
+            title: `游历${r.years}年 · 收获`,
+            body: `<p style="margin-bottom:10px">遍历四方，所得如下：</p>
+                   <div class="loot-row"><span class="loot-label">灵石</span><span class="loot-val">+${fmtNum(r.stone)}</span></div>
+                   <div class="loot-row"><span class="loot-label">材料</span><div class="loot-chips">${matHtml}</div></div>
+                   <div class="loot-row"><span class="loot-label">丹药</span><div class="loot-chips">${pillHtml}</div></div>
+                   ${fortHtml}`,
+            footer: [
+                { text: '收下', action: () => { this.hideModal(); this.renderAll(); } }
+            ]
+        });
+    },
+
+    /* ---------- 拿修为换灵石 ---------- */
+    openExchange() {
+        const p = Game.player;
+        if (!p) return;
+        const rate = Cultivate.XIU_TO_STONE_RATE;
+        const tiers = [
+            { v: 1e5,  label: '10万修为' },
+            { v: 1e6,  label: '100万修为' },
+            { v: 1e7,  label: '1000万修为' },
+            { v: 1e8,  label: '1亿修为' },
+            { v: 1e9,  label: '10亿修为' }
+        ];
+        const cards = tiers.map(o => {
+            const disabled = o.v > (p.xiu || 0);
+            const stone = Math.floor(o.v * rate);
+            return `
+                <button class="seclusion-card exchange-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.exchangeAction(${o.v})"`}>
+                    <span class="secl-label">${o.label}</span>
+                    <span class="secl-sub">兑换</span>
+                    ${disabled ? '<span class="secl-gain">修为不足</span>' : `<span class="secl-gain">→ ${fmtNum(stone)}灵石</span>`}
+                </button>
+            `;
+        }).join('');
+        const allIn = Math.floor(p.xiu || 0);
+        const allInStone = Math.floor(allIn * rate);
+        const allInDisabled = allIn <= 0;
+        this.showModal({
+            title: '兑换灵石',
+            body: `<p style="line-height:1.7;margin-bottom:12px">将<b>修为</b>兑换为<b>灵石</b>，用于突破与坊市采买。当前修为：<b style="color:#7dd3c0">${fmtNum(p.xiu || 0)}</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:8px">汇率：约 ${fmtNum(2000)} 修为 ≈ 1 灵石。兑换所得灵石不计入任务进度；兑换会消耗修为，可能拖慢突破，请权衡。</p>
+                   <div class="seclusion-scroll-wrap">
+                       <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('exchangeOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
+                       <div class="seclusion-options" id="exchangeOptions">${cards}</div>
+                       <button class="seclusion-arrow seclusion-arrow-right" aria-label="向右滑动" onclick="document.getElementById('exchangeOptions').scrollBy({left:170,behavior:'smooth'})">›</button>
+                   </div>
+                   <div class="seclusion-allin exchange-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.exchangeAction(${allIn})"`}>
+                       <span class="secl-allin-label">全部可兑</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无修为可用' : `${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}修为`}</span>
+                   </div>`,
+            footer: [
+                { text: '关闭', action: () => this.hideModal() }
+            ]
+        });
+    },
+
+    exchangeAction(v) {
+        const p = Game.player;
+        if (!p) return;
+        const r = Cultivate.exchangeXiuForStone(p, v);
+        if (!r) return;
+        this.hideModal();
+        this.toast(`兑换成功：消耗${fmtNum(r.xiuSpent)}修为，得${fmtNum(r.stoneGot)}灵石`, 'gold');
+        this.renderAll();
     },
 
     openSeclusion() {

@@ -128,7 +128,8 @@ const GameConfig = {
         { id: 's_combo_chain',  name: '连珠诀',   elem: null,   cost: 50, cd: 4, dmgMult: 2.4,  desc: '连击三次，每次递增', learnCost: 80000,  realmReq: 2, upCostMult: 1.22, combo: 3 },
         { id: 's_soul_seal',    name: '封魂印',   elem: null,   cost: 80, cd: 5, dmgMult: 2.0,  desc: '封印敌人灵力',     learnCost: 150000, realmReq: 3, upCostMult: 1.25, debuff: { type: 'seal', value: 0.5, turns: 2 } },
         { id: 's_chaos_slash',  name: '混沌斩',   elem: null,   cost: 120,cd: 5, dmgMult: 5.0,  desc: '混沌之力斩击，无视防御', learnCost: 500000, realmReq: 3, upCostMult: 1.28, ignoreDef: true },
-        { id: 's_immortal_art', name: '仙法·万剑归宗', elem: null, cost: 200, cd: 6, dmgMult: 8.0, desc: '万剑齐发，灭杀一切', learnCost: 2000000, realmReq: 4, upCostMult: 1.30 }
+        { id: 's_immortal_art', name: '仙法·万剑归宗', elem: null, cost: 200, cd: 6, dmgMult: 8.0, desc: '万剑齐发，灭杀一切', learnCost: 2000000, realmReq: 4, upCostMult: 1.30 },
+        { id: 's_xuanyuan',     name: '玄元无极功',   elem: null, cost: 30, cd: 2, dmgMult: 2.2, desc: '无极玄力，攻伐凌厉，等级越高威能越盛', learnCost: 12000, realmReq: 1, upCostMult: 1.20 }
     ],
 
     /* ---------- 法宝技能 ---------- */
@@ -155,17 +156,17 @@ const GameConfig = {
 
     /* ---------- 敌人配置 ---------- */
     enemies: [
-        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   xiuReward: 60,    stoneReward: 30,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15000000000000002, count: 1 }] },
+        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   xiuReward: 60,    stoneReward: 30,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15, count: 1 }] },
         { id: 'e_bat',      name: '吸血妖蝠',   icon: '蝠', elem: 'water', realmIdx: 0, realmLayer: 3, hp: 80,   atk: 10,   def: 4,   spd: 16,  ling: 8,   xiuReward: 120,    stoneReward: 50,   drops: [{ id: 'm_beast', rate: 0.45, count: 1 }, { id: 'p_qi_pill', rate: 0.2, count: 1 }] },
         { id: 'e_snake',    name: '青鳞蛇妖',   icon: '蛇', elem: 'wood',  realmIdx: 0, realmLayer: 5, hp: 128,  atk: 14,   def: 6,   spd: 14,  ling: 12,  xiuReward: 220,   stoneReward: 90,   drops: [{ id: 'm_herb', rate: 0.55, count: 2 }, { id: 'm_beast', rate: 0.35, count: 1 }] },
         { id: 'e_bear',     name: '玄铁熊',     icon: '熊', elem: 'earth', realmIdx: 0, realmLayer: 7, hp: 224,  atk: 20,   def: 14,  spd: 8,   ling: 18,  xiuReward: 400,   stoneReward: 160,   drops: [{ id: 'm_ore', rate: 0.55, count: 2 }, { id: 'a_silk_robe', rate: 0.1, count: 1 }] },
         { id: 'e_evil_dao', name: '邪修散人',   icon: '邪', elem: 'fire',  realmIdx: 1, realmLayer: 1, hp: 360,  atk: 32,   def: 18,  spd: 18,  ling: 30,  xiuReward: 1000,   stoneReward: 360,  drops: [{ id: 'w_flame_blade', rate: 0.13, count: 1 }, { id: 'p_xiu_pill', rate: 0.25, count: 1 }] },
         { id: 'e_tiger',    name: '赤焰虎王',   icon: '虎', elem: 'fire',  realmIdx: 1, realmLayer: 4, hp: 640,  atk: 52,   def: 30,  spd: 22,  ling: 50,  xiuReward: 2400,  stoneReward: 760,  drops: [{ id: 'm_beast', rate: 0.65, count: 3 }, { id: 'w_thunder_sword', rate: 0.1, count: 1 }] },
-        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, xiuReward: 10000,  stoneReward: 2400, drops: [{ id: 'w_zither', rate: 0.15000000000000002, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
+        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, xiuReward: 10000,  stoneReward: 2400, drops: [{ id: 'w_zither', rate: 0.15, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
         { id: 'e_dragon_jc',name: '蛟龙',       icon: '蛟', elem: 'water', realmIdx: 2, realmLayer: 5, hp: 4000, atk: 192,  def: 128, spd: 30,  ling: 200, xiuReward: 28000, stoneReward: 6400, drops: [{ id: 'f_mountain', rate: 0.13, count: 1 }, { id: 'm_pearl', rate: 0.45, count: 2 }] },
-        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, xiuReward: 120000, stoneReward: 30000,drops: [{ id: 'f_mirror', rate: 0.15000000000000002, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, xiuReward: 120000, stoneReward: 30000,drops: [{ id: 'f_mirror', rate: 0.15, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
         { id: 'e_devil',    name: '天魔',       icon: '魔', elem: 'fire',  realmIdx: 3, realmLayer: 5, hp: 40000,atk: 1200, def: 720, spd: 45,  ling: 1000,xiuReward: 400000,stoneReward: 90000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'm_chaos', rate: 0.35, count: 1 }] },
-        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, xiuReward: 1600000,stoneReward: 360000, drops: [{ id: 'w_chaos_sword', rate: 0.15000000000000002, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
+        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, xiuReward: 1600000,stoneReward: 360000, drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
         // 扩展：炼虚至道祖
         { id: 'e_lianxu',   name: '炼虚魔君',   icon: '虚', elem: 'fire',  realmIdx: 5, realmLayer: 1, hp: 15000, atk: 1200, def: 600, spd: 28,  ling: 4000, xiuReward: 4000000,  stoneReward: 1000000,  drops: [{ id: 'm_chaos', rate: 0.35, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
         { id: 'e_heti',     name: '合体妖尊',   icon: '合', elem: 'wood',  realmIdx: 6, realmLayer: 1, hp: 35000, atk: 2800, def: 1400, spd: 30,  ling: 8000, xiuReward: 10000000,  stoneReward: 2400000, drops: [{ id: 'm_spirit_wood', rate: 0.45, count: 2 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
@@ -173,7 +174,7 @@ const GameConfig = {
         { id: 'e_zhenxian', name: '真仙使者',   icon: '真', elem: 'water', realmIdx: 8, realmLayer: 1, hp: 180000,atk:15000, def:7500, spd: 34,  ling: 32000,xiuReward: 60000000, stoneReward: 16000000, drops: [{ id: 'm_qi_essence', rate: 0.45, count: 2 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
         { id: 'e_jinxian',  name: '金仙老祖',   icon: '金', elem: 'metal', realmIdx: 9, realmLayer: 1, hp: 400000,atk:35000, def:17500,spd: 36,  ling: 64000,xiuReward: 160000000, stoneReward: 40000000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'p_grand_hp', rate: 0.25, count: 1 }] },
         { id: 'e_taiyi',    name: '太乙天尊',   icon: '乙', elem: 'fire',  realmIdx: 10,realmLayer: 1, hp: 900000,atk:80000, def:40000,spd: 38,  ling: 128000,xiuReward: 400000000,stoneReward: 100000000,drops: [{ id: 'f_void_banner', rate: 0.13, count: 1 }, { id: 'p_grand_ling', rate: 0.25, count: 1 }] },
-        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,xiuReward: 1000000000,stoneReward: 240000000,drops: [{ id: 'w_chaos_sword', rate: 0.15000000000000002, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
+        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,xiuReward: 1000000000,stoneReward: 240000000,drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
         { id: 'e_daozu',    name: '道祖化身',   icon: '祖', elem: 'earth', realmIdx: 12,realmLayer: 1, hp: 5000000,atk:400000, def:200000,spd: 42,  ling: 512000,xiuReward: 2400000000,stoneReward: 600000000,drops: [{ id: 'w_pangu_axe', rate: 0.13, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] }
     ],
 
@@ -245,7 +246,7 @@ const GameConfig = {
         realmIdx: 0,
         realmLayer: 1,
         xiu: 0,
-        stone: 100,
+        stone: 500,
         // 基础属性（不含装备境界加成）
         baseAtk: 10,
         baseDef: 5,
@@ -270,7 +271,7 @@ const GameConfig = {
         // 任务进度 { id: { progress, claimed } }
         quests: {},
         // 统计
-        stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0 },
+        stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0, tutorialDone: false },
         // 寿元（闭关上限）：每闭关一年折损一年，境界突破可增寿
         lifespan: 100,
         // 时间戳

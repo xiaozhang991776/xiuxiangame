@@ -242,9 +242,10 @@ const Explore = {
 
     /* ---------- 随机战斗 ---------- */
     triggerRandomCombat(player) {
-        // 根据当前境界选择合适的敌人
-        const candidates = GameConfig.enemies.filter(e => 
-            e.realmIdx <= player.realmIdx && e.realmIdx >= Math.max(0, player.realmIdx - 1)
+        // 根据当前境界选择合适的敌人（只选“打得过”的，避免弹出“境界不足”）
+        const canFight = (e) => !(player.realmIdx < e.realmIdx || (player.realmIdx === e.realmIdx && player.realmLayer < e.realmLayer));
+        const candidates = GameConfig.enemies.filter(e =>
+            e.realmIdx <= player.realmIdx && e.realmIdx >= Math.max(0, player.realmIdx - 1) && canFight(e)
         );
         if (candidates.length === 0) {
             // 无匹配敌人时动态生成同境界化身
@@ -256,16 +257,18 @@ const Explore = {
 
     /* ---------- 强敌战斗 ---------- */
     triggerHardCombat(player) {
-        // 选择当前境界或更高的敌人
-        const candidates = GameConfig.enemies.filter(e => 
-            e.realmIdx <= player.realmIdx + 1 && e.realmIdx >= player.realmIdx
+        // 选“打得过”的敌人中尽量强的一个（与startBattle门槛严格对齐）
+        const canFight = (e) => !(player.realmIdx < e.realmIdx || (player.realmIdx === e.realmIdx && player.realmLayer < e.realmLayer));
+        const candidates = GameConfig.enemies.filter(e =>
+            e.realmIdx <= player.realmIdx && e.realmIdx >= Math.max(0, player.realmIdx - 1) && canFight(e)
         );
         if (candidates.length === 0) {
             // 无匹配敌人时动态生成更强化身
             return Combat.startBattleWithEnemy(player, this._scaleEnemy(player, true), true);
         }
-        const enemy = candidates[Math.floor(Math.random() * candidates.length)];
-        Combat.startBattle(player, enemy.id, true);
+        // 按 realmIdx、realmLayer 降序，挑最难的（仍是可战胜的）
+        candidates.sort((a, b) => (b.realmIdx - a.realmIdx) || (b.realmLayer - a.realmLayer));
+        Combat.startBattle(player, candidates[0].id, true);
     },
 
     /* ---------- 动态生成高境界敌人化身 ---------- */
@@ -310,10 +313,10 @@ const Explore = {
             // 谨慎检查，避免陷阱但奖励较少
             qualityPool = [0, 0, 1];
             stoneReward = Math.floor(30 + Math.random() * 100);
-            player.stone += stoneReward;
             if (typeof UI !== 'undefined') UI.toast(`获得${stoneReward}灵石`, 'gold');
             if (Math.random() < 0.3) {
                 // 30%概率只有灵石，无装备
+                player.stone += stoneReward;
                 return;
             }
         } else {
