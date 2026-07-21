@@ -510,7 +510,7 @@ const Cultivate = {
             stoneMult: 0
         };
     },
-    /* ---------- 轮回相关：境界天花板 / 战力 ---------- */
+    /* ---------- 轮回相关：境界天花板 ---------- */
     // 今生可抵达的最高大境界索引（随轮回层数提升；不低于当前进度，避免旧档被锁死）
     getMaxRealm(player) {
         const n = (player && player.rebirth) || 0;
@@ -518,11 +518,6 @@ const Cultivate = {
         const formula = (c.baseRealm || 0) + n * (c.realmPerRebirth || 1);
         const capped = Math.min(GameConfig.realms.length - 1, formula);
         return Math.max(player ? (player.realmIdx || 0) : 0, capped);
-    },
-    // 玩家当前战力（与道友榜同一口径：atk + def + hp*0.3 + ling）
-    calcCombatPower(player) {
-        const s = this.calcFinalStats(player);
-        return Math.floor(s.atk + s.def + s.hp * 0.3 + s.ling);
     },
     // 估算某境界下的属性（临时改写 realm 字段后还原，不污染原对象）
     estimateStatsAt(player, realmIdx, realmLayer) {

@@ -766,9 +766,6 @@ const UI = {
         document.getElementById('attrSpd').textContent = stats.spd;
         document.getElementById('attrCrit').textContent = (stats.crit * 100).toFixed(0) + '%';
         document.getElementById('attrElem').textContent = GameConfig.elements[p.element].name;
-        // 战力（与道友榜同一口径）
-        const powerEl = document.getElementById('attrPower');
-        if (powerEl) powerEl.textContent = fmtNum(Cultivate.calcCombatPower(p));
         // 装备
         const slots = { weapon: '武器', armor: '护甲', accessory: '饰品', fabao: '法宝' };
         const equipList = document.getElementById('equipList');
