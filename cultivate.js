@@ -632,11 +632,10 @@ const Cultivate = {
             }
             player.rebirth = (player.rebirth || 0) + 1;
         }
-        // 重置境界/修为/装备/寿元（保留属性加成/资源/功法/灵宠/好友等）
+        // 重置境界/修为/寿元（保留属性加成/装备/资源/功法/灵宠/好友等）
         player.realmIdx = 0;
         player.realmLayer = 1;
         player.xiu = 0;
-        player.equipped = { weapon: null, armor: null, accessory: null, fabao: null };
         player.lifespan = 100;
         this.save(player);
         if (typeof UI !== 'undefined') {
