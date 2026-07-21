@@ -63,118 +63,118 @@ const GameConfig = {
     /* ---------- 装备模板 ---------- */
     equipmentTemplates: [
         // 武器
-        { id: 'w_short_sword',  type: 'weapon', name: '寒铁短剑',   icon: '剑', quality: 0, atk: 5,   def: 0,  hp: 0,   ling: 0,  crit: 0,    desc: '寒铁所铸，锋利无匹', price: 150 },
-        { id: 'w_flame_blade',  type: 'weapon', name: '烈焰刀',     icon: '刀', quality: 1, atk: 14,  def: 0,  hp: 0,   ling: 5,  crit: 0.03, desc: '附火灵之力，斩敌如焚', price: 840 },
-        { id: 'w_zither',       type: 'weapon', name: '七弦灵琴',   icon: '琴', quality: 2, atk: 32,  def: 5,  hp: 60,  ling: 20, crit: 0.05, desc: '以音杀人，余音绕梁', price: 4500 },
-        { id: 'w_thunder_sword',type: 'weapon', name: '紫电雷剑',   icon: '剑', quality: 3, atk: 90,  def: 10, hp: 150, ling: 50, crit: 0.12, desc: '雷霆之力凝聚，斩魂灭魄', price: 29400 },
-        { id: 'w_chaos_sword',  type: 'weapon', name: '混沌剑',     icon: '剑', quality: 4, atk: 380, def: 40, hp: 600, ling: 200,crit: 0.20, desc: '混沌之力所化，斩断因果', price: 264000 },
-        { id: 'w_azure_spear', type: 'weapon', name: '青锋枪',   icon: '枪', quality: 2, atk: 28,  def: 4,  hp: 50,  ling: 20, crit: 0.06, desc: '青锋凛冽，挑刺如龙', price: 5400 },
-        { id: 'w_sun_moon',    type: 'weapon', name: '日月轮',   icon: '轮', quality: 3, atk: 72,  def: 8,  hp: 130, ling: 48, crit: 0.11, desc: '日月交辉，轮转破敌', price: 26400 },
-        { id: 'w_pangu_axe',   type: 'weapon', name: '盘古斧',   icon: '斧', quality: 4, atk: 430, def: 25, hp: 520, ling: 120,crit: 0.22, desc: '开天辟地之威，重若山岳', price: 276000 },
+        { id: 'w_short_sword',  type: 'weapon', name: '寒铁短剑',   icon: '剑', quality: 0, atk: 5,   def: 0,  hp: 0,   ling: 0,  crit: 0,    desc: '寒铁所铸，锋利无匹', price: 500 },
+        { id: 'w_flame_blade',  type: 'weapon', name: '烈焰刀',     icon: '刀', quality: 1, atk: 14,  def: 0,  hp: 0,   ling: 5,  crit: 0.03, desc: '附火灵之力，斩敌如焚', price: 2800 },
+        { id: 'w_zither',       type: 'weapon', name: '七弦灵琴',   icon: '琴', quality: 2, atk: 32,  def: 5,  hp: 60,  ling: 20, crit: 0.05, desc: '以音杀人，余音绕梁', price: 15000 },
+        { id: 'w_thunder_sword',type: 'weapon', name: '紫电雷剑',   icon: '剑', quality: 3, atk: 90,  def: 10, hp: 150, ling: 50, crit: 0.12, desc: '雷霆之力凝聚，斩魂灭魄', price: 98000 },
+        { id: 'w_chaos_sword',  type: 'weapon', name: '混沌剑',     icon: '剑', quality: 4, atk: 380, def: 40, hp: 600, ling: 200,crit: 0.20, desc: '混沌之力所化，斩断因果', price: 880000 },
+        { id: 'w_azure_spear', type: 'weapon', name: '青锋枪',   icon: '枪', quality: 2, atk: 28,  def: 4,  hp: 50,  ling: 20, crit: 0.06, desc: '青锋凛冽，挑刺如龙', price: 18000 },
+        { id: 'w_sun_moon',    type: 'weapon', name: '日月轮',   icon: '轮', quality: 3, atk: 72,  def: 8,  hp: 130, ling: 48, crit: 0.11, desc: '日月交辉，轮转破敌', price: 88000 },
+        { id: 'w_pangu_axe',   type: 'weapon', name: '盘古斧',   icon: '斧', quality: 4, atk: 430, def: 25, hp: 520, ling: 120,crit: 0.22, desc: '开天辟地之威，重若山岳', price: 920000 },
         // 护甲
-        { id: 'a_cloth_robe',   type: 'armor',  name: '麻布道袍',   icon: '袍', quality: 0, atk: 0,   def: 4,  hp: 20,  ling: 0,  crit: 0,    desc: '寻常布衣，聊胜于无', price: 120 },
-        { id: 'a_silk_robe',    type: 'armor',  name: '云纹锦袍',   icon: '袍', quality: 1, atk: 0,   def: 12, hp: 80,  ling: 8,  crit: 0,    desc: '云纹加持，灵气流转', price: 780 },
-        { id: 'a_spirit_armor', type: 'armor',  name: '灵纹战甲',   icon: '甲', quality: 2, atk: 5,   def: 28, hp: 240, ling: 15, crit: 0,    desc: '灵纹铭刻，刀枪不入', price: 4200 },
-        { id: 'a_starlight',    type: 'armor',  name: '星辉仙衣',   icon: '衣', quality: 3, atk: 15,  def: 75, hp: 700, ling: 60, crit: 0.03, desc: '星辉织就，免疫百邪', price: 27600 },
-        { id: 'a_chaos_robe',   type: 'armor',  name: '混沌道袍',   icon: '袍', quality: 4, atk: 60,  def: 300,hp: 2800,ling: 240,crit: 0.05, desc: '混沌之力护体，万法不侵', price: 246000 },
-        { id: 'a_bronze_mirror',type: 'armor',  name: '青铜镜',     icon: '镜', quality: 1, atk: 0,   def: 14, hp: 95,  ling: 10, crit: 0,    desc: '青铜照影，邪祟难近', price: 900 },
-        { id: 'a_azure_robe',   type: 'armor',  name: '青云袍',     icon: '袍', quality: 2, atk: 0,   def: 34, hp: 310, ling: 26, crit: 0.02, desc: '青云加护，灵气绵长', price: 5250 },
-        { id: 'a_celestial',    type: 'armor',  name: '天蚕衣',     icon: '衣', quality: 3, atk: 8,   def: 88, hp: 840, ling: 78, crit: 0.04, desc: '天蚕丝织，刀剑难伤', price: 33600 },
+        { id: 'a_cloth_robe',   type: 'armor',  name: '麻布道袍',   icon: '袍', quality: 0, atk: 0,   def: 4,  hp: 20,  ling: 0,  crit: 0,    desc: '寻常布衣，聊胜于无', price: 400 },
+        { id: 'a_silk_robe',    type: 'armor',  name: '云纹锦袍',   icon: '袍', quality: 1, atk: 0,   def: 12, hp: 80,  ling: 8,  crit: 0,    desc: '云纹加持，灵气流转', price: 2600 },
+        { id: 'a_spirit_armor', type: 'armor',  name: '灵纹战甲',   icon: '甲', quality: 2, atk: 5,   def: 28, hp: 240, ling: 15, crit: 0,    desc: '灵纹铭刻，刀枪不入', price: 14000 },
+        { id: 'a_starlight',    type: 'armor',  name: '星辉仙衣',   icon: '衣', quality: 3, atk: 15,  def: 75, hp: 700, ling: 60, crit: 0.03, desc: '星辉织就，免疫百邪', price: 92000 },
+        { id: 'a_chaos_robe',   type: 'armor',  name: '混沌道袍',   icon: '袍', quality: 4, atk: 60,  def: 300,hp: 2800,ling: 240,crit: 0.05, desc: '混沌之力护体，万法不侵', price: 820000 },
+        { id: 'a_bronze_mirror',type: 'armor',  name: '青铜镜',     icon: '镜', quality: 1, atk: 0,   def: 14, hp: 95,  ling: 10, crit: 0,    desc: '青铜照影，邪祟难近', price: 3000 },
+        { id: 'a_azure_robe',   type: 'armor',  name: '青云袍',     icon: '袍', quality: 2, atk: 0,   def: 34, hp: 310, ling: 26, crit: 0.02, desc: '青云加护，灵气绵长', price: 17500 },
+        { id: 'a_celestial',    type: 'armor',  name: '天蚕衣',     icon: '衣', quality: 3, atk: 8,   def: 88, hp: 840, ling: 78, crit: 0.04, desc: '天蚕丝织，刀剑难伤', price: 112000 },
         // 饰品
-        { id: 'ac_jade_pendant',type: 'accessory', name: '灵玉佩',   icon: '玉', quality: 0, atk: 2,  def: 2,  hp: 10,  ling: 8,  crit: 0.02, desc: '灵玉所制，安神定志', price: 180 },
-        { id: 'ac_fire_ring',   type: 'accessory', name: '炎火戒',   icon: '戒', quality: 1, atk: 6,  def: 3,  hp: 30,  ling: 20, crit: 0.05, desc: '炎火凝聚，催动法术', price: 900 },
-        { id: 'ac_spirit_band', type: 'accessory', name: '灵纹束带', icon: '带', quality: 2, atk: 12, def: 8,  hp: 100, ling: 45, crit: 0.08, desc: '灵纹铭刻，催发灵力', price: 4800 },
-        { id: 'ac_star_pendant',type: 'accessory', name: '星辰坠',   icon: '坠', quality: 3, atk: 35, def: 22, hp: 300, ling: 130,crit: 0.15, desc: '星辰之力凝聚，运势加身', price: 30000 },
-        { id: 'ac_chaos_pearl', type: 'accessory', name: '混沌珠',   icon: '珠', quality: 4, atk: 150,def: 90, hp: 1200,ling: 520,crit: 0.25, desc: '混沌所凝，道韵流转', price: 255000 },
-        { id: 'ac_wind_charm',  type: 'accessory', name: '风灵符',   icon: '符', quality: 1, atk: 8,   def: 4,  hp: 42,  ling: 26, crit: 0.06, desc: '风灵萦绕，身法轻盈', price: 1080 },
-        { id: 'ac_dragon_jade', type: 'accessory', name: '龙玉珏',   icon: '珏', quality: 2, atk: 18,  def: 11, hp: 140, ling: 58, crit: 0.10, desc: '龙玉温养，灵机盎然', price: 6000 },
-        { id: 'ac_void_orb',    type: 'accessory', name: '太虚珠',   icon: '珠', quality: 4, atk: 180, def: 100,hp: 1400,ling: 580,crit: 0.28, desc: '太虚之气所凝，运势加身', price: 270000 },
+        { id: 'ac_jade_pendant',type: 'accessory', name: '灵玉佩',   icon: '玉', quality: 0, atk: 2,  def: 2,  hp: 10,  ling: 8,  crit: 0.02, desc: '灵玉所制，安神定志', price: 600 },
+        { id: 'ac_fire_ring',   type: 'accessory', name: '炎火戒',   icon: '戒', quality: 1, atk: 6,  def: 3,  hp: 30,  ling: 20, crit: 0.05, desc: '炎火凝聚，催动法术', price: 3000 },
+        { id: 'ac_spirit_band', type: 'accessory', name: '灵纹束带', icon: '带', quality: 2, atk: 12, def: 8,  hp: 100, ling: 45, crit: 0.08, desc: '灵纹铭刻，催发灵力', price: 16000 },
+        { id: 'ac_star_pendant',type: 'accessory', name: '星辰坠',   icon: '坠', quality: 3, atk: 35, def: 22, hp: 300, ling: 130,crit: 0.15, desc: '星辰之力凝聚，运势加身', price: 100000 },
+        { id: 'ac_chaos_pearl', type: 'accessory', name: '混沌珠',   icon: '珠', quality: 4, atk: 150,def: 90, hp: 1200,ling: 520,crit: 0.25, desc: '混沌所凝，道韵流转', price: 850000 },
+        { id: 'ac_wind_charm',  type: 'accessory', name: '风灵符',   icon: '符', quality: 1, atk: 8,   def: 4,  hp: 42,  ling: 26, crit: 0.06, desc: '风灵萦绕，身法轻盈', price: 3600 },
+        { id: 'ac_dragon_jade', type: 'accessory', name: '龙玉珏',   icon: '珏', quality: 2, atk: 18,  def: 11, hp: 140, ling: 58, crit: 0.10, desc: '龙玉温养，灵机盎然', price: 20000 },
+        { id: 'ac_void_orb',    type: 'accessory', name: '太虚珠',   icon: '珠', quality: 4, atk: 180, def: 100,hp: 1400,ling: 580,crit: 0.28, desc: '太虚之气所凝，运势加身', price: 900000 },
         // 法宝（独有栏位）
-        { id: 'f_bell',         type: 'fabao',  name: '小金钟',     icon: '钟', quality: 1, atk: 8,   def: 15, hp: 100, ling: 30, crit: 0,    desc: '护身法宝，可挡一击', price: 1500, skill: 'f_bell_skill' },
-        { id: 'f_mountain',     type: 'fabao',  name: '须弥小山',   icon: '山', quality: 2, atk: 20,  def: 50, hp: 400, ling: 80, crit: 0.05, desc: '镇压万物，重如泰山', price: 6600, skill: 'f_mountain_skill' },
-        { id: 'f_mirror',       type: 'fabao',  name: '阴阳镜',     icon: '镜', quality: 3, atk: 60,  def: 40, hp: 600, ling: 150,crit: 0.10, desc: '阴阳流转，反弹伤害', price: 33000, skill: 'f_mirror_skill' },
-        { id: 'f_pagoda',       type: 'fabao',  name: '七宝玲珑塔', icon: '塔', quality: 4, atk: 250, def: 180,hp: 2400,ling: 600,crit: 0.18, desc: '镇压一切邪祟，万法归一', price: 285000, skill: 'f_pagoda_skill' },
-        { id: 'f_jade_ruyi',    type: 'fabao',  name: '玉如意',     icon: '如意', quality: 0, atk: 3,  def: 6,  hp: 50,  ling: 15, crit: 0,    desc: '寻常护身法宝，可挡一击', price: 540, skill: 'f_bell_skill' },
-        { id: 'f_void_banner',  type: 'fabao',  name: '招魂幡',     icon: '幡', quality: 4, atk: 280, def: 200,hp: 2600,ling: 650,crit: 0.20, desc: '招魂摄魄，万灵听令', price: 294000, skill: 'f_pagoda_skill' }
+        { id: 'f_bell',         type: 'fabao',  name: '小金钟',     icon: '钟', quality: 1, atk: 8,   def: 15, hp: 100, ling: 30, crit: 0,    desc: '护身法宝，可挡一击', price: 5000, skill: 'f_bell_skill' },
+        { id: 'f_mountain',     type: 'fabao',  name: '须弥小山',   icon: '山', quality: 2, atk: 20,  def: 50, hp: 400, ling: 80, crit: 0.05, desc: '镇压万物，重如泰山', price: 22000, skill: 'f_mountain_skill' },
+        { id: 'f_mirror',       type: 'fabao',  name: '阴阳镜',     icon: '镜', quality: 3, atk: 60,  def: 40, hp: 600, ling: 150,crit: 0.10, desc: '阴阳流转，反弹伤害', price: 110000, skill: 'f_mirror_skill' },
+        { id: 'f_pagoda',       type: 'fabao',  name: '七宝玲珑塔', icon: '塔', quality: 4, atk: 250, def: 180,hp: 2400,ling: 600,crit: 0.18, desc: '镇压一切邪祟，万法归一', price: 950000, skill: 'f_pagoda_skill' },
+        { id: 'f_jade_ruyi',    type: 'fabao',  name: '玉如意',     icon: '如意', quality: 0, atk: 3,  def: 6,  hp: 50,  ling: 15, crit: 0,    desc: '寻常护身法宝，可挡一击', price: 1800, skill: 'f_bell_skill' },
+        { id: 'f_void_banner',  type: 'fabao',  name: '招魂幡',     icon: '幡', quality: 4, atk: 280, def: 200,hp: 2600,ling: 650,crit: 0.20, desc: '招魂摄魄，万灵听令', price: 980000, skill: 'f_pagoda_skill' }
     ],
 
     /* ---------- 丹药配置 ---------- */
     pills: [
-        { id: 'p_qi_pill',     name: '聚气丹',   icon: '丹', quality: 0, desc: '恢复50灵力',          effect: { type: 'ling', value: 50 },        price: 90,  craft: { materials: {m_herb:2}, cost: 60 } },
-        { id: 'p_hp_pill',     name: '回春丹',   icon: '丹', quality: 0, desc: '恢复100气血',         effect: { type: 'hp', value: 100 },        price: 90,  craft: { materials: {m_herb:2}, cost: 60 } },
-        { id: 'p_xiu_pill',    name: '筑基丹',   icon: '丹', quality: 1, desc: '立即获得200修为',     effect: { type: 'xiu', value: 200 },       price: 450, craft: { materials: {m_herb:5, m_ore:2}, cost: 300 } },
-        { id: 'p_atk_pill',    name: '虎力丹',   icon: '丹', quality: 1, desc: '战斗中攻击+15（3回合）', effect: { type: 'buff_atk', value: 15, turns: 3 }, price: 600, craft: { materials: {m_beast:3}, cost: 360 } },
-        { id: 'p_def_pill',    name: '金刚丹',   icon: '丹', quality: 1, desc: '战斗中防御+10（3回合）', effect: { type: 'buff_def', value: 10, turns: 3 }, price: 600, craft: { materials: {m_ore:3}, cost: 360 } },
-        { id: 'p_breakthrough',name: '破障丹',   icon: '丹', quality: 2, desc: '突破成功率+20%',      effect: { type: 'breakBonus', value: 0.2 }, price: 2400, craft: { materials: {m_herb:10, m_ore:5, m_beast:3}, cost: 1500 } },
-        { id: 'p_permanent_hp',name: '培元丹',   icon: '丹', quality: 2, desc: '永久+50气血',         effect: { type: 'perm_hp', value: 50 },    price: 2700, craft: { materials: {m_herb:8, m_pearl:1}, cost: 1800 } },
-        { id: 'p_permanent_atk',name: '锻骨丹',  icon: '丹', quality: 3, desc: '永久+8攻击',          effect: { type: 'perm_atk', value: 8 },    price: 9000, craft: { materials: {m_ore:15, m_beast:8, m_pearl:2}, cost: 6000 } },
-        { id: 'p_immortal',    name: '九转金丹', icon: '丹', quality: 4, desc: '永久+30攻击 +200气血', effect: { type: 'perm_all', value: 30 },   price: 150000, craft: { materials: {m_herb:50, m_ore:30, m_beast:20, m_pearl:10}, cost: 90000 } },
-        { id: 'p_grand_hp',   name: '大还丹',   icon: '丹', quality: 3, desc: '恢复2000气血',        effect: { type: 'hp', value: 2000 },      price: 7200, craft: { materials: {m_herb:20, m_pearl:2}, cost: 4500 } },
-        { id: 'p_grand_ling', name: '聚灵丹',   icon: '丹', quality: 2, desc: '恢复500灵力',         effect: { type: 'ling', value: 500 },     price: 2100,  craft: { materials: {m_herb:10, m_beast:3}, cost: 1200 } },
-        { id: 'p_ningshen',  name: '凝神丹',   icon: '丹', quality: 3, desc: '永久+200灵力',        effect: { type: 'perm_ling', value: 200 }, price: 15000, craft: { materials: {m_herb:30, m_pearl:3, m_qi_essence:1}, cost: 9000 } }
+        { id: 'p_qi_pill',     name: '聚气丹',   icon: '丹', quality: 0, desc: '恢复50灵力',          effect: { type: 'ling', value: 50 },        price: 300,  craft: { materials: {m_herb:2}, cost: 200 } },
+        { id: 'p_hp_pill',     name: '回春丹',   icon: '丹', quality: 0, desc: '恢复100气血',         effect: { type: 'hp', value: 100 },        price: 300,  craft: { materials: {m_herb:2}, cost: 200 } },
+        { id: 'p_xiu_pill',    name: '筑基丹',   icon: '丹', quality: 1, desc: '立即获得200修为',     effect: { type: 'xiu', value: 200 },       price: 1500, craft: { materials: {m_herb:5, m_ore:2}, cost: 1000 } },
+        { id: 'p_atk_pill',    name: '虎力丹',   icon: '丹', quality: 1, desc: '战斗中攻击+15（3回合）', effect: { type: 'buff_atk', value: 15, turns: 3 }, price: 2000, craft: { materials: {m_beast:3}, cost: 1200 } },
+        { id: 'p_def_pill',    name: '金刚丹',   icon: '丹', quality: 1, desc: '战斗中防御+10（3回合）', effect: { type: 'buff_def', value: 10, turns: 3 }, price: 2000, craft: { materials: {m_ore:3}, cost: 1200 } },
+        { id: 'p_breakthrough',name: '破障丹',   icon: '丹', quality: 2, desc: '突破成功率+20%',      effect: { type: 'breakBonus', value: 0.2 }, price: 8000, craft: { materials: {m_herb:10, m_ore:5, m_beast:3}, cost: 5000 } },
+        { id: 'p_permanent_hp',name: '培元丹',   icon: '丹', quality: 2, desc: '永久+50气血',         effect: { type: 'perm_hp', value: 50 },    price: 9000, craft: { materials: {m_herb:8, m_pearl:1}, cost: 6000 } },
+        { id: 'p_permanent_atk',name: '锻骨丹',  icon: '丹', quality: 3, desc: '永久+8攻击',          effect: { type: 'perm_atk', value: 8 },    price: 30000, craft: { materials: {m_ore:15, m_beast:8, m_pearl:2}, cost: 20000 } },
+        { id: 'p_immortal',    name: '九转金丹', icon: '丹', quality: 4, desc: '永久+30攻击 +200气血', effect: { type: 'perm_all', value: 30 },   price: 500000, craft: { materials: {m_herb:50, m_ore:30, m_beast:20, m_pearl:10}, cost: 300000 } },
+        { id: 'p_grand_hp',   name: '大还丹',   icon: '丹', quality: 3, desc: '恢复2000气血',        effect: { type: 'hp', value: 2000 },      price: 24000, craft: { materials: {m_herb:20, m_pearl:2}, cost: 15000 } },
+        { id: 'p_grand_ling', name: '聚灵丹',   icon: '丹', quality: 2, desc: '恢复500灵力',         effect: { type: 'ling', value: 500 },     price: 7000,  craft: { materials: {m_herb:10, m_beast:3}, cost: 4000 } },
+        { id: 'p_ningshen',  name: '凝神丹',   icon: '丹', quality: 3, desc: '永久+200灵力',        effect: { type: 'perm_ling', value: 200 }, price: 50000, craft: { materials: {m_herb:30, m_pearl:3, m_qi_essence:1}, cost: 30000 } }
     ],
 
     /* ---------- 材料配置 ---------- */
     materials: [
-        { id: 'm_herb',  name: '灵草',   icon: '草', quality: 0, price: 30,  desc: '炼丹基础材料' },
-        { id: 'm_ore',   name: '灵矿',   icon: '矿', quality: 0, price: 36,  desc: '炼器基础材料' },
-        { id: 'm_beast', name: '妖兽内丹',icon: '丹', quality: 1, price: 120,  desc: '妖兽核心' },
-        { id: 'm_pearl', name: '灵珠',   icon: '珠', quality: 2, price: 600, desc: '炼丹高级材料' },
-        { id: 'm_chaos', name: '混沌石', icon: '石', quality: 4, price: 24000,desc: '蕴含混沌之力的奇石' },
-        { id: 'm_spirit_wood', name: '灵木',   icon: '木', quality: 1, price: 90,  desc: '温养灵气的奇木' },
-        { id: 'm_geng_gold',  name: '庚金',   icon: '金', quality: 2, price: 450, desc: '锋锐无比的庚金之精' },
-        { id: 'm_qi_essence',name: '精气',   icon: '气', quality: 3, price: 2400, desc: '天地精气凝炼而成' },
-        { id: 'm_rebirth_herb', name: '轮回草', icon: '轮', quality: 5, price: 15000000000, desc: '转世轮回之引，根植幽冥，坊市有售' }
+        { id: 'm_herb',  name: '灵草',   icon: '草', quality: 0, price: 100,  desc: '炼丹基础材料' },
+        { id: 'm_ore',   name: '灵矿',   icon: '矿', quality: 0, price: 120,  desc: '炼器基础材料' },
+        { id: 'm_beast', name: '妖兽内丹',icon: '丹', quality: 1, price: 400,  desc: '妖兽核心' },
+        { id: 'm_pearl', name: '灵珠',   icon: '珠', quality: 2, price: 2000, desc: '炼丹高级材料' },
+        { id: 'm_chaos', name: '混沌石', icon: '石', quality: 4, price: 80000,desc: '蕴含混沌之力的奇石' },
+        { id: 'm_spirit_wood', name: '灵木',   icon: '木', quality: 1, price: 300,  desc: '温养灵气的奇木' },
+        { id: 'm_geng_gold',  name: '庚金',   icon: '金', quality: 2, price: 1500, desc: '锋锐无比的庚金之精' },
+        { id: 'm_qi_essence',name: '精气',   icon: '气', quality: 3, price: 8000, desc: '天地精气凝炼而成' },
+        { id: 'm_rebirth_herb', name: '轮回草', icon: '轮', quality: 5, price: 50000000000, desc: '转世轮回之引，根植幽冥，坊市有售' }
     ],
 
     /* ---------- 功法配置 ---------- */
     gongfas: [
         { id: 'g_basic',    name: '基础吐纳术', icon: '功', quality: 0, xiuBonus: 0.10, price: 0,     desc: '最基础的修炼功法', realmReq: 0 },
-        { id: 'g_five_elem',name: '五行诀',     icon: '功', quality: 1, xiuBonus: 0.25, price: 2400,   desc: '调和五行，修炼效率提升', realmReq: 1 },
-        { id: 'g_purple',   name: '紫气东来',   icon: '功', quality: 2, xiuBonus: 0.50, price: 15000,  desc: '吸纳紫气，道韵加身', realmReq: 2 },
-        { id: 'g_chaos',    name: '混沌造化功', icon: '功', quality: 3, xiuBonus: 1.00, price: 120000, desc: '混沌之力，造化万物', realmReq: 3 },
-        { id: 'g_immortal', name: '太上感应篇', icon: '功', quality: 4, xiuBonus: 2.00, price: 900000,desc: '太上传承，道法自然', realmReq: 4 },
-        { id: 'g_void',     name: '虚空炼神诀', icon: '功', quality: 4, xiuBonus: 1.50, price: 450000,desc: '虚空炼神，道韵自生', realmReq: 4 }
+        { id: 'g_five_elem',name: '五行诀',     icon: '功', quality: 1, xiuBonus: 0.25, price: 8000,   desc: '调和五行，修炼效率提升', realmReq: 1 },
+        { id: 'g_purple',   name: '紫气东来',   icon: '功', quality: 2, xiuBonus: 0.50, price: 50000,  desc: '吸纳紫气，道韵加身', realmReq: 2 },
+        { id: 'g_chaos',    name: '混沌造化功', icon: '功', quality: 3, xiuBonus: 1.00, price: 400000, desc: '混沌之力，造化万物', realmReq: 3 },
+        { id: 'g_immortal', name: '太上感应篇', icon: '功', quality: 4, xiuBonus: 2.00, price: 3000000,desc: '太上传承，道法自然', realmReq: 4 },
+        { id: 'g_void',     name: '虚空炼神诀', icon: '功', quality: 4, xiuBonus: 1.50, price: 1500000,desc: '虚空炼神，道韵自生', realmReq: 4 }
     ],
 
     /* ---------- 技能配置（玩家可学） ---------- */
     skills: [
         { id: 's_basic_strike', name: '一击',     elem: null,   cost: 0,  cd: 0, dmgMult: 1.0,  desc: '基础攻击',         learnCost: 0,      realmReq: 0, upCostMult: 1.15 },
-        { id: 's_sword_qi',     name: '剑气斩',   elem: 'metal', cost: 45, cd: 0, dmgMult: 1.6,  desc: '金属性，凌厉剑气', learnCost: 6000,   realmReq: 0, upCostMult: 1.18 },
-        { id: 's_fire_ball',    name: '火球术',   elem: 'fire',  cost: 60, cd: 0, dmgMult: 1.8,  desc: '火属性，灼烧敌人', learnCost: 9000,   realmReq: 0, upCostMult: 1.18 },
-        { id: 's_water_arrow',  name: '寒冰矢',   elem: 'water', cost: 54, cd: 1, dmgMult: 1.5,  desc: '水属性，减速敌人', learnCost: 15000,   realmReq: 0, upCostMult: 1.18, debuff: { type: 'spd', value: 0.3, turns: 2 } },
-        { id: 's_wood_heal',    name: '回春术',   elem: 'wood',  cost: 75, cd: 2, healMult: 1.0, desc: '木属性，恢复气血', learnCost: 24000,   realmReq: 1, upCostMult: 1.20 },
-        { id: 's_earth_shield', name: '土盾术',   elem: 'earth', cost: 90, cd: 3, shield: 0.5,   desc: '土属性，护身盾甲', learnCost: 36000,  realmReq: 1, upCostMult: 1.20, buff: { type: 'def', value: 20, turns: 3 } },
-        { id: 's_thunder',      name: '雷霆万钧', elem: 'metal', cost: 180, cd: 3, dmgMult: 3.0,  desc: '金属性群雷，强力一击', learnCost: 150000,  realmReq: 2, upCostMult: 1.22 },
-        { id: 's_inferno',      name: '焚天烈焰', elem: 'fire',  cost: 210, cd: 3, dmgMult: 3.2,  desc: '火属性烈焰，灼烧万物', learnCost: 180000,  realmReq: 2, upCostMult: 1.22, debuff: { type: 'burn', value: 0.15, turns: 3 } },
-        { id: 's_combo_chain',  name: '连珠诀',   elem: null,   cost: 150, cd: 4, dmgMult: 2.4,  desc: '连击三次，每次递增', learnCost: 240000,  realmReq: 2, upCostMult: 1.22, combo: 3 },
-        { id: 's_soul_seal',    name: '封魂印',   elem: null,   cost: 240, cd: 5, dmgMult: 2.0,  desc: '封印敌人灵力',     learnCost: 450000, realmReq: 3, upCostMult: 1.25, debuff: { type: 'seal', value: 0.5, turns: 2 } },
-        { id: 's_chaos_slash',  name: '混沌斩',   elem: null,   cost: 360,cd: 5, dmgMult: 5.0,  desc: '混沌之力斩击，无视防御', learnCost: 1500000, realmReq: 3, upCostMult: 1.28, ignoreDef: true },
-        { id: 's_immortal_art', name: '仙法·万剑归宗', elem: null, cost: 600, cd: 6, dmgMult: 8.0, desc: '万剑齐发，灭杀一切', learnCost: 6000000, realmReq: 4, upCostMult: 1.30 },
-        { id: 's_xuanyuan',     name: '玄元无极功',   elem: null, cost: 90, cd: 2, dmgMult: 2.2, desc: '无极玄力，攻伐凌厉，等级越高威能越盛', learnCost: 36000, realmReq: 1, upCostMult: 1.20 },
+        { id: 's_sword_qi',     name: '剑气斩',   elem: 'metal', cost: 15, cd: 0, dmgMult: 1.6,  desc: '金属性，凌厉剑气', learnCost: 20000,   realmReq: 0, upCostMult: 1.18 },
+        { id: 's_fire_ball',    name: '火球术',   elem: 'fire',  cost: 20, cd: 0, dmgMult: 1.8,  desc: '火属性，灼烧敌人', learnCost: 30000,   realmReq: 0, upCostMult: 1.18 },
+        { id: 's_water_arrow',  name: '寒冰矢',   elem: 'water', cost: 18, cd: 1, dmgMult: 1.5,  desc: '水属性，减速敌人', learnCost: 50000,   realmReq: 0, upCostMult: 1.18, debuff: { type: 'spd', value: 0.3, turns: 2 } },
+        { id: 's_wood_heal',    name: '回春术',   elem: 'wood',  cost: 25, cd: 2, healMult: 1.0, desc: '木属性，恢复气血', learnCost: 80000,   realmReq: 1, upCostMult: 1.20 },
+        { id: 's_earth_shield', name: '土盾术',   elem: 'earth', cost: 30, cd: 3, shield: 0.5,   desc: '土属性，护身盾甲', learnCost: 120000,  realmReq: 1, upCostMult: 1.20, buff: { type: 'def', value: 20, turns: 3 } },
+        { id: 's_thunder',      name: '雷霆万钧', elem: 'metal', cost: 60, cd: 3, dmgMult: 3.0,  desc: '金属性群雷，强力一击', learnCost: 500000,  realmReq: 2, upCostMult: 1.22 },
+        { id: 's_inferno',      name: '焚天烈焰', elem: 'fire',  cost: 70, cd: 3, dmgMult: 3.2,  desc: '火属性烈焰，灼烧万物', learnCost: 600000,  realmReq: 2, upCostMult: 1.22, debuff: { type: 'burn', value: 0.15, turns: 3 } },
+        { id: 's_combo_chain',  name: '连珠诀',   elem: null,   cost: 50, cd: 4, dmgMult: 2.4,  desc: '连击三次，每次递增', learnCost: 800000,  realmReq: 2, upCostMult: 1.22, combo: 3 },
+        { id: 's_soul_seal',    name: '封魂印',   elem: null,   cost: 80, cd: 5, dmgMult: 2.0,  desc: '封印敌人灵力',     learnCost: 1500000, realmReq: 3, upCostMult: 1.25, debuff: { type: 'seal', value: 0.5, turns: 2 } },
+        { id: 's_chaos_slash',  name: '混沌斩',   elem: null,   cost: 120,cd: 5, dmgMult: 5.0,  desc: '混沌之力斩击，无视防御', learnCost: 5000000, realmReq: 3, upCostMult: 1.28, ignoreDef: true },
+        { id: 's_immortal_art', name: '仙法·万剑归宗', elem: null, cost: 200, cd: 6, dmgMult: 8.0, desc: '万剑齐发，灭杀一切', learnCost: 20000000, realmReq: 4, upCostMult: 1.30 },
+        { id: 's_xuanyuan',     name: '玄元无极功',   elem: null, cost: 30, cd: 2, dmgMult: 2.2, desc: '无极玄力，攻伐凌厉，等级越高威能越盛', learnCost: 120000, realmReq: 1, upCostMult: 1.20 },
         // —— 大成期(大乘)以上方可修习的绝学，威能远超凡术，可大幅提升斗法战力 ——
-        { id: 's_taiqing',     name: '太清剑诀',   elem: 'metal', cost: 450, cd: 4, dmgMult: 15,  desc: '太清仙宗剑诀，一剑化万道清光，大乘修士的杀伐绝学', learnCost: 15000000,  realmReq: 7, upCostMult: 1.35, ignoreDef: true },
-        { id: 's_zixiao',     name: '紫霄神雷',   elem: 'metal', cost: 540, cd: 5, dmgMult: 25,  desc: '引紫霄神雷灌体，雷光所至万法崩摧', learnCost: 60000000, realmReq: 8, upCostMult: 1.38, debuff: { type: 'seal', value: 0.4, turns: 3 } },
-        { id: 's_lihuo',      name: '离火焚天',   elem: 'fire',  cost: 660, cd: 5, dmgMult: 40,  desc: '离火真炎焚尽八荒，触者形神俱灭', learnCost: 240000000,  realmReq: 9, upCostMult: 1.40, debuff: { type: 'burn', value: 0.25, turns: 3 } },
-        { id: 's_xuantian',   name: '玄天镇魔',   elem: null,   cost: 840, cd: 6, dmgMult: 60,  desc: '玄天之力镇封亘古大魔，一击定乾坤', learnCost: 900000000, realmReq: 10, upCostMult: 1.42, ignoreDef: true },
-        { id: 's_ruzun',      name: '儒尊·浩然', elem: null,   cost: 1080, cd: 7, dmgMult: 100, desc: '浩然正气贯长虹，言出法随、灭度诸邪', learnCost: 3600000000, realmReq: 11, upCostMult: 1.45, combo: 2 },
-        { id: 's_daodao',    name: '道·无上',  elem: null,   cost: 1500, cd: 8, dmgMult: 200, desc: '大道无上，一念生灭轮回，乃诸天至高的攻伐道法', learnCost: 15000000000, realmReq: 12, upCostMult: 1.50, ignoreDef: true, combo: 3 }
+        { id: 's_taiqing',     name: '太清剑诀',   elem: 'metal', cost: 150, cd: 4, dmgMult: 15,  desc: '太清仙宗剑诀，一剑化万道清光，大乘修士的杀伐绝学', learnCost: 50000000,  realmReq: 7, upCostMult: 1.35, ignoreDef: true },
+        { id: 's_zixiao',     name: '紫霄神雷',   elem: 'metal', cost: 180, cd: 5, dmgMult: 25,  desc: '引紫霄神雷灌体，雷光所至万法崩摧', learnCost: 200000000, realmReq: 8, upCostMult: 1.38, debuff: { type: 'seal', value: 0.4, turns: 3 } },
+        { id: 's_lihuo',      name: '离火焚天',   elem: 'fire',  cost: 220, cd: 5, dmgMult: 40,  desc: '离火真炎焚尽八荒，触者形神俱灭', learnCost: 800000000,  realmReq: 9, upCostMult: 1.40, debuff: { type: 'burn', value: 0.25, turns: 3 } },
+        { id: 's_xuantian',   name: '玄天镇魔',   elem: null,   cost: 280, cd: 6, dmgMult: 60,  desc: '玄天之力镇封亘古大魔，一击定乾坤', learnCost: 3000000000, realmReq: 10, upCostMult: 1.42, ignoreDef: true },
+        { id: 's_ruzun',      name: '儒尊·浩然', elem: null,   cost: 360, cd: 7, dmgMult: 100, desc: '浩然正气贯长虹，言出法随、灭度诸邪', learnCost: 12000000000, realmReq: 11, upCostMult: 1.45, combo: 2 },
+        { id: 's_daodao',    name: '道·无上',  elem: null,   cost: 500, cd: 8, dmgMult: 200, desc: '大道无上，一念生灭轮回，乃诸天至高的攻伐道法', learnCost: 50000000000, realmReq: 12, upCostMult: 1.50, ignoreDef: true, combo: 3 }
     ],
 
     /* ---------- 法宝技能 ---------- */
     fabaoSkills: {
         f_bell_skill:        { name: '金钟护体', cost: 0, cd: 4, desc: '抵挡下一次攻击', shield: 1.0 },
-        f_mountain_skill:    { name: '泰山压顶', cost: 90, cd: 3, dmgMult: 2.2, desc: '镇压敌人' },
-        f_mirror_skill:      { name: '阴阳反照', cost: 120, cd: 4, reflect: 0.5, desc: '反弹50%伤害', turns: 2 },
-        f_pagoda_skill:      { name: '万法镇灭', cost: 240, cd: 5, dmgMult: 4.0, ignoreDef: true, desc: '镇压一切' }
+        f_mountain_skill:    { name: '泰山压顶', cost: 30, cd: 3, dmgMult: 2.2, desc: '镇压敌人' },
+        f_mirror_skill:      { name: '阴阳反照', cost: 40, cd: 4, reflect: 0.5, desc: '反弹50%伤害', turns: 2 },
+        f_pagoda_skill:      { name: '万法镇灭', cost: 80, cd: 5, dmgMult: 4.0, ignoreDef: true, desc: '镇压一切' }
     },
 
     /* ---------- 灵宠配置 ---------- */
     pets: [
-        { id: 'pet_wolf',    name: '玄狼',   icon: '狼', elem: 'metal', atk: 8,  def: 4,  hp: 50,  skill: 'pet_bite',    desc: '玄铁狼，攻击型灵宠', realmReq: 0, price: 6000 },
-        { id: 'pet_turtle',  name: '玄龟',   icon: '龟', elem: 'water', atk: 3,  def: 15, hp: 150, skill: 'pet_shield',  desc: '玄水龟，防御型灵宠', realmReq: 1, price: 18000 },
-        { id: 'pet_phoenix', name: '火凤',   icon: '凤', elem: 'fire',  atk: 25, def: 10, hp: 200, skill: 'pet_flame',   desc: '烈焰火凤，群攻灵宠', realmReq: 2, price: 60000 },
-        { id: 'pet_dragon',  name: '青龙',   icon: '龙', elem: 'wood',  atk: 80, def: 40, hp: 600, skill: 'pet_roar',    desc: '上古青龙，至强灵宠', realmReq: 3, price: 240000 }
+        { id: 'pet_wolf',    name: '玄狼',   icon: '狼', elem: 'metal', atk: 8,  def: 4,  hp: 50,  skill: 'pet_bite',    desc: '玄铁狼，攻击型灵宠', realmReq: 0, price: 20000 },
+        { id: 'pet_turtle',  name: '玄龟',   icon: '龟', elem: 'water', atk: 3,  def: 15, hp: 150, skill: 'pet_shield',  desc: '玄水龟，防御型灵宠', realmReq: 1, price: 60000 },
+        { id: 'pet_phoenix', name: '火凤',   icon: '凤', elem: 'fire',  atk: 25, def: 10, hp: 200, skill: 'pet_flame',   desc: '烈焰火凤，群攻灵宠', realmReq: 2, price: 200000 },
+        { id: 'pet_dragon',  name: '青龙',   icon: '龙', elem: 'wood',  atk: 80, def: 40, hp: 600, skill: 'pet_roar',    desc: '上古青龙，至强灵宠', realmReq: 3, price: 800000 }
     ],
     petSkills: {
         pet_bite:   { name: '撕咬', dmgMult: 0.6, cd: 1 },
@@ -185,26 +185,26 @@ const GameConfig = {
 
     /* ---------- 敌人配置 ---------- */
     enemies: [
-        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   xiuReward: 60,    stoneReward: 30,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15, count: 1 }] },
-        { id: 'e_bat',      name: '吸血妖蝠',   icon: '蝠', elem: 'water', realmIdx: 0, realmLayer: 3, hp: 80,   atk: 10,   def: 4,   spd: 16,  ling: 8,   xiuReward: 120,    stoneReward: 50,   drops: [{ id: 'm_beast', rate: 0.45, count: 1 }, { id: 'p_qi_pill', rate: 0.2, count: 1 }] },
-        { id: 'e_snake',    name: '青鳞蛇妖',   icon: '蛇', elem: 'wood',  realmIdx: 0, realmLayer: 5, hp: 128,  atk: 14,   def: 6,   spd: 14,  ling: 12,  xiuReward: 220,   stoneReward: 90,   drops: [{ id: 'm_herb', rate: 0.55, count: 2 }, { id: 'm_beast', rate: 0.35, count: 1 }] },
-        { id: 'e_bear',     name: '玄铁熊',     icon: '熊', elem: 'earth', realmIdx: 0, realmLayer: 7, hp: 224,  atk: 20,   def: 14,  spd: 8,   ling: 18,  xiuReward: 400,   stoneReward: 160,   drops: [{ id: 'm_ore', rate: 0.55, count: 2 }, { id: 'a_silk_robe', rate: 0.1, count: 1 }] },
-        { id: 'e_evil_dao', name: '邪修散人',   icon: '邪', elem: 'fire',  realmIdx: 1, realmLayer: 1, hp: 360,  atk: 32,   def: 18,  spd: 18,  ling: 30,  xiuReward: 1000,   stoneReward: 360,  drops: [{ id: 'w_flame_blade', rate: 0.13, count: 1 }, { id: 'p_xiu_pill', rate: 0.25, count: 1 }] },
-        { id: 'e_tiger',    name: '赤焰虎王',   icon: '虎', elem: 'fire',  realmIdx: 1, realmLayer: 4, hp: 640,  atk: 52,   def: 30,  spd: 22,  ling: 50,  xiuReward: 2400,  stoneReward: 760,  drops: [{ id: 'm_beast', rate: 0.65, count: 3 }, { id: 'w_thunder_sword', rate: 0.1, count: 1 }] },
-        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, xiuReward: 10000,  stoneReward: 2400, drops: [{ id: 'w_zither', rate: 0.15, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
-        { id: 'e_dragon_jc',name: '蛟龙',       icon: '蛟', elem: 'water', realmIdx: 2, realmLayer: 5, hp: 4000, atk: 192,  def: 128, spd: 30,  ling: 200, xiuReward: 28000, stoneReward: 6400, drops: [{ id: 'f_mountain', rate: 0.13, count: 1 }, { id: 'm_pearl', rate: 0.45, count: 2 }] },
-        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, xiuReward: 120000, stoneReward: 30000,drops: [{ id: 'f_mirror', rate: 0.15, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_devil',    name: '天魔',       icon: '魔', elem: 'fire',  realmIdx: 3, realmLayer: 5, hp: 40000,atk: 1200, def: 720, spd: 45,  ling: 1000,xiuReward: 400000,stoneReward: 90000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'm_chaos', rate: 0.35, count: 1 }] },
-        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, xiuReward: 1600000,stoneReward: 360000, drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
+        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   xiuReward: 60,    stoneReward: 90,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15, count: 1 }] },
+        { id: 'e_bat',      name: '吸血妖蝠',   icon: '蝠', elem: 'water', realmIdx: 0, realmLayer: 3, hp: 80,   atk: 10,   def: 4,   spd: 16,  ling: 8,   xiuReward: 120,    stoneReward: 150,   drops: [{ id: 'm_beast', rate: 0.45, count: 1 }, { id: 'p_qi_pill', rate: 0.2, count: 1 }] },
+        { id: 'e_snake',    name: '青鳞蛇妖',   icon: '蛇', elem: 'wood',  realmIdx: 0, realmLayer: 5, hp: 128,  atk: 14,   def: 6,   spd: 14,  ling: 12,  xiuReward: 220,   stoneReward: 270,   drops: [{ id: 'm_herb', rate: 0.55, count: 2 }, { id: 'm_beast', rate: 0.35, count: 1 }] },
+        { id: 'e_bear',     name: '玄铁熊',     icon: '熊', elem: 'earth', realmIdx: 0, realmLayer: 7, hp: 224,  atk: 20,   def: 14,  spd: 8,   ling: 18,  xiuReward: 400,   stoneReward: 480,   drops: [{ id: 'm_ore', rate: 0.55, count: 2 }, { id: 'a_silk_robe', rate: 0.1, count: 1 }] },
+        { id: 'e_evil_dao', name: '邪修散人',   icon: '邪', elem: 'fire',  realmIdx: 1, realmLayer: 1, hp: 360,  atk: 32,   def: 18,  spd: 18,  ling: 30,  xiuReward: 1000,   stoneReward: 1080,  drops: [{ id: 'w_flame_blade', rate: 0.13, count: 1 }, { id: 'p_xiu_pill', rate: 0.25, count: 1 }] },
+        { id: 'e_tiger',    name: '赤焰虎王',   icon: '虎', elem: 'fire',  realmIdx: 1, realmLayer: 4, hp: 640,  atk: 52,   def: 30,  spd: 22,  ling: 50,  xiuReward: 2400,  stoneReward: 2280,  drops: [{ id: 'm_beast', rate: 0.65, count: 3 }, { id: 'w_thunder_sword', rate: 0.1, count: 1 }] },
+        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, xiuReward: 10000,  stoneReward: 7200, drops: [{ id: 'w_zither', rate: 0.15, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
+        { id: 'e_dragon_jc',name: '蛟龙',       icon: '蛟', elem: 'water', realmIdx: 2, realmLayer: 5, hp: 4000, atk: 192,  def: 128, spd: 30,  ling: 200, xiuReward: 28000, stoneReward: 19200, drops: [{ id: 'f_mountain', rate: 0.13, count: 1 }, { id: 'm_pearl', rate: 0.45, count: 2 }] },
+        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, xiuReward: 120000, stoneReward: 90000,drops: [{ id: 'f_mirror', rate: 0.15, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_devil',    name: '天魔',       icon: '魔', elem: 'fire',  realmIdx: 3, realmLayer: 5, hp: 40000,atk: 1200, def: 720, spd: 45,  ling: 1000,xiuReward: 400000,stoneReward: 270000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'm_chaos', rate: 0.35, count: 1 }] },
+        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, xiuReward: 1600000,stoneReward: 1080000, drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
         // 扩展：炼虚至道祖
-        { id: 'e_lianxu',   name: '炼虚魔君',   icon: '虚', elem: 'fire',  realmIdx: 5, realmLayer: 1, hp: 15000, atk: 1200, def: 600, spd: 28,  ling: 4000, xiuReward: 4000000,  stoneReward: 1000000,  drops: [{ id: 'm_chaos', rate: 0.35, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_heti',     name: '合体妖尊',   icon: '合', elem: 'wood',  realmIdx: 6, realmLayer: 1, hp: 35000, atk: 2800, def: 1400, spd: 30,  ling: 8000, xiuReward: 10000000,  stoneReward: 2400000, drops: [{ id: 'm_spirit_wood', rate: 0.45, count: 2 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
-        { id: 'e_dacheng',  name: '大乘罗汉',   icon: '乘', elem: 'earth', realmIdx: 7, realmLayer: 1, hp: 80000, atk: 6500, def: 3200, spd: 32,  ling: 16000,xiuReward: 24000000, stoneReward: 6000000, drops: [{ id: 'm_geng_gold', rate: 0.45, count: 2 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_zhenxian', name: '真仙使者',   icon: '真', elem: 'water', realmIdx: 8, realmLayer: 1, hp: 180000,atk:15000, def:7500, spd: 34,  ling: 32000,xiuReward: 60000000, stoneReward: 16000000, drops: [{ id: 'm_qi_essence', rate: 0.45, count: 2 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
-        { id: 'e_jinxian',  name: '金仙老祖',   icon: '金', elem: 'metal', realmIdx: 9, realmLayer: 1, hp: 400000,atk:35000, def:17500,spd: 36,  ling: 64000,xiuReward: 160000000, stoneReward: 40000000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'p_grand_hp', rate: 0.25, count: 1 }] },
-        { id: 'e_taiyi',    name: '太乙天尊',   icon: '乙', elem: 'fire',  realmIdx: 10,realmLayer: 1, hp: 900000,atk:80000, def:40000,spd: 38,  ling: 128000,xiuReward: 400000000,stoneReward: 100000000,drops: [{ id: 'f_void_banner', rate: 0.13, count: 1 }, { id: 'p_grand_ling', rate: 0.25, count: 1 }] },
-        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,xiuReward: 1000000000,stoneReward: 240000000,drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
-        { id: 'e_daozu',    name: '道祖化身',   icon: '祖', elem: 'earth', realmIdx: 12,realmLayer: 1, hp: 5000000,atk:400000, def:200000,spd: 42,  ling: 512000,xiuReward: 2400000000,stoneReward: 600000000,drops: [{ id: 'w_pangu_axe', rate: 0.13, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] }
+        { id: 'e_lianxu',   name: '炼虚魔君',   icon: '虚', elem: 'fire',  realmIdx: 5, realmLayer: 1, hp: 15000, atk: 1200, def: 600, spd: 28,  ling: 4000, xiuReward: 4000000,  stoneReward: 3000000,  drops: [{ id: 'm_chaos', rate: 0.35, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_heti',     name: '合体妖尊',   icon: '合', elem: 'wood',  realmIdx: 6, realmLayer: 1, hp: 35000, atk: 2800, def: 1400, spd: 30,  ling: 8000, xiuReward: 10000000,  stoneReward: 7200000, drops: [{ id: 'm_spirit_wood', rate: 0.45, count: 2 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
+        { id: 'e_dacheng',  name: '大乘罗汉',   icon: '乘', elem: 'earth', realmIdx: 7, realmLayer: 1, hp: 80000, atk: 6500, def: 3200, spd: 32,  ling: 16000,xiuReward: 24000000, stoneReward: 18000000, drops: [{ id: 'm_geng_gold', rate: 0.45, count: 2 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_zhenxian', name: '真仙使者',   icon: '真', elem: 'water', realmIdx: 8, realmLayer: 1, hp: 180000,atk:15000, def:7500, spd: 34,  ling: 32000,xiuReward: 60000000, stoneReward: 48000000, drops: [{ id: 'm_qi_essence', rate: 0.45, count: 2 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
+        { id: 'e_jinxian',  name: '金仙老祖',   icon: '金', elem: 'metal', realmIdx: 9, realmLayer: 1, hp: 400000,atk:35000, def:17500,spd: 36,  ling: 64000,xiuReward: 160000000, stoneReward: 120000000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'p_grand_hp', rate: 0.25, count: 1 }] },
+        { id: 'e_taiyi',    name: '太乙天尊',   icon: '乙', elem: 'fire',  realmIdx: 10,realmLayer: 1, hp: 900000,atk:80000, def:40000,spd: 38,  ling: 128000,xiuReward: 400000000,stoneReward: 300000000,drops: [{ id: 'f_void_banner', rate: 0.13, count: 1 }, { id: 'p_grand_ling', rate: 0.25, count: 1 }] },
+        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,xiuReward: 1000000000,stoneReward: 720000000,drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
+        { id: 'e_daozu',    name: '道祖化身',   icon: '祖', elem: 'earth', realmIdx: 12,realmLayer: 1, hp: 5000000,atk:400000, def:200000,spd: 42,  ling: 512000,xiuReward: 2400000000,stoneReward: 1800000000,drops: [{ id: 'w_pangu_axe', rate: 0.13, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] }
     ],
 
     /* ---------- 地图场景 ---------- */
@@ -228,7 +228,7 @@ const GameConfig = {
         sect_task:       { title: '宗门任务', icon: '卷', desc: '掌门召你前去，有一桩差事', choices: [{ text: '领命前往', type: 'quest' }] },
         find_stall:      { title: '偶遇摊位', icon: '摊', desc: '路边一老叟摆摊，似有奇货', choices: [{ text: '上前查看', type: 'shop_random' }, { text: '离开', type: 'nothing' }] },
         auction:         { title: '拍卖盛会', icon: '锤', desc: '坊市举办拍卖会，有稀有宝物', choices: [{ text: '参与竞拍', type: 'auction' }, { text: '围观', type: 'xiu', value: 20 }] },
-        beggar:          { title: '乞丐乞讨', icon: '乞', desc: '一蓬头乞丐拦住去路，声称是有缘人', choices: [{ text: '施舍100灵石', type: 'beggar_pay', cost: 300 }, { text: '不予理会', type: 'nothing' }] },
+        beggar:          { title: '乞丐乞讨', icon: '乞', desc: '一蓬头乞丐拦住去路，声称是有缘人', choices: [{ text: '施舍100灵石', type: 'beggar_pay', cost: 100 }, { text: '不予理会', type: 'nothing' }] },
         beast_attack:    { title: '妖兽袭击', icon: '兽', desc: '一头妖兽挡住去路！', choices: [{ text: '迎战', type: 'combat_random' }, { text: '绕道', type: 'nothing' }] },
         find_herb:       { title: '发现灵草', icon: '草', desc: '路边发现一丛灵草', choices: [{ text: '采摘', type: 'item', value: 'm_herb', count: 3 }] },
         lost_disciple:   { title: '迷路弟子', icon: '人', desc: '遇到一位迷路的同门弟子', choices: [{ text: '送他回去', type: 'karma_good' }, { text: '抢他灵石', type: 'karma_bad' }] },
@@ -258,16 +258,16 @@ const GameConfig = {
 
     /* ---------- 任务配置 ---------- */
     quests: [
-        { id: 'q_first_cultivate', name: '初识修炼',   desc: '修炼累积100修为',     target: 100,    type: 'xiu_total',     reward: { stone: 50, xiu: 50 } },
-        { id: 'q_first_combat',    name: '初战告捷',   desc: '战胜1个敌人',         target: 1,      type: 'combat_win',    reward: { stone: 80, items: [{ id: 'p_hp_pill', count: 3 }] } },
-        { id: 'q_lianqi_break',    name: '突破练气',   desc: '突破至练气三层',       target: 3,      type: 'realm_layer',   reward: { stone: 200, items: [{ id: 'p_xiu_pill', count: 2 }] } },
-        { id: 'q_zhuji',           name: '筑基大道',   desc: '突破至筑基境界',       target: 2,      type: 'realm_idx',     reward: { stone: 1000, items: [{ id: 'p_breakthrough', count: 1 }] } },
-        { id: 'q_explore_10',      name: '历练初探',   desc: '完成10次探索',        target: 10,     type: 'explore_count', reward: { stone: 300, xiu: 500 } },
-        { id: 'q_kill_20',         name: '斩妖除魔',   desc: '战胜20个敌人',        target: 20,     type: 'combat_win',    reward: { stone: 500, items: [{ id: 'ac_fire_ring', count: 1 }] } },
-        { id: 'q_jindan',          name: '结丹大道',   desc: '突破至金丹境界',       target: 3,      type: 'realm_idx',     reward: { stone: 8000, items: [{ id: 'p_permanent_hp', count: 1 }] } },
-        { id: 'q_kill_50',         name: '威震四方',   desc: '战胜50个敌人',        target: 50,     type: 'combat_win',    reward: { stone: 3000, items: [{ id: 'w_thunder_sword', count: 1 }] } },
-        { id: 'q_yuanying',        name: '元婴大道',   desc: '突破至元婴境界',       target: 4,      type: 'realm_idx',     reward: { stone: 50000, items: [{ id: 'p_permanent_atk', count: 1 }] } },
-        { id: 'q_huashen',         name: '化神飞升',   desc: '突破至化神境界',       target: 5,      type: 'realm_idx',     reward: { stone: 500000, items: [{ id: 'p_immortal', count: 1 }] } }
+        { id: 'q_first_cultivate', name: '初识修炼',   desc: '修炼累积100修为',     target: 100,    type: 'xiu_total',     reward: { stone: 150, xiu: 50 } },
+        { id: 'q_first_combat',    name: '初战告捷',   desc: '战胜1个敌人',         target: 1,      type: 'combat_win',    reward: { stone: 240, items: [{ id: 'p_hp_pill', count: 3 }] } },
+        { id: 'q_lianqi_break',    name: '突破练气',   desc: '突破至练气三层',       target: 3,      type: 'realm_layer',   reward: { stone: 600, items: [{ id: 'p_xiu_pill', count: 2 }] } },
+        { id: 'q_zhuji',           name: '筑基大道',   desc: '突破至筑基境界',       target: 2,      type: 'realm_idx',     reward: { stone: 3000, items: [{ id: 'p_breakthrough', count: 1 }] } },
+        { id: 'q_explore_10',      name: '历练初探',   desc: '完成10次探索',        target: 10,     type: 'explore_count', reward: { stone: 900, xiu: 500 } },
+        { id: 'q_kill_20',         name: '斩妖除魔',   desc: '战胜20个敌人',        target: 20,     type: 'combat_win',    reward: { stone: 1500, items: [{ id: 'ac_fire_ring', count: 1 }] } },
+        { id: 'q_jindan',          name: '结丹大道',   desc: '突破至金丹境界',       target: 3,      type: 'realm_idx',     reward: { stone: 24000, items: [{ id: 'p_permanent_hp', count: 1 }] } },
+        { id: 'q_kill_50',         name: '威震四方',   desc: '战胜50个敌人',        target: 50,     type: 'combat_win',    reward: { stone: 9000, items: [{ id: 'w_thunder_sword', count: 1 }] } },
+        { id: 'q_yuanying',        name: '元婴大道',   desc: '突破至元婴境界',       target: 4,      type: 'realm_idx',     reward: { stone: 150000, items: [{ id: 'p_permanent_atk', count: 1 }] } },
+        { id: 'q_huashen',         name: '化神飞升',   desc: '突破至化神境界',       target: 5,      type: 'realm_idx',     reward: { stone: 1500000, items: [{ id: 'p_immortal', count: 1 }] } }
     ],
 
     /* ---------- 转世轮回 ---------- */

@@ -154,7 +154,7 @@ const Explore = {
 
             case 'karma_bad':
                 // 行凶夺宝
-                const stoneGain = Math.floor(50 + Math.random() * 100);
+                const stoneGain = Math.floor(150 + Math.random() * 300);
                 player.stone += stoneGain;
                 if (typeof UI !== 'undefined') {
                     UI.toast(`抢得${stoneGain}灵石`, 'gold');
@@ -310,11 +310,11 @@ const Explore = {
         let stoneReward;
         if (type === 'treasure') {
             qualityPool = [0, 0, 1, 1, 2];
-            stoneReward = Math.floor(50 + Math.random() * 200);
+            stoneReward = Math.floor(150 + Math.random() * 600);
         } else if (type === 'treasure_safe') {
             // 谨慎检查，避免陷阱但奖励较少
             qualityPool = [0, 0, 1];
-            stoneReward = Math.floor(30 + Math.random() * 100);
+            stoneReward = Math.floor(90 + Math.random() * 300);
             if (typeof UI !== 'undefined') UI.toast(`获得${stoneReward}灵石`, 'gold');
             if (Math.random() < 0.3) {
                 // 30%概率只有灵石，无装备
@@ -324,7 +324,7 @@ const Explore = {
         } else {
             // 深海宝库
             qualityPool = [1, 2, 2, 3, 3, 4];
-            stoneReward = Math.floor(500 + Math.random() * 2000);
+            stoneReward = Math.floor(1500 + Math.random() * 6000);
         }
         player.stone += stoneReward;
         if (typeof UI !== 'undefined') UI.toast(`获得${stoneReward}灵石`, 'gold');
