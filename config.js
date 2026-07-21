@@ -300,8 +300,11 @@ const GameConfig = {
         skills: { s_basic_strike: 1 },
         // 当前所修功法id
         gongfa: 'g_basic',
-        // 灵宠
+        // 灵宠（player.pet = 出战灵宠id；pets = 已收服列表）
         pet: null,
+        pets: [],
+        // 天赋（pts = 可分配点数；learned = { 天赋id: 等级 }）
+        talents: { pts: 0, learned: {} },
         // 任务进度 { id: { progress, claimed } }
         quests: {},
         // 统计

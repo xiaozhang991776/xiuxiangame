@@ -48,7 +48,7 @@ const Combat = {
                 buffs: [],
                 debuffs: [],
                 skillCd: {},  // 技能冷却
-                pet: player.pet ? getPet(player.pet) : null,
+                pet: (player.pet && typeof PetSys !== 'undefined') ? PetSys.getCombatPet(player) : null,
                 petCd: 0,
                 fabao: player.equipped.fabao ? getEquipTemplate(player.equipped.fabao.baseId) : null,
                 fabaoCd: 0,
@@ -240,6 +240,12 @@ const Combat = {
         // 暴击
         let isCrit = Math.random() < attacker.crit;
         if (isCrit) dmg *= 1.8;
+        // 天赋：斗法伤害（我方出手）/ 减伤（我方受击）
+        const _tp = (typeof Game !== 'undefined' && Game.player) ? Game.player : null;
+        if (_tp && typeof Talent !== 'undefined') {
+            if (from === 'player') dmg *= Talent.dmgDealMult(_tp);
+            if (to === 'player') dmg *= (1 - Talent.dmgReduce(_tp));
+        }
         dmg = Math.floor(dmg);
 
         // 护盾抵扣
@@ -289,7 +295,8 @@ const Combat = {
             player.shieldTurns = petSkill.cd || 3;
             this.addLog(`${player.pet.name}施展${petSkill.name}，护主加盾`, 'heal');
         } else if (petSkill.dmgMult) {
-            const baseDmg = player.pet.atk * petSkill.dmgMult;
+            const tdMult = (typeof Game !== 'undefined' && Game.player && typeof Talent !== 'undefined') ? Talent.dmgDealMult(Game.player) : 1;
+            const baseDmg = Math.floor(player.pet.atk * petSkill.dmgMult * tdMult);
             const elemMult = getElementMultiplier(player.pet.elem, this.state.enemy.elem);
             const dmg = Math.max(1, Math.floor(baseDmg * elemMult - this.state.enemy.def * 0.5));
             this.state.enemy.hp -= dmg;
@@ -327,6 +334,10 @@ const Combat = {
         let pDef = player.def;
         player.buffs.forEach(b => { if (b.type === 'def') pDef += Math.floor(b.value * (b.lvlMult || 1)); });
         player.debuffs.forEach(d => { if (d.type === 'def') pDef = Math.floor(pDef * (1 - d.value)); });
+        // 天赋：受到伤害减免（天命系·护身）
+        if (typeof Game !== 'undefined' && Game.player && typeof Talent !== 'undefined') {
+            dmg *= (1 - Talent.dmgReduce(Game.player));
+        }
         dmg = Math.max(1, dmg - pDef * 0.8);
         // 暴击
         const isCrit = Math.random() < 0.08;

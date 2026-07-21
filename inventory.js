@@ -443,11 +443,17 @@ const Inventory = {
             if (typeof UI !== 'undefined') UI.toast(`境界不足，无法收服${pet.name}`, 'bad');
             return false;
         }
-        if (player.pet === petId) {
+        if (player.pets && player.pets.find(x => x.id === petId)) {
             if (typeof UI !== 'undefined') UI.toast('已收服此灵宠', 'bad');
             return false;
         }
-        player.pet = petId;
+        if (typeof PetSys !== 'undefined') {
+            PetSys.addPet(player, petId);
+        } else {
+            if (!player.pets) player.pets = [];
+            player.pets.push({ id: petId, lv: 1, exp: 0, aff: 0, evo: 0 });
+            if (!player.pet) player.pet = petId;
+        }
         if (typeof UI !== 'undefined') {
             UI.toast(`收服灵宠：${pet.name}！`, 'gold');
             UI.addLog(`收服灵宠 ${pet.name}！`, 'evt');

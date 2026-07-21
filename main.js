@@ -529,7 +529,7 @@
                 || !document.getElementById('settings-screen').classList.contains('hidden')
                 || !document.getElementById('reward-screen').classList.contains('hidden');
             if (blocked) return;
-            const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest', '8': 'friends', '9': 'reincarnate' };
+            const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest', '8': 'friends', '9': 'reincarnate', '0': 'talent', 'p': 'pet' };
             if (keyMap[e.key]) UI.switchPanel(keyMap[e.key]);
             // 空格键：在修炼面板手动聚气
             if (e.key === ' ' && Game.currentPanel === 'cultivate') {

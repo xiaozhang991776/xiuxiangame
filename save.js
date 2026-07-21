@@ -179,6 +179,13 @@ const SaveSystem = {
         if (!player.quests) player.quests = {};
         if (!player.stats) player.stats = { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0 };
         if (!player.settings) player.settings = { autoSave: true, anim: true, sound: false };
+        // 灵宠培养 + 天赋系统 字段补全 / 旧档迁移
+        if (!player.pets) player.pets = [];
+        if (!player.talents) player.talents = { pts: 0, learned: {} };
+        // 旧档：仅有单一 player.pet，迁移进 pets 列表
+        if (player.pet && !player.pets.find(x => x.id === player.pet)) {
+            player.pets.push({ id: player.pet, lv: 1, exp: 0, aff: 0, evo: 0 });
+        }
         // 补全新任务
         GameConfig.quests.forEach(q => {
             if (!player.quests[q.id]) player.quests[q.id] = { progress: 0, claimed: false };
@@ -244,6 +251,8 @@ const SaveSystem = {
         if (GameConfig.rebirth && GameConfig.rebirth.xiuBonusPerRebirth) {
             base *= (1 + (player.rebirth || 0) * GameConfig.rebirth.xiuBonusPerRebirth);
         }
+        // 天赋加成（悟道系·明悟）
+        if (typeof Talent !== 'undefined') base *= Talent.xiuRateMult(player);
         return base;
     },
 

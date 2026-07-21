@@ -88,7 +88,7 @@ const Shop = {
                 const p = getPet(id);
                 if (!p) return;
                 price = p.price || (p.realmReq + 1) * 2000;
-                if (player.pet === id) {
+                if (player.pets && player.pets.find(x => x.id === id)) {
                     canBuy = false; reason = '已拥有';
                 }
                 if (player.realmIdx < p.realmReq) {
@@ -110,8 +110,6 @@ const Shop = {
         // 根据类型添加
         if (type === 'pet') {
             Inventory.catchPet(player, id);
-            // catchPet 会再判断境界，这里已扣款，强制添加
-            player.pet = id;
         } else if (type === 'gongfa') {
             Inventory.learnGongfa(player, id);
             // learnGongfa会判断，强制添加

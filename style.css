@@ -1731,3 +1731,60 @@ input { font-family: inherit; }
 .rebirth-hint { font-size: 13px; color: var(--text-dim); line-height: 1.8; margin-top: 6px; }
 .rebirth-hint b { color: var(--text-gold); }
 .rb-lock { color: #f0936b; }
+
+/* ============ 灵宠培养面板 ============ */
+.pet-cult-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 16px 0; }
+.pet-cult-card {
+    display: flex; gap: 12px; padding: 14px; cursor: pointer;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.18);
+    border-radius: 14px; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.pet-cult-card:hover { transform: translateY(-2px); background: rgba(212,175,55,0.08); }
+.pet-cult-card.active { border-color: var(--gold); box-shadow: 0 6px 22px rgba(212,175,55,0.22); background: rgba(212,175,55,0.10); }
+.pc-icon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.22); }
+.pc-info { flex: 1; min-width: 0; }
+.pc-name { font-size: 15px; font-weight: 600; color: var(--text-gold); display: flex; align-items: center; gap: 8px; }
+.pc-tag { font-size: 11px; font-weight: 600; color: #0d0a14; background: linear-gradient(135deg, var(--gold-light), var(--gold)); padding: 1px 7px; border-radius: 6px; }
+.pc-lv { font-size: 12px; color: var(--text-dim); margin: 2px 0 4px; }
+.pc-stats { font-size: 13px; color: #d8c98e; }
+.pc-exp { height: 6px; margin-top: 8px; background: rgba(0,0,0,0.35); border-radius: 4px; overflow: hidden; }
+.pc-exp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 4px; transition: width 0.4s ease; }
+.pet-empty-tip { font-size: 14px; color: var(--text-dim); line-height: 1.8; padding: 18px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(212,175,55,0.2); border-radius: 12px; }
+
+.pet-cult-detail { margin-top: 8px; padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.16); border-radius: 14px; }
+.pd-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+.pd-icon { width: 60px; height: 60px; flex: 0 0 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 34px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.25); }
+.pd-name { font-size: 19px; font-weight: 700; color: var(--text-gold); }
+.pd-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+.pd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.pd-stats > div { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; text-align: center; }
+.pd-stats span { display: block; font-size: 12px; color: var(--text-dim); }
+.pd-stats b { font-size: 18px; color: var(--gold-light); }
+.pd-exp { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+.pd-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pd-btn { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-gold); background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.25); transition: transform 0.2s ease, background 0.2s ease; }
+.pd-btn:hover:not(:disabled) { transform: translateY(-2px); background: rgba(212,175,55,0.12); }
+.pd-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pd-hint { font-size: 12px; color: var(--text-dim); margin-top: 10px; }
+
+/* ============ 天赋面板 ============ */
+.talent-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 4px; }
+.talent-pts { font-size: 15px; color: var(--text-dim); }
+.talent-pts b { font-size: 20px; color: var(--gold-light); font-weight: 700; }
+.talent-tree { margin-top: 16px; display: flex; flex-direction: column; gap: 18px; }
+.talent-branch { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.14); border-radius: 14px; padding: 14px; }
+.tb-title { font-size: 15px; font-weight: 700; color: var(--text-gold); letter-spacing: 2px; margin-bottom: 12px; }
+.tb-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.talent-card { display: flex; gap: 12px; padding: 12px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+.talent-card.maxed { border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); }
+.tc-icon { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.2); }
+.tc-body { flex: 1; min-width: 0; }
+.tc-name { font-size: 15px; font-weight: 600; color: var(--text-gold); display: flex; align-items: center; gap: 8px; }
+.tc-lv { font-size: 12px; color: var(--gold-light); font-weight: 700; }
+.tc-desc { font-size: 12px; color: var(--text-dim); margin: 4px 0 8px; }
+.tc-btn { width: 100%; padding: 8px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; color: #0d0a14; background: linear-gradient(135deg, var(--gold-light), var(--gold)); border: none; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.tc-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.35); }
+.tc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 灵宠状态卡（右侧） */
+.pet-lv { font-size: 11px; color: var(--gold-light); margin-left: 6px; }

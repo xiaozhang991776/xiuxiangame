@@ -188,6 +188,12 @@
                 <button class="nav-btn" data-panel="skill" title="神通">
                     <span class="nav-icon">符</span><span class="nav-label">神通</span>
                 </button>
+                <button class="nav-btn" data-panel="pet" title="灵宠">
+                    <span class="nav-icon">宠</span><span class="nav-label">灵宠</span>
+                </button>
+                <button class="nav-btn" data-panel="talent" title="天赋">
+                    <span class="nav-icon">赋</span><span class="nav-label">天赋</span>
+                </button>
                 <button class="nav-btn" data-panel="shop" title="坊市">
                     <span class="nav-icon">市</span><span class="nav-label">坊市</span>
                 </button>
@@ -317,6 +323,26 @@
                     <h3 class="panel-title">神通法术</h3>
                     <p class="panel-desc">修炼神通，斗法时施展。可消耗修为提升等级。</p>
                     <div class="skill-list" id="skillList"></div>
+                </div>
+
+                <!-- 灵宠面板 -->
+                <div class="panel" id="panel-pet">
+                    <h3 class="panel-title">灵宠培养</h3>
+                    <p class="panel-desc">喂养、修炼、化形进阶，养成与你同生共死的本命灵宠。坊市可购灵宠，历练东海龙宫可得幼龙。</p>
+                    <div class="pet-cult-list" id="petCultList"></div>
+                    <div class="pet-cult-detail" id="petCultDetail">
+                        <p class="inv-detail-empty">选中灵宠查看详情</p>
+                    </div>
+                </div>
+
+                <!-- 天赋面板 -->
+                <div class="panel" id="panel-talent">
+                    <div class="talent-head">
+                        <h3 class="panel-title">天赋</h3>
+                        <div class="talent-pts">天赋点：<b id="talentPts">0</b></div>
+                    </div>
+                    <p class="panel-desc">突破大境界觉醒天赋点（每满 5 小境界再得 1 点）。修习六系天赋，永久增益道途。</p>
+                    <div class="talent-tree" id="talentTree"></div>
                 </div>
 
                 <!-- 坊市面板 -->
@@ -590,6 +616,8 @@
     <!-- 脚本按顺序加载 -->
     <script src="config.js"></script>
     <script src="shop_ext.js"></script>
+    <script src="talents.js"></script>
+    <script src="pets.js"></script>
     <script src="save.js"></script>
     <script src="inventory.js"></script>
     <script src="cultivate.js"></script>

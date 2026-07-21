@@ -786,17 +786,22 @@ const UI = {
         }
         // 灵宠
         const petDisplay = document.getElementById('petDisplay');
-        if (p.pet) {
-            const pet = getPet(p.pet);
-            petDisplay.innerHTML = `
-                <div class="pet-card">
-                    <div class="pet-icon">${pet.icon}</div>
-                    <div class="pet-info">
-                        <div class="pet-name">${pet.name}</div>
-                        <div class="pet-stat">攻${pet.atk} 防${pet.def} 血${pet.hp}</div>
+        if (p.pet && typeof PetSys !== 'undefined') {
+            const inst = PetSys.active(p);
+            const ps = inst ? PetSys.instStats(p, inst) : null;
+            if (ps) {
+                petDisplay.innerHTML = `
+                    <div class="pet-card">
+                        <div class="pet-icon">${ps.icon}</div>
+                        <div class="pet-info">
+                            <div class="pet-name">${ps.name} <span class="pet-lv">Lv.${inst.lv}</span></div>
+                            <div class="pet-stat">攻${ps.atk} 防${ps.def} 血${ps.hp}</div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                petDisplay.innerHTML = '<p class="pet-empty">尚未收服灵宠</p>';
+            }
         } else {
             petDisplay.innerHTML = '<p class="pet-empty">尚未收服灵宠</p>';
         }
@@ -906,6 +911,152 @@ const UI = {
         setTimeout(() => float.remove(), 1000);
     },
 
+    /* ---------- 灵宠培养面板 ---------- */
+    renderPetPanel() {
+        const p = Game.player;
+        if (!p) return;
+        const listEl = document.getElementById('petCultList');
+        const detailEl = document.getElementById('petCultDetail');
+        if (!listEl) return;
+        if (!p.pets || p.pets.length === 0) {
+            listEl.innerHTML = '<p class="pet-empty-tip">尚未收服灵宠。前往<b>坊市·灵宠</b>购得，或于<b>历练·东海龙宫</b>收服幼龙。</p>';
+            if (detailEl) detailEl.innerHTML = '<p class="inv-detail-empty">选中灵宠查看详情</p>';
+            return;
+        }
+        listEl.innerHTML = p.pets.map(inst => {
+            const tpl = getPet(inst.id);
+            const ps = (typeof PetSys !== 'undefined') ? PetSys.instStats(p, inst) : null;
+            const active = (p.pet === inst.id);
+            const need = (typeof PetSys !== 'undefined') ? PetSys.expNeed(inst.lv) : 1;
+            const pct = Math.max(0, Math.min(100, Math.floor((inst.exp / need) * 100)));
+            return `
+                <div class="pet-cult-card${active ? ' active' : ''}" data-pet="${inst.id}" onclick="UI.selectPet('${inst.id}')">
+                    <div class="pc-icon">${ps ? ps.icon : tpl.icon}</div>
+                    <div class="pc-info">
+                        <div class="pc-name">${ps ? ps.name : tpl.name} ${active ? '<span class="pc-tag">出战</span>' : ''}</div>
+                        <div class="pc-lv">Lv.${inst.lv}${PetSys.evoName(inst.evo)} · 亲密度 ${inst.aff}</div>
+                        <div class="pc-stats">攻${ps ? ps.atk : tpl.atk} 防${ps ? ps.def : tpl.def} 血${ps ? ps.hp : tpl.hp}</div>
+                        <div class="pc-exp"><div class="pc-exp-fill" style="width:${pct}%"></div></div>
+                    </div>
+                </div>`;
+        }).join('');
+        if (detailEl && (!this.selectedPet || !p.pets.find(x => x.id === this.selectedPet))) {
+            this.selectedPet = p.pet || (p.pets[0] && p.pets[0].id);
+        }
+        this.renderPetDetail();
+    },
+    selectedPet: null,
+    selectPet(id) {
+        this.selectedPet = id;
+        const cards = document.querySelectorAll('.pet-cult-card');
+        cards.forEach(c => c.classList.toggle('active', c.dataset.pet === id));
+        this.renderPetDetail();
+    },
+    renderPetDetail() {
+        const p = Game.player;
+        const el = document.getElementById('petCultDetail');
+        if (!el || !p || !this.selectedPet) { if (el) el.innerHTML = '<p class="inv-detail-empty">选中灵宠查看详情</p>'; return; }
+        const inst = p.pets.find(x => x.id === this.selectedPet);
+        if (!inst) { el.innerHTML = '<p class="inv-detail-empty">选中灵宠查看详情</p>'; return; }
+        const tpl = getPet(inst.id);
+        const ps = (typeof PetSys !== 'undefined') ? PetSys.instStats(p, inst) : null;
+        const active = (p.pet === inst.id);
+        const food = (p.inventory.material && p.inventory.material['m_pet_food']) || 0;
+        const evoDan = (p.inventory.material && p.inventory.material['m_pet_evo']) || 0;
+        const need = (typeof PetSys !== 'undefined') ? PetSys.expNeed(inst.lv) : 1;
+        const canEvo = (typeof PetSys !== 'undefined') ? PetSys.canEvolve(inst) : false;
+        const evoNeed = (inst.evo + 1) * 20;
+        const trainCost = 200 * inst.lv;
+        el.innerHTML = `
+            <div class="pd-head">
+                <div class="pd-icon">${ps ? ps.icon : tpl.icon}</div>
+                <div class="pd-title">
+                    <div class="pd-name">${ps ? ps.name : tpl.name}</div>
+                    <div class="pd-sub">${tpl.desc || ''} · Lv.${inst.lv} · 亲密度 ${inst.aff}</div>
+                </div>
+            </div>
+            <div class="pd-stats">
+                <div><span>攻击</span><b>${ps ? ps.atk : tpl.atk}</b></div>
+                <div><span>防御</span><b>${ps ? ps.def : tpl.def}</b></div>
+                <div><span>气血</span><b>${ps ? ps.hp : tpl.hp}</b></div>
+            </div>
+            <div class="pd-exp">经验 ${inst.exp} / ${need}</div>
+            <div class="pd-actions">
+                ${active ? '' : `<button class="pd-btn" onclick="UI.setPetActive('${inst.id}')">设为主战</button>`}
+                <button class="pd-btn" onclick="UI.petFeed('${inst.id}')">喂养（灵兽粮×1）</button>
+                <button class="pd-btn" onclick="UI.petTrain('${inst.id}')">修炼（耗 ${fmtNum(trainCost)} 修为）</button>
+                <button class="pd-btn${canEvo ? '' : ' disabled'}" ${canEvo ? '' : 'disabled'} onclick="UI.petEvolve('${inst.id}')">化形进阶${canEvo ? '' : `（需 Lv.${evoNeed}）`}</button>
+            </div>
+            <div class="pd-hint">持有：灵兽粮 ${food} · 化形丹 ${evoDan}（坊市可购）</div>
+        `;
+    },
+    setPetActive(id) {
+        const p = Game.player; if (!p) return;
+        if (typeof PetSys !== 'undefined') PetSys.setActive(p, id);
+        if (typeof UI !== 'undefined') { UI.toast('已设为主战灵宠', 'good'); UI.addLog('唤出主战灵宠', 'evt'); }
+        this.renderPetPanel(); this.renderStatus();
+    },
+    petFeed(id) {
+        const p = Game.player; if (!p || typeof PetSys === 'undefined') return;
+        const r = PetSys.feed(p, id, 1);
+        if (!r.ok) { this.toast(r.msg || '喂养失败', 'bad'); return; }
+        this.toast(`喂养成功，灵宠经验 +${r.gained}（Lv.${r.lv}）`, 'gold');
+        this.renderPetPanel(); this.renderStatus();
+    },
+    petTrain(id) {
+        const p = Game.player; if (!p || typeof PetSys === 'undefined') return;
+        const r = PetSys.train(p, id);
+        if (!r.ok) { this.toast(r.msg || '修炼失败', 'bad'); return; }
+        this.toast(`灵宠修炼有成，Lv.${r.lv} · 亲密度 ${r.aff}`, 'gold');
+        this.renderPetPanel(); this.renderStatus();
+    },
+    petEvolve(id) {
+        const p = Game.player; if (!p || typeof PetSys === 'undefined') return;
+        const r = PetSys.evolve(p, id);
+        if (!r.ok) { this.toast(r.msg || '化形失败', 'bad'); return; }
+        this.toast(`灵宠化形进阶！蜕变至 ${PetSys.evoName(r.evo)} 之姿，属性大涨`, 'gold');
+        this.addLog('灵宠化形进阶，资质蜕变', 'evt');
+        this.renderPetPanel(); this.renderStatus();
+    },
+
+    /* ---------- 天赋面板 ---------- */
+    renderTalent() {
+        const p = Game.player;
+        if (!p) return;
+        const ptsEl = document.getElementById('talentPts');
+        if (ptsEl) ptsEl.textContent = (typeof Talent !== 'undefined') ? Talent.pts(p) : 0;
+        const tree = document.getElementById('talentTree');
+        if (!tree) return;
+        if (typeof Talent === 'undefined' || !GameConfig.talents) return;
+        // 按系分组
+        const branches = {};
+        GameConfig.talents.forEach(t => { (branches[t.branch] = branches[t.branch] || []).push(t); });
+        tree.innerHTML = Object.keys(branches).map(branch => {
+            const cards = branches[branch].map(t => {
+                const lv = Talent.level(p, t.id);
+                const maxed = lv >= t.max;
+                const can = !maxed && Talent.pts(p) >= 1;
+                return `
+                    <div class="talent-card${maxed ? ' maxed' : ''}">
+                        <div class="tc-icon">${t.icon}</div>
+                        <div class="tc-body">
+                            <div class="tc-name">${t.name} <span class="tc-lv">${lv}/${t.max}</span></div>
+                            <div class="tc-desc">${t.desc}</div>
+                            <button class="tc-btn${can ? '' : ' disabled'}" ${can ? '' : 'disabled'} onclick="UI.learnTalent('${t.id}')">${maxed ? '已满级' : '修习（+1）'}</button>
+                        </div>
+                    </div>`;
+            }).join('');
+            return `<div class="talent-branch"><div class="tb-title">${branch}系</div><div class="tb-cards">${cards}</div></div>`;
+        }).join('');
+    },
+    learnTalent(id) {
+        const p = Game.player; if (!p || typeof Talent === 'undefined') return;
+        if (Talent.learn(p, id)) {
+            this.renderTalent();
+            this.renderStatus();
+        }
+    },
+
     /* ---------- 转世轮回 ---------- */
     renderReincarnate() {
         const p = Game.player;
@@ -981,6 +1132,8 @@ const UI = {
         safe(this.renderFriends);
         safe(this.renderReincarnate);
         safe(this.renderStatus);
+        safe(this.renderPetPanel);
+        safe(this.renderTalent);
     },
 
     /* ---------- 切换面板 ---------- */
@@ -999,6 +1152,8 @@ const UI = {
         else if (name === 'quest') this.renderQuests();
         else if (name === 'friends') this.renderFriends();
         else if (name === 'reincarnate') this.renderReincarnate();
+        else if (name === 'pet') this.renderPetPanel();
+        else if (name === 'talent') this.renderTalent();
     },
 
     /* ---------- 新手教程 ---------- */
@@ -1015,6 +1170,8 @@ const UI = {
         { title: '神通', body: '「<b>神通</b>」可修习法术，临阵施展。攻伐、护身、辅助各具妙用，功法愈深，威能愈盛——是越阶斗法、闯荡秘境的底气。', panel: 'skill', target: '#panel-skill' },
         { title: '道友', body: '「<b>道友</b>」凭<b>档案码</b>结交同道，<b>道友榜</b>按战力排序、彼此砥砺；亦可与道友切磋论道，互证修行。', panel: 'friends', target: '#panel-friends' },
         { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>今生境界天花板</b>」（筑基 + 已轮回世数）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
+        { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；选中灵宠可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗修为）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'pet', target: '#panel-pet' },
+        { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。六系天赋（攻伐/守御/长生/悟道/御兽/天命）永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'talent', target: '#panel-talent' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
     ],
     tutorialIndex: 0,

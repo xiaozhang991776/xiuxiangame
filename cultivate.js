@@ -47,6 +47,10 @@ const Cultivate = {
         const rebirthMult = 1 + rb.xiuMult;
         base *= rebirthMult;
 
+        // 天赋加成（悟道系·明悟）
+        const talentXiu = (typeof Talent !== 'undefined') ? Talent.xiuRateMult(player) : 1;
+        base *= talentXiu;
+
         return {
             base,
             realmMult,
@@ -55,8 +59,10 @@ const Cultivate = {
             wuxingMult,
             tribulusMult,
             rebirthMult,
+            talentXiu,
             tribulusBonus: (tribulusMult - 1),
             rebirthBonus: (rebirthMult - 1),
+            talentBonus: (talentXiu - 1),
             realmBonus: (realmMult - 1),
             equipBonus: (equipMult - 1),
             wuxingBonus: (wuxingMult - 1)
@@ -118,6 +124,8 @@ const Cultivate = {
             player.stone -= stoneCost;
             // 突破成功率
             let rate = realm.breakthroughRate;
+            // 天命系·通玄 天赋加成
+            if (typeof Talent !== 'undefined') rate = Math.min(1, rate + Talent.breakRateAdd(player));
             // 破障丹加成（库存自动消耗 + 手动使用累积）
             let btBonus = player.breakBonus || 0;
             if (player.inventory.pill.p_breakthrough > 0) {
@@ -137,6 +145,11 @@ const Cultivate = {
                 // 大境界突破增寿元（按新境界）
                 player.lifespan = (player.lifespan || 0) + player.realmIdx * 200;
                 player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
+                // 突破大境界：觉醒天赋点（核心长线成长）
+                if (typeof Talent !== 'undefined') {
+                    Talent.grant(player, 3);
+                    if (typeof UI !== 'undefined') UI.toast('境界突破，觉醒天赋点 +3！前往「天赋」面板修习', 'gold');
+                }
                 const newRealm = getRealm(player.realmIdx);
                 if (typeof UI !== 'undefined') {
                     UI.showBreakthroughFX(`突破！${newRealm.name}一层`);
@@ -180,6 +193,11 @@ const Cultivate = {
         player.xiu -= cost;
         player.realmLayer++;
         player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
+        // 每满 5 小境界：额外天赋点
+        if (player.realmLayer % 5 === 0 && typeof Talent !== 'undefined') {
+            Talent.grant(player, 1);
+            if (typeof UI !== 'undefined') UI.toast('境界精进，天赋点 +1', 'gold');
+        }
         const realm = getRealm(player.realmIdx);
         if (typeof UI !== 'undefined') {
             UI.showBreakthroughFX(`${realm.name}${cnNum(player.realmLayer)}层`);
@@ -345,7 +363,7 @@ const Cultivate = {
         if (player.lifespan <= 0) {
             player.lifespan = 0;
             const _rbD = this.getRebirthBonus(player);
-            player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbD.stoneMult));
+            player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbD.stoneMult) * this.stoneGainMult(player));
             this.save(player);
             if (typeof UI !== 'undefined') UI.addLog(`${player.name}游历${years}年，寿元已尽，羽化归虚……`, 'evt');
             if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
@@ -354,7 +372,7 @@ const Cultivate = {
             return { years, dead: true, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
         }
         const _rbN = this.getRebirthBonus(player);
-        player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbN.stoneMult));
+        player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbN.stoneMult) * this.stoneGainMult(player));
         this.save(player);
         if (typeof UI !== 'undefined') UI.addLog(`游历${years}年，收获${fmtNum(stoneGain)}灵石及诸多宝物`, 'evt');
         return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
@@ -380,7 +398,7 @@ const Cultivate = {
         }
         player.xiu -= xiuAmount;
         const _rbX = this.getRebirthBonus(player);
-        player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbX.stoneMult));
+        player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbX.stoneMult) * this.stoneGainMult(player));
         this.save(player);
         if (typeof UI !== 'undefined') {
             UI.addLog(`以${fmtNum(xiuAmount)}修为，兑换得${fmtNum(stone)}灵石`, 'evt');
@@ -427,13 +445,14 @@ const Cultivate = {
             }
         }
 
-        // 灵宠加成
-        if (player.pet) {
-            const pet = getPet(player.pet);
-            if (pet) {
-                atk += Math.floor(pet.atk * 0.3);
-                def += Math.floor(pet.def * 0.3);
-                hp += Math.floor(pet.hp * 0.2);
+        // 灵宠加成（出战灵宠，按培养等级/化形缩放）
+        if (player.pet && typeof PetSys !== 'undefined') {
+            const inst = PetSys.active(player);
+            const ps = inst ? PetSys.instStats(player, inst) : null;
+            if (ps) {
+                atk += Math.floor(ps.atk * 0.3);
+                def += Math.floor(ps.def * 0.3);
+                hp += Math.floor(ps.hp * 0.2);
             }
         }
 
@@ -441,6 +460,12 @@ const Cultivate = {
         const rb = this.getRebirthBonus(player);
         atk = Math.floor(atk * rb.atkMult);
         hp = Math.floor(hp * rb.hpMult);
+
+        // 天赋加成（最终统一乘区，覆盖全属性）
+        if (typeof Talent !== 'undefined' && player.talents) {
+            const ts = Talent.applyStats({ atk, def, hp, ling, spd, crit }, player);
+            atk = ts.atk; def = ts.def; hp = ts.hp; ling = ts.ling; spd = ts.spd; crit = ts.crit;
+        }
 
         return { atk, def, hp, ling, spd, crit, realmAtk, realmDef, realmHp, realmLing };
     },
@@ -542,7 +567,8 @@ const Cultivate = {
         const base = (trib && trib.baseChance) || 0.6;
         const realmAdj = (player.realmIdx || 0) * 0.03;
         const wxAdj = (player.wuxingLevel || 0) * 0.004;
-        return Math.max(0.35, Math.min(0.95, base + realmAdj + wxAdj));
+        const tribAdj = (typeof Talent !== 'undefined') ? Talent.tribChanceAdd(player) : 0;
+        return Math.max(0.35, Math.min(0.95, base + realmAdj + wxAdj + tribAdj));
     },
     // 请护道人化解的灵石成本（随境界指数增长）
     protectCost(player, trib) {
@@ -603,6 +629,11 @@ const Cultivate = {
         this.save(player);
         return { mode, success: false, penalty: fp, xiuLost: loss,
             msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}修为、寿元-${fp.lifeLoss}` };
+    },
+
+    /* 灵石获取倍率（含 悟道系·点石 天赋） */
+    stoneGainMult(player) {
+        return (typeof Talent !== 'undefined') ? Talent.stoneRateMult(player) : 1;
     },
 
     /* ---------- 转世轮回 ---------- */

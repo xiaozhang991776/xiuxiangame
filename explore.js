@@ -213,8 +213,10 @@ const Explore = {
                     } else {
                         // 直接收服幼龙（已扣灵石）
                         const pet = getPet('pet_dragon');
-                        if (pet && !player.pet) {
-                            player.pet = 'pet_dragon';
+                        const hasDragon = player.pets && player.pets.find(x => x.id === 'pet_dragon');
+                        if (pet && !hasDragon) {
+                            if (typeof PetSys !== 'undefined') PetSys.addPet(player, 'pet_dragon');
+                            else { if (!player.pets) player.pets = []; player.pets.push({ id: 'pet_dragon', lv: 1, exp: 0, aff: 0, evo: 0 }); if (!player.pet) player.pet = 'pet_dragon'; }
                             if (typeof UI !== 'undefined') {
                                 UI.toast(`收服灵宠：${pet.name}！`, 'gold');
                                 UI.addLog(`龙王许你收服${pet.name}！`, 'evt');
