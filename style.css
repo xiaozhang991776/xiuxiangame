@@ -1007,6 +1007,14 @@ input { font-family: inherit; }
 }
 .quest-claim:hover:not(:disabled) { background: var(--jade); color: var(--bg-deep); }
 .quest-claim:disabled { opacity: 0.4; cursor: default; }
+.quest-card.locked { opacity: 0.55; border-style: dashed; }
+.quest-card.locked .quest-name { color: var(--text-dim); }
+
+/* ---------- 仙途主线叙事弹窗 ---------- */
+.story-box { line-height: 1.9; }
+.story-realm { font-size: 13px; color: var(--jade); letter-spacing: 2px; margin-bottom: 10px; }
+.story-body { font-size: 15px; color: var(--text); opacity: 0.95; margin-bottom: 14px; text-indent: 2em; }
+.story-reward { font-size: 13px; color: var(--gold); padding: 8px 12px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-sm); }
 
 /* 右侧状态面板 */
 .status-panel {

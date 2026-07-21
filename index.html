@@ -194,6 +194,9 @@
                 <button class="nav-btn" data-panel="quest" title="任务">
                     <span class="nav-icon">卷</span><span class="nav-label">任务</span>
                 </button>
+                <button class="nav-btn" data-panel="mainstory" title="主线">
+                    <span class="nav-icon">书</span><span class="nav-label">主线</span>
+                </button>
                 <button class="nav-btn" data-panel="friends" title="道友">
                     <span class="nav-icon">友</span><span class="nav-label">道友</span>
                 </button>
@@ -369,6 +372,14 @@
                     <h3 class="panel-title">道途任务</h3>
                     <p class="panel-desc">完成道途任务，获取丰厚奖赏。</p>
                     <div class="quest-list" id="questList"></div>
+                </div>
+
+                <!-- 主线面板 -->
+                <div class="panel" id="panel-mainstory">
+                    <h3 class="panel-title">仙途主线</h3>
+                    <p class="panel-desc">你自一介凡人，怀半卷残书踏上仙途。每突破一大境界，便揭开一重旧事——那卷被诸天封禁的「道」之残篇，究竟藏着什么？已阅章节可随时回看。</p>
+                    <div class="quest-progress" id="mainStoryTip" style="margin-bottom:14px;color:var(--jade);font-size:13px;"></div>
+                    <div class="quest-list" id="mainStoryList"></div>
                 </div>
 
                 <!-- 道友面板 -->
@@ -623,6 +634,7 @@
     <script src="cultivate.js"></script>
     <script src="combat.js"></script>
     <script src="explore.js"></script>
+    <script src="mainstory.js"></script>
     <script src="shop.js"></script>
     <script src="friends.js"></script>
     <script src="ui.js"></script>

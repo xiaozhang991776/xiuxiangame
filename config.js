@@ -280,6 +280,53 @@ const GameConfig = {
         { id: 'q_huashen',         name: '化神飞升',   desc: '突破至化神境界',       target: 5,      type: 'realm_idx',     reward: { stone: 1500000, items: [{ id: 'p_immortal', count: 1 }] } }
     ],
 
+    /* ---------- 仙途主线（境界里程碑剧情） ----------
+       13 章，与 13 大境界一一对应（realmReq = 需突破到达的 realmIdx）。
+       达成对应大境界突破时自动解锁、弹窗叙事并发放 reward（奖励保守，缓解调难后资源压力）。
+       seen=已阅、claimed=已领；旧档载入时由 MainStory.checkInitial 静默补齐。
+    */
+    mainStory: [
+        { id: 'm_ch1', realmReq: 0, title: '壹·凡尘微光',
+          body: '你本是一介凡人，困于生老病死。偶得残破道书半卷，扉页八字灼灼：「仙途有尽，问道无心」。你揣着这丝念想，踏上了修仙之路——哪怕最初，只是为多看一眼山外的云。',
+          reward: { xiu: 200, stone: 300 } },
+        { id: 'm_ch2', realmReq: 1, title: '贰·筑基立道',
+          body: '灵气第一次在丹田凝成实质。你明白，自此肉身不再如纸糊，寿元也悄然延长。师门长辈抚须而笑：「筑基者，立道之基也。往后风浪再大，你已有了不随风倒的根。」',
+          reward: { stone: 2000, items: [{ id: 'p_xiu_pill', count: 3 }] } },
+        { id: 'm_ch3', realmReq: 2, title: '叁·金丹一颗',
+          body: '丹田之中，灵气坍缩成一枚温润金丹，心跳与之同频。你忽有所感：世人称金丹为「逆死之种」，因它一旦结成，便与天地挣出一线生机。可你心头那卷残书，却无端发烫。',
+          reward: { stone: 12000, items: [{ id: 'p_breakthrough', count: 1 }] } },
+        { id: 'm_ch4', realmReq: 3, title: '肆·元婴睁眼',
+          body: '金丹碎，元婴生——一个与你形貌无二、却通体莹白的婴孩在识海盘坐睁眼。它望向你的刹那，你听见残书里传来一声极轻的叹息，似是久眠之物，终于记起了什么。',
+          reward: { stone: 80000, items: [{ id: 'p_permanent_hp', count: 1 }] } },
+        { id: 'm_ch5', realmReq: 4, title: '伍·化神之疑',
+          body: '神识离体，可俯瞰山河。你以神念翻动那卷残书，竟读出一段被抹去的旧事：上古曾有「问道者」窥破长生，却被诸天共忌、镇于无名之地。你心头一凛——自己揣着的，莫非正是那被封禁的「道」之残篇？',
+          reward: { stone: 500000, items: [{ id: 'p_permanent_atk', count: 1 }] } },
+        { id: 'm_ch6', realmReq: 5, title: '陆·炼虚窥隙',
+          body: '虚空在你眼中裂开细隙，露出其后流转的法则丝线。你伸手欲触，残书却猛然将你告警拉回。你恍然：所谓长生，从来不是终点，而是一场早已写就的棋局——而你，恐怕正落在某个人的落子里。',
+          reward: { stone: 3000000, items: [{ id: 'p_immortal', count: 1 }] } },
+        { id: 'm_ch7', realmReq: 6, title: '柒·合体同源',
+          body: '你与元婴、与天地灵机、与那卷残书，第一次真正「合」为一体。某一瞬，你不再是「修者」，而成了「道」本身的一缕呼吸。残书旧事渐明：那被镇者，名号已佚，世人只唤它——「无亘」。',
+          reward: { stone: 18000000, items: [{ id: 'p_hunyuan', count: 1 }] } },
+        { id: 'm_ch8', realmReq: 7, title: '捌·大乘将临',
+          body: '法则丝线在你掌心编成网。你窥见网的外缘，悬着一座无光的弥罗之狱——正是残书所载、镇锁「无亘」的囚笼。你忽然懂了师门那句「不随风倒的根」是何意：你修的从不是长生，是去把那被夺走的东西，争回来。',
+          reward: { stone: 120000000, items: [{ id: 'f_pagoda', count: 1 }] } },
+        { id: 'm_ch9', realmReq: 8, title: '玖·真仙初蜕',
+          body: '仙躯初成，灵肉再无滞碍。你循着残书指引飞升九重天，却在云海尽头看见一面残碑，碑文半数风蚀，可依稀辨出：「……后来者，若见此碑，便知吾等并非败亡，乃是以身作锚，钉住诸天不坠。」',
+          reward: { stone: 800000000, items: [{ id: 'w_chaos_sword', count: 1 }] } },
+        { id: 'm_ch10', realmReq: 9, title: '拾·金仙问道',
+          body: '你立于时间长河之上，终于拼齐残书的全貌：上古「无亘」并非窃道之贼，而是欲以一己之陨，为众生挣一条不被诸天收割的生路。它败了，却被污名为贼。你握紧道心——这一次，你要替它，把真相说给天地听。',
+          reward: { stone: 5000000000, items: [{ id: 'ac_chaos_pearl', count: 1 }] } },
+        { id: 'm_ch11', realmReq: 10, title: '拾壹·太乙临霄',
+          body: '太乙之境，你可执法则如执笔。弥罗之狱的锁链在你眼中一根根显形——它们另一端，竟系着诸天无数「问道者」的残魂。你明白此狱既是囚笼，也是饵：诸天以「无亘」为饵，钓尽天下不甘长生之人。',
+          reward: { stone: 30000000000, items: [{ id: 'a_chaos_robe', count: 1 }] } },
+        { id: 'm_ch12', realmReq: 11, title: '拾贰·大罗破狱',
+          body: '大罗之下，时空如泥可塑。你引动毕生道行，第一次主动叩击弥罗之狱的门。锁链剧震，狱中传来一声跨越万古的轻笑：「来了么。吾等这一局，等了不止一世。」你这才惊觉——自己的轮回里，或许早有「它」留下的痕。',
+          reward: { stone: 200000000000, items: [{ id: 'f_void_banner', count: 1 }] } },
+        { id: 'm_ch13', realmReq: 12, title: '拾叁·道祖之争',
+          body: '你登临道祖，与狱中那缕亘古之识隔狱相望。它把最后半卷真相交付于你：长生从非恩赐，而是被诸天垄断的火。你可选择以道祖之身撞碎弥罗之狱、放出万古残魂，教众生皆执此火——也可就此立地成圣，独享无量寿元。仙途尽头，棋局终要你落子。',
+          reward: { stone: 1500000000000, items: [{ id: 'ac_void_orb', count: 1 }] } }
+    ],
+
     /* ---------- 转世轮回 ---------- */
     rebirth: {
         herbId: 'm_rebirth_herb',   // 轮回草
@@ -329,6 +376,8 @@ const GameConfig = {
         talents: { pts: 0, learned: {} },
         // 任务进度 { id: { progress, claimed } }
         quests: {},
+        // 仙途主线进度 { seen: {章节id:true}, claimed: {章节id:true} }
+        mainStory: { currentIdx: 0, seen: {}, claimed: {} },
         // 统计
         stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0, tutorialDone: false },
         // 渡劫天劫永久加成（劫后余韵）

@@ -169,6 +169,8 @@ const Cultivate = {
                 }
                 // 突破大境界成功，触发天劫
                 this.tribulateAfterBreakthrough(player);
+                // 仙途主线：解锁并弹出对应章节（带 typeof 兜底）
+                if (typeof MainStory !== 'undefined') MainStory.onBreakthrough(player);
                 // 触发任务进度
                 if (typeof Quests !== 'undefined') {
                     Quests.tickProgress('realm_idx', player.realmIdx + 1);

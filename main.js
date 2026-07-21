@@ -233,6 +233,8 @@
             enterGame();
             UI.toast(`欢迎踏入仙途，${name}！`, 'gold');
             UI.addLog(`你以${name}之名，踏入仙途`, 'evt');
+            // 新道途：弹出仙途主线·序章（发奖 + 弹窗）
+            if (typeof MainStory !== 'undefined' && Game.player) MainStory.intro(Game.player);
             // 新道途首次进入自动展开新手教程
             if (Game.player && (!Game.player.stats || !Game.player.stats.tutorialDone)) {
                 UI.startTutorial();

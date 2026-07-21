@@ -198,6 +198,9 @@ const SaveSystem = {
         GameConfig.quests.forEach(q => {
             if (!player.quests[q.id]) player.quests[q.id] = { progress: 0, claimed: false };
         });
+        // 仙途主线字段补全 + 旧档静默补齐已达成章节（不弹窗）
+        if (!player.mainStory) player.mainStory = { currentIdx: 0, seen: {}, claimed: {} };
+        if (typeof MainStory !== 'undefined') MainStory.checkInitial(player);
         return player;
     },
 

@@ -666,6 +666,88 @@ const UI = {
 
     claimQuest(id) { Quests.claim(Game.player, id); this.renderAll(); },
 
+    /* ---------- 渲染仙途主线 ---------- */
+    renderMainStory() {
+        const p = Game.player;
+        if (!p) return;
+        const list = document.getElementById('mainStoryList');
+        if (!list) return;
+        list.innerHTML = '';
+        const chapters = (typeof MainStory !== 'undefined') ? MainStory.getChapters(p) : [];
+        const curRealm = getRealm(p.realmIdx).name;
+        if (chapters.length === 0) {
+            list.innerHTML = '<div class="quest-desc">暂无主线剧情。</div>';
+            return;
+        }
+        chapters.forEach(ch => {
+            const card = document.createElement('div');
+            let statusHtml, btnHtml;
+            if (!ch.unlocked) {
+                card.className = 'quest-card locked';
+                statusHtml = `<span class="quest-reward">🔒 未解锁（需${ch.realmName}境界）</span>`;
+                btnHtml = '<button class="quest-claim" disabled>未达境界</button>';
+            } else if (!ch.seen) {
+                card.className = 'quest-card';
+                statusHtml = `<span class="quest-reward">✦ 新章待阅</span>`;
+                btnHtml = `<button class="quest-claim" onclick="UI.replayStory('${ch.id}')">阅读</button>`;
+            } else {
+                card.className = 'quest-card done';
+                statusHtml = `<span class="quest-reward">✓ 已阅${ch.claimed ? ' · 已领赏' : ''}</span>`;
+                btnHtml = `<button class="quest-claim" onclick="UI.replayStory('${ch.id}')">回看</button>`;
+            }
+            let rewardStr = '';
+            if (ch.reward && ch.reward.stone) rewardStr += `${fmtNum(ch.reward.stone)}灵石 `;
+            if (ch.reward && ch.reward.xiu) rewardStr += `${fmtNum(ch.reward.xiu)}修为 `;
+            if (ch.reward && ch.reward.items) ch.reward.items.forEach(it => {
+                const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
+                rewardStr += `${t ? t.name : it.id}×${it.count} `;
+            });
+            card.innerHTML = `
+                <div class="quest-header">
+                    <span class="quest-name">${ch.title}</span>
+                    ${statusHtml}
+                </div>
+                <div class="quest-desc">${ch.unlocked ? (ch.body.length > 48 ? ch.body.slice(0, 48) + '…' : ch.body) : '突破至' + ch.realmName + '境界后解锁此章。'}</div>
+                ${rewardStr ? `<div class="quest-progress">解锁奖励：${rewardStr}</div>` : ''}
+                ${btnHtml}
+            `;
+            list.appendChild(card);
+        });
+        // 当前境界提示
+        const tip = document.getElementById('mainStoryTip');
+        if (tip) tip.textContent = `当前境界：${curRealm}（共 ${chapters.filter(c => c.unlocked).length}/${chapters.length} 章已解锁）`;
+    },
+
+    replayStory(id) {
+        if (typeof MainStory !== 'undefined') MainStory.replay(Game.player, id);
+        this.renderMainStory();
+    },
+
+    /* ---------- 主线章节叙事弹窗 ---------- */
+    showMainStory(ch, isReplay) {
+        if (!ch) return;
+        let rewardStr = '';
+        if (ch.reward && ch.reward.stone) rewardStr += `${fmtNum(ch.reward.stone)}灵石 `;
+        if (ch.reward && ch.reward.xiu) rewardStr += `${fmtNum(ch.reward.xiu)}修为 `;
+        if (ch.reward && ch.reward.items) ch.reward.items.forEach(it => {
+            const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
+            rewardStr += `${t ? t.name : it.id}×${it.count} `;
+        });
+        const body = `
+            <div class="story-box">
+                <div class="story-realm">${ch.realmName ? '◇ ' + ch.realmName + '境界' : '◇ 序章'}</div>
+                <p class="story-body">${ch.body}</p>
+                ${rewardStr ? `<div class="story-reward">🎁 解锁奖励：${rewardStr}</div>` : ''}
+            </div>`;
+        this.showModal({
+            title: '📜 ' + ch.title,
+            body,
+            footer: isReplay
+                ? [{ text: '收下', action: () => this.hideModal() }]
+                : [{ text: '继续仙途', type: 'primary', action: () => { this.hideModal(); this.renderAll(); } }]
+        });
+    },
+
     /* ---------- 渲染道友系统 ---------- */
     renderFriends() {
         const p = Game.player;
@@ -1140,6 +1222,7 @@ const UI = {
         safe(this.renderSkillList);
         safe(this.renderShop);
         safe(this.renderQuests);
+        safe(this.renderMainStory);
         safe(this.renderFriends);
         safe(this.renderReincarnate);
         safe(this.renderStatus);
@@ -1185,6 +1268,7 @@ const UI = {
         else if (name === 'skill') this.renderSkillList();
         else if (name === 'shop') this.renderShop();
         else if (name === 'quest') this.renderQuests();
+        else if (name === 'mainstory') this.renderMainStory();
         else if (name === 'friends') this.renderFriends();
         else if (name === 'reincarnate') this.renderReincarnate();
     },
