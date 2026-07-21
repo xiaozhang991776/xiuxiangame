@@ -121,7 +121,8 @@ const GameConfig = {
         { id: 'm_chaos', name: '混沌石', icon: '石', quality: 4, price: 8000,desc: '蕴含混沌之力的奇石' },
         { id: 'm_spirit_wood', name: '灵木',   icon: '木', quality: 1, price: 30,  desc: '温养灵气的奇木' },
         { id: 'm_geng_gold',  name: '庚金',   icon: '金', quality: 2, price: 150, desc: '锋锐无比的庚金之精' },
-        { id: 'm_qi_essence',name: '精气',   icon: '气', quality: 3, price: 800, desc: '天地精气凝炼而成' }
+        { id: 'm_qi_essence',name: '精气',   icon: '气', quality: 3, price: 800, desc: '天地精气凝炼而成' },
+        { id: 'm_rebirth_herb', name: '轮回草', icon: '轮', quality: 5, price: 5000000000, desc: '转世轮回之引，根植幽冥，坊市有售' }
     ],
 
     /* ---------- 功法配置 ---------- */
@@ -257,6 +258,15 @@ const GameConfig = {
         { id: 'q_huashen',         name: '化神飞升',   desc: '突破至化神境界',       target: 5,      type: 'realm_idx',     reward: { stone: 500000, items: [{ id: 'p_immortal', count: 1 }] } }
     ],
 
+    /* ---------- 转世轮回 ---------- */
+    rebirth: {
+        herbId: 'm_rebirth_herb',   // 轮回草
+        herbCost: 100,               // 轮回丹轮回需耗 100 株
+        unlockRealmIdx: 1,           // 需先达筑基期方可轮回
+        // 每转世一层，永久加持（与劫后余韵、悟性等叠加）
+        perLevel: { atk: 0.30, def: 0.30, hp: 0.30, ling: 0.30, xiu: 0.15, stone: 0.12 }
+    },
+
     /* ---------- 默认初始玩家 ---------- */
     defaultPlayer: {
         name: '无名修士',
@@ -293,6 +303,8 @@ const GameConfig = {
         stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0, tutorialDone: false },
         // 渡劫天劫永久加成（劫后余韵）
         tribulus: { xiuMult: 0, stoneMult: 0 },
+        // 转世轮回层数（每突破一次大境界后可轮回，层数越高根基越厚）
+        rebirth: 0,
         // 寿元（闭关上限）：每闭关一年折损一年，境界突破可增寿
         lifespan: 100,
         // 时间戳

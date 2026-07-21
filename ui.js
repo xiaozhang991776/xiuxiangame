@@ -56,6 +56,17 @@ const UI = {
         }
         document.getElementById('modal-overlay').classList.remove('hidden');
     },
+    // 通用确认弹窗（yesCallback 确认后执行）
+    showConfirm(title, body, yesCallback) {
+        this.showModal({
+            title: title || '确认',
+            body: `<p style="line-height:1.7;opacity:.9">${body || ''}</p>`,
+            footer: [
+                { text: '取消', type: '', action: () => this.hideModal() },
+                { text: '确认', type: 'primary', action: () => { this.hideModal(); if (yesCallback) yesCallback(); } }
+            ]
+        });
+    },
 
     hideModal() {
         document.getElementById('modal-overlay').classList.add('hidden');
@@ -895,6 +906,58 @@ const UI = {
         setTimeout(() => float.remove(), 1000);
     },
 
+    /* ---------- 转世轮回 ---------- */
+    renderReincarnate() {
+        const p = Game.player;
+        if (!p) return;
+        const cfg = GameConfig.rebirth;
+        const n = p.rebirth || 0;
+        const rb = Cultivate.getRebirthBonus(p);
+        const c = cfg.perLevel;
+        const cntEl = document.getElementById('rbCount');
+        const bonusEl = document.getElementById('rbBonus');
+        const prevEl = document.getElementById('rbPreview');
+        const hintEl = document.getElementById('rbHint');
+        if (cntEl) cntEl.textContent = n;
+        if (bonusEl) bonusEl.textContent = `属性 ×${rb.atkMult.toFixed(2)} · 修炼 ×${(1 + rb.xiuMult).toFixed(2)} · 灵石 ×${(1 + rb.stoneMult).toFixed(2)}`;
+        if (prevEl) {
+            const nx = n + 1;
+            prevEl.innerHTML = `<div class="rb-line">下一世（第 ${nx} 世）将得：</div>` +
+                `<div class="rb-grid">` +
+                `<span>基础属性</span><b>×${(1 + nx * c.atk).toFixed(2)}</b>` +
+                `<span>修炼速率</span><b>×${(1 + nx * c.xiu).toFixed(2)}</b>` +
+                `<span>灵石获取</span><b>×${(1 + nx * c.stone).toFixed(2)}</b>` +
+                `</div>`;
+        }
+        if (hintEl) {
+            if ((p.realmIdx || 0) < cfg.unlockRealmIdx) {
+                hintEl.innerHTML = `<span class="rb-lock">需先达 ${getRealm(cfg.unlockRealmIdx).name}期 方可轮回。当前境界：${getRealm(p.realmIdx || 0).name}。</span>`;
+            } else {
+                const herbName = getMaterial(cfg.herbId).name;
+                const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
+                hintEl.innerHTML = `轮回丹轮回需 ${cfg.herbCost} 株${herbName}（坊市 ${fmtNum(getMaterial(cfg.herbId).price)}灵石/株）。你现有 <b>${have}</b> 株。`;
+            }
+        }
+        const pillBtn = document.getElementById('btnRebirthPill');
+        if (pillBtn) {
+            const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
+            pillBtn.disabled = have < cfg.herbCost;
+        }
+    },
+    doReincarnate(mode) {
+        const p = Game.player;
+        if (!p) return;
+        const doIt = () => { Cultivate.reincarnate(p, mode); };
+        if (mode === 'free') {
+            this.showConfirm('确认免费轮回？', '散功重修：境界、修为、装备、寿元将重置归零，但你的劫后余韵、悟性、永久属性等加成全部保留，可更快重登仙途。', doIt);
+        } else {
+            const cfg = GameConfig.rebirth;
+            const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
+            if (have < cfg.herbCost) { this.toast(`需 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}`, 'bad'); return; }
+            this.showConfirm('确认轮回丹轮回？', `将消耗 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}，转世层数 +1，根基永久大进（战力照常重置）。`, doIt);
+        }
+    },
+
     /* ---------- 渲染所有 ---------- */
     renderAll() {
         if (!Game.player) return;
@@ -910,6 +973,7 @@ const UI = {
         safe(this.renderShop);
         safe(this.renderQuests);
         safe(this.renderFriends);
+        safe(this.renderReincarnate);
         safe(this.renderStatus);
     },
 
@@ -928,6 +992,7 @@ const UI = {
         else if (name === 'shop') this.renderShop();
         else if (name === 'quest') this.renderQuests();
         else if (name === 'friends') this.renderFriends();
+        else if (name === 'reincarnate') this.renderReincarnate();
     },
 
     /* ---------- 新手教程 ---------- */

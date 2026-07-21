@@ -197,6 +197,9 @@
                 <button class="nav-btn" data-panel="friends" title="道友">
                     <span class="nav-icon">友</span><span class="nav-label">道友</span>
                 </button>
+                <button class="nav-btn" data-panel="reincarnate" title="转世轮回">
+                    <span class="nav-icon">轮</span><span class="nav-label">转世</span>
+                </button>
             </nav>
 
             <!-- 内容区 -->
@@ -384,6 +387,22 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- 转世轮回面板 -->
+                <div class="panel" id="panel-reincarnate">
+                    <h3 class="panel-title">转世轮回</h3>
+                    <p class="panel-desc">超脱轮回，重立道基。转世层数越高，根基越厚——诸般属性与修炼、灵石皆受永久加持。</p>
+                    <div class="rebirth-stat">
+                        <div class="rs-item"><span>转世层数</span><b id="rbCount">0</b></div>
+                        <div class="rs-item"><span>当前轮回加成</span><b id="rbBonus" class="text-gold">—</b></div>
+                    </div>
+                    <div class="rebirth-preview" id="rbPreview"></div>
+                    <div class="rebirth-actions">
+                        <button class="btn-rebirth free" id="btnRebirthFree" onclick="UI.doReincarnate('free')">免费轮回（重置战力，保留属性加成）</button>
+                        <button class="btn-rebirth pill" id="btnRebirthPill" onclick="UI.doReincarnate('pill')">轮回丹轮回（耗 100 株轮回草）</button>
+                    </div>
+                    <div class="rebirth-hint" id="rbHint"></div>
                 </div>
             </section>
 

@@ -420,7 +420,8 @@ const Combat = {
             const stoneReward = enemyTpl.stoneReward;
             player.xiu += xiuReward;
             const _ts = (typeof Cultivate !== 'undefined' && Cultivate.getTribulusBonus) ? Cultivate.getTribulusBonus(player).stoneMult : 0;
-            player.stone += Math.floor(stoneReward * (1 + _ts));
+            const _rb = (typeof Cultivate !== 'undefined' && Cultivate.getRebirthBonus) ? Cultivate.getRebirthBonus(player).stoneMult : 0;
+            player.stone += Math.floor(stoneReward * (1 + _ts) * (1 + _rb));
             player.stats.totalXiu = (player.stats.totalXiu || 0) + xiuReward;
             player.stats.combatWins = (player.stats.combatWins || 0) + 1;
             // 掉落

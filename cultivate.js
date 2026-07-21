@@ -42,6 +42,11 @@ const Cultivate = {
         const tribulusMult = 1 + trib.xiuMult;
         base *= tribulusMult;
 
+        // 转世轮回加成
+        const rb = this.getRebirthBonus(player);
+        const rebirthMult = 1 + rb.xiuMult;
+        base *= rebirthMult;
+
         return {
             base,
             realmMult,
@@ -49,7 +54,9 @@ const Cultivate = {
             equipMult,
             wuxingMult,
             tribulusMult,
+            rebirthMult,
             tribulusBonus: (tribulusMult - 1),
+            rebirthBonus: (rebirthMult - 1),
             realmBonus: (realmMult - 1),
             equipBonus: (equipMult - 1),
             wuxingBonus: (wuxingMult - 1)
@@ -337,7 +344,8 @@ const Cultivate = {
         player.lifespan -= years;
         if (player.lifespan <= 0) {
             player.lifespan = 0;
-            player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1));
+            const _rbD = this.getRebirthBonus(player);
+            player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbD.stoneMult));
             this.save(player);
             if (typeof UI !== 'undefined') UI.addLog(`${player.name}游历${years}年，寿元已尽，羽化归虚……`, 'evt');
             if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
@@ -345,7 +353,8 @@ const Cultivate = {
             }
             return { years, dead: true, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
         }
-        player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1));
+        const _rbN = this.getRebirthBonus(player);
+        player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbN.stoneMult));
         this.save(player);
         if (typeof UI !== 'undefined') UI.addLog(`游历${years}年，收获${fmtNum(stoneGain)}灵石及诸多宝物`, 'evt');
         return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
@@ -370,7 +379,8 @@ const Cultivate = {
             return null;
         }
         player.xiu -= xiuAmount;
-        player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1));
+        const _rbX = this.getRebirthBonus(player);
+        player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbX.stoneMult));
         this.save(player);
         if (typeof UI !== 'undefined') {
             UI.addLog(`以${fmtNum(xiuAmount)}修为，兑换得${fmtNum(stone)}灵石`, 'evt');
@@ -427,6 +437,13 @@ const Cultivate = {
             }
         }
 
+        // 转世轮回加成（根基越厚，属性越强）
+        const rb = this.getRebirthBonus(player);
+        atk = Math.floor(atk * rb.atkMult);
+        def = Math.floor(def * rb.defMult);
+        hp = Math.floor(hp * rb.hpMult);
+        ling = Math.floor(ling * rb.lingMult);
+
         return { atk, def, hp, ling, spd, crit, realmAtk, realmDef, realmHp, realmLing };
     },
 
@@ -476,6 +493,20 @@ const Cultivate = {
     getTribulusBonus(player) {
         const t = (player && player.tribulus) || { xiuMult: 0, stoneMult: 0 };
         return { xiuMult: t.xiuMult || 0, stoneMult: t.stoneMult || 0 };
+    },
+    // 转世轮回永久加成（与劫后余韵、悟性等叠加）
+    getRebirthBonus(player) {
+        const n = (player && player.rebirth) || 0;
+        const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth.perLevel
+            : { atk: 0, def: 0, hp: 0, ling: 0, xiu: 0, stone: 0 };
+        return {
+            atkMult: 1 + n * c.atk,
+            defMult: 1 + n * c.def,
+            hpMult: 1 + n * c.hp,
+            lingMult: 1 + n * c.ling,
+            xiuMult: n * c.xiu,
+            stoneMult: n * c.stone
+        };
     },
     _addTribBonus(player, b) {
         if (!player.tribulus) player.tribulus = { xiuMult: 0, stoneMult: 0 };
@@ -553,6 +584,42 @@ const Cultivate = {
         this.save(player);
         return { mode, success: false, penalty: fp, xiuLost: loss,
             msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}修为、寿元-${fp.lifeLoss}` };
+    },
+
+    /* ---------- 转世轮回 ---------- */
+    reincarnate(player, mode) {
+        const cfg = GameConfig.rebirth;
+        if ((player.realmIdx || 0) < cfg.unlockRealmIdx) {
+            if (typeof UI !== 'undefined') UI.toast(`需先达${getRealm(cfg.unlockRealmIdx).name}期方可轮回`, 'bad');
+            return { ok: false, reason: 'locked' };
+        }
+        let usedPill = false;
+        if (mode === 'pill') {
+            const have = ((player.inventory.material && player.inventory.material[cfg.herbId]) || 0);
+            if (have < cfg.herbCost) {
+                if (typeof UI !== 'undefined') UI.toast(`需 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}（坊市有售）`, 'bad');
+                return { ok: false, reason: 'no_herb' };
+            }
+            player.inventory.material[cfg.herbId] -= cfg.herbCost;
+            player.rebirth = (player.rebirth || 0) + 1;
+            usedPill = true;
+        }
+        // 重置战力（保留属性加成/资源/功法/灵宠/好友等）
+        player.realmIdx = 0;
+        player.realmLayer = 1;
+        player.xiu = 0;
+        player.equipped = { weapon: null, armor: null, accessory: null, fabao: null };
+        player.lifespan = 100;
+        this.save(player);
+        if (typeof UI !== 'undefined') {
+            const rb = this.getRebirthBonus(player);
+            UI.toast(usedPill
+                ? `转世第 ${player.rebirth} 世！根基大进：基础属性 ×${rb.atkMult.toFixed(2)} · 修炼 ×${(1 + rb.xiuMult).toFixed(2)} · 灵石 ×${(1 + rb.stoneMult).toFixed(2)}`
+                : `已免费轮回，重立道基（属性加成保留）`, 'gold');
+            UI.addLog(usedPill ? `历经${player.rebirth}世轮回，道基愈发浑厚` : `${player.name}散功重修，再踏仙途`, 'evt');
+            UI.renderAll();
+        }
+        return { ok: true, usedPill, rebirth: player.rebirth };
     },
 
     /* ---------- 立即保存 ---------- */

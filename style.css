@@ -1680,3 +1680,46 @@ input { font-family: inherit; }
     .tutorial-body { font-size: 13px; line-height: 1.75; }
     .tutorial-btn { font-size: 13px; padding: 9px 0; }
 }
+
+/* ========== 转世轮回面板 ========== */
+.rebirth-stat {
+    display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0 6px;
+}
+.rs-item {
+    flex: 1 1 200px; min-width: 180px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.18);
+    border-radius: 14px; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px;
+}
+.rs-item span { font-size: 13px; color: var(--text-dim); letter-spacing: 1px; }
+.rs-item b { font-size: 20px; color: var(--text-gold); font-weight: 700; }
+
+.rebirth-preview {
+    margin: 16px 0; padding: 14px 18px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.10), rgba(255,255,255,0.03));
+    border: 1px solid rgba(212,175,55,0.20);
+}
+.rb-line { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 1px; }
+.rb-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto; gap: 6px 12px; align-items: center; }
+.rb-grid span { color: var(--text-dim); font-size: 13px; }
+.rb-grid b { color: var(--gold-light); font-size: 16px; font-weight: 700; }
+
+.rebirth-actions { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0 10px; }
+.btn-rebirth {
+    flex: 1 1 260px; min-width: 240px; padding: 14px 18px; border-radius: 14px;
+    font-size: 15px; font-weight: 600; letter-spacing: 1px; cursor: pointer;
+    border: 1px solid transparent; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.btn-rebirth.free {
+    background: rgba(255,255,255,0.06); color: var(--text-gold); border-color: rgba(212,175,55,0.28);
+}
+.btn-rebirth.free:hover { transform: translateY(-2px); background: rgba(212,175,55,0.12); box-shadow: 0 8px 24px rgba(212,175,55,0.22); }
+.btn-rebirth.pill {
+    color: #0d0a14; background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    box-shadow: 0 6px 22px rgba(212,175,55,0.30);
+}
+.btn-rebirth.pill:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(212,175,55,0.5); }
+.btn-rebirth:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.rebirth-hint { font-size: 13px; color: var(--text-dim); line-height: 1.8; margin-top: 6px; }
+.rebirth-hint b { color: var(--text-gold); }
+.rb-lock { color: #f0936b; }
