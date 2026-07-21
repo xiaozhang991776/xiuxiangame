@@ -81,10 +81,11 @@ const Explore = {
 
         switch (choice.type) {
             case 'xiu':
-                player.xiu += choice.value;
-                player.stats.totalXiu = (player.stats.totalXiu || 0) + choice.value;
+                const _incV = Math.floor(choice.value * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
+                player.xiu += _incV;
+                player.stats.totalXiu = (player.stats.totalXiu || 0) + _incV;
                 if (typeof UI !== 'undefined') {
-                    UI.toast(`获得${fmtNum(choice.value)}修为`, 'gold');
+                    UI.toast(`获得${fmtNum(_incV)}修为`, 'gold');
                     UI.addLog(`奇遇：获得${fmtNum(choice.value)}修为`, 'evt');
                 }
                 if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
@@ -131,17 +132,20 @@ const Explore = {
                 this.triggerRandomShop(player);
                 break;
 
-            case 'quest':
+            case 'quest': {
                 if (typeof UI !== 'undefined') UI.toast('接到新的宗门任务', 'good');
-                // 简单：给一些修为作为任务奖励预付
-                player.xiu += 100;
-                if (typeof UI !== 'undefined') UI.addLog('接到宗门任务，预付100修为', 'evt');
+                // 简单：给一些修为作为任务奖励预付（资源收紧：乘 incomeMult）
+                const _qPre = Math.floor(100 * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
+                player.xiu += _qPre;
+                if (typeof UI !== 'undefined') UI.addLog(`接到宗门任务，预付${_qPre}修为`, 'evt');
                 break;
+            }
 
             case 'karma_good':
-                // 行善积德，小概率获得奇遇
+                // 行善积德，小概率获得奇遇（资源收紧：善报修为乘 incomeMult）
                 if (Math.random() < 0.3) {
-                    const reward = Math.floor(player.xiu * 0.01) + 50;
+                    const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
+                    const reward = Math.floor((player.xiu * 0.01 + 50) * _m);
                     player.xiu = Math.min(player.xiu + reward, XIU_CAP);
                     if (typeof UI !== 'undefined') {
                         UI.toast(`善有善报，获得${fmtNum(reward)}修为`, 'gold');
@@ -308,13 +312,14 @@ const Explore = {
     openTreasure(player, type) {
         let qualityPool;
         let stoneReward;
+        const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
         if (type === 'treasure') {
             qualityPool = [0, 0, 1, 1, 2];
-            stoneReward = Math.floor(150 + Math.random() * 600);
+            stoneReward = Math.floor((150 + Math.random() * 600) * _m);
         } else if (type === 'treasure_safe') {
             // 谨慎检查，避免陷阱但奖励较少
             qualityPool = [0, 0, 1];
-            stoneReward = Math.floor(90 + Math.random() * 300);
+            stoneReward = Math.floor((90 + Math.random() * 300) * _m);
             if (typeof UI !== 'undefined') UI.toast(`获得${stoneReward}灵石`, 'gold');
             if (Math.random() < 0.3) {
                 // 30%概率只有灵石，无装备
@@ -324,7 +329,7 @@ const Explore = {
         } else {
             // 深海宝库
             qualityPool = [1, 2, 2, 3, 3, 4];
-            stoneReward = Math.floor(1500 + Math.random() * 6000);
+            stoneReward = Math.floor((1500 + Math.random() * 6000) * _m);
         }
         player.stone += stoneReward;
         if (typeof UI !== 'undefined') UI.toast(`获得${stoneReward}灵石`, 'gold');
@@ -441,8 +446,8 @@ const Explore = {
             !player.inventory.gongfa.includes(g.id) && player.realmIdx >= g.realmReq
         );
         if (candidates.length === 0) {
-            // 没有可学的，给修为补偿
-            const xiu = 500 + Math.floor(Math.random() * 2000);
+            // 没有可学的，给修为补偿（资源收紧：乘 incomeMult）
+            const xiu = Math.floor((500 + Math.floor(Math.random() * 2000)) * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
             player.xiu += xiu;
             if (typeof UI !== 'undefined') UI.toast(`获得${fmtNum(xiu)}修为`, 'gold');
             return;
@@ -506,17 +511,21 @@ const Quests = {
         }
         state.claimed = true;
         player.quests[questId] = state;
-        // 发放奖励
-        if (q.reward.stone) player.stone += q.reward.stone;
+        // 发放奖励（资源收紧：灵石/修为奖励乘 incomeMult）
+        const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
+        let _gotStone = 0, _gotXiu = 0;
+        if (q.reward.stone) { const _s = Math.floor(q.reward.stone * _m); player.stone += _s; _gotStone = _s; }
         if (q.reward.xiu) {
-            player.xiu += q.reward.xiu;
-            player.stats.totalXiu = (player.stats.totalXiu || 0) + q.reward.xiu;
+            const _x = Math.floor(q.reward.xiu * _m);
+            player.xiu += _x;
+            player.stats.totalXiu = (player.stats.totalXiu || 0) + _x;
+            _gotXiu = _x;
         }
         if (q.reward.items) {
             q.reward.items.forEach(it => Inventory.addItem(player, it.id, it.count));
         }
         if (typeof UI !== 'undefined') {
-            UI.toast(`领取奖励：${q.reward.stone ? fmtNum(q.reward.stone) + '灵石 ' : ''}${q.reward.xiu ? fmtNum(q.reward.xiu) + '修为' : ''}`, 'gold');
+            UI.toast(`领取奖励：${_gotStone ? fmtNum(_gotStone) + '灵石 ' : ''}${_gotXiu ? fmtNum(_gotXiu) + '修为' : ''}`, 'gold');
             UI.addLog(`完成任务 ${q.name}，领取奖励`, 'evt');
             UI.renderAll();
         }

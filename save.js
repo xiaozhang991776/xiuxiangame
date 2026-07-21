@@ -265,6 +265,8 @@ const SaveSystem = {
         }
         // 天赋加成（悟道系·明悟）
         if (typeof Talent !== 'undefined') base *= Talent.xiuRateMult(player);
+        // 难度系数：修炼速率 ×rateMult（与 getRateDetail 同步，避免运行时与显示不一致）
+        base *= (typeof DIFF !== 'undefined') ? DIFF.rateMult : 1;
         // 硬顶：最终速率不得超过 JS 安全整数，防止 UI/离线收益出现无法阅读的超大数字
         return Math.min(base, Number.MAX_SAFE_INTEGER);
     },

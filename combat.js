@@ -427,12 +427,14 @@ const Combat = {
         const enemyTpl = this.state.enemyTpl;
         if (victory) {
             // 奖励
-            const xiuReward = enemyTpl.xiuReward;
-            const stoneReward = enemyTpl.stoneReward;
-            player.xiu += xiuReward;
+            // 难度系数：战斗收入 ×incomeMult（调难时 <1，资源更紧）
+            const _inc = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
+            const xiuReward = Math.floor(enemyTpl.xiuReward * _inc);
             const _ts = (typeof Cultivate !== 'undefined' && Cultivate.getTribulusBonus) ? Cultivate.getTribulusBonus(player).stoneMult : 0;
             const _rb = (typeof Cultivate !== 'undefined' && Cultivate.getRebirthBonus) ? Cultivate.getRebirthBonus(player).stoneMult : 0;
-            player.stone += Math.floor(stoneReward * (1 + _ts) * (1 + _rb));
+            const stoneReward = Math.floor(enemyTpl.stoneReward * (1 + _ts) * (1 + _rb) * _inc);
+            player.xiu += xiuReward;
+            player.stone += stoneReward;
             player.stats.totalXiu = (player.stats.totalXiu || 0) + xiuReward;
             player.stats.combatWins = (player.stats.combatWins || 0) + 1;
             // 掉落

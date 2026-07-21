@@ -288,8 +288,10 @@ const Inventory = {
                 msg = `永久速度+${eff.value}`;
                 break;
             case 'stone':
-                player.stone = (player.stone || 0) + eff.value;
-                msg = `获得${eff.value}灵石`;
+                // 招财丹等：灵石收入（资源收紧：乘 incomeMult）
+                const _stGain = Math.floor(eff.value * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
+                player.stone = (player.stone || 0) + _stGain;
+                msg = `获得${_stGain}灵石`;
                 break;
         }
         if (typeof UI !== 'undefined') {

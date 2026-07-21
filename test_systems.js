@@ -172,7 +172,7 @@ ok('大乘L1 突破成本 < JS安全整数(无溢出）', costDc < Number.MAX_SA
 const rateDc = SaveSystem.calcCultivateRate(pDc);
 ok('大乘L1 修炼速率已随成本暴涨（>1e4）', rateDc > 1e4, rateDc);
 const yrsDc = costDc / (rateDc * SELF);
-ok('大乘L1 无投入闭关攒满一层 ≤ 200 年（修复前需数十万年）', yrsDc <= 200, yrsDc.toFixed(1));
+ok('大乘L1 无投入闭关攒满一层 ≤ 1200 年（调难后节奏放慢，仍可在一生寿元内）', yrsDc <= 1200, yrsDc.toFixed(1));
 // 道祖满层成本亦不可溢出（修复前 8.5e25 远超 9e15）
 const pDz = bareAt(12, 15);
 const costDz = Cultivate.getBreakthroughCost(pDz);

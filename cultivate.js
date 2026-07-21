@@ -55,6 +55,8 @@ const Cultivate = {
         const talentXiu = (typeof Talent !== 'undefined') ? Talent.xiuRateMult(player) : 1;
         base *= talentXiu;
 
+        // 难度系数：修炼速率 ×rateMult（默认 1；调难时 <1 让修为获取整体变慢）
+        base *= (typeof DIFF !== 'undefined') ? DIFF.rateMult : 1;
         // 硬顶：最终修炼速率不得超过 JS 安全整数，防止界面上出现无法阅读的超大数字，也避免后续点击/闭关收益中间值溢出
         base = Math.min(base, Number.MAX_SAFE_INTEGER);
 
@@ -81,7 +83,8 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         // 当前大境界内，层数越高所需越多
         const layerProgress = (player.realmLayer - 1) / realm.layers;
-        return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1));
+        // 难度系数：突破所需修为 ×breakXiuMult（调难时 >1）
+        return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1) * (typeof DIFF !== 'undefined' ? DIFF.breakXiuMult : 1));
     },
 
     /* ---------- 获取当前突破（段位/大境界）所需额外灵石 ---------- */
@@ -89,8 +92,8 @@ const Cultivate = {
     getBreakthroughStoneCost(player) {
         const realm = getRealm(player.realmIdx);
         const seq = player.realmIdx * realm.layers + (player.realmLayer - 1);
-        // 随坊市物价 ×10 同步上调，使突破灵石门槛与坊市（同为灵石支付）重新挂钩
-        return Math.floor(2000 + seq * 400000);
+        // 随坊市物价 ×10 同步上调，使突破灵石门槛与坊市（同为灵石支付）重新挂钩；难度系数再 ×breakStoneMult
+        return Math.floor((2000 + seq * 400000) * (typeof DIFF !== 'undefined' ? DIFF.breakStoneMult : 1));
     },
 
     /* ---------- 是否可以突破当前小境界 ---------- */
@@ -320,7 +323,8 @@ const Cultivate = {
             return null;
         }
         const realmIdx = player.realmIdx || 0;
-        const stonePerYear = this.YOULI_BASE_STONE * Math.pow(this.YOULI_GROWTH, realmIdx);
+        // 难度系数：游历灵石收入 ×incomeMult（调难时 <1，资源更紧）
+        const stonePerYear = this.YOULI_BASE_STONE * Math.pow(this.YOULI_GROWTH, realmIdx) * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1);
         let stoneGain = Math.floor(years * stonePerYear * (0.85 + Math.random() * 0.3));
 
         const gains = { stone: stoneGain, materials: [], pills: [] };
@@ -578,7 +582,8 @@ const Cultivate = {
     },
     // 硬抗成功率：随境界与悟性小幅提升，但始终保留翻车风险
     calcTribSuccess(player, trib) {
-        const base = (trib && trib.baseChance) || 0.6;
+        // 难度系数：基础成功率 ×tribChanceMult（调难时 <1，更难过）
+        const base = ((trib && trib.baseChance) || 0.6) * (typeof DIFF !== 'undefined' ? DIFF.tribChanceMult : 1);
         const realmAdj = (player.realmIdx || 0) * 0.03;
         const wxAdj = (player.wuxingLevel || 0) * 0.004;
         const tribAdj = (typeof Talent !== 'undefined') ? Talent.tribChanceAdd(player) : 0;
@@ -626,8 +631,14 @@ const Cultivate = {
             return { mode, success: true, bonus: sb,
                 msg: `硬抗${trib.name}成功！劫后余韵加身：修炼速率+${Math.round(sb.xiuMult*100)}%、灵石获取+${Math.round(sb.stoneMult*100)}%` };
         }
-        // 硬抗失败：境界回落 + 损修为 + 损寿元
-        const fp = trib.failPenalty || { layerDown: 2, xiuLossPct: 0.3, lifeLoss: 5 };
+        // 硬抗失败：境界回落 + 损修为 + 损寿元（难度系数 tribPenaltyMult 加重惩罚）
+        const _m = (typeof DIFF !== 'undefined') ? DIFF.tribPenaltyMult : 1;
+        const fpRaw = trib.failPenalty || { layerDown: 2, xiuLossPct: 0.3, lifeLoss: 5 };
+        const fp = {
+            layerDown: Math.max(1, Math.round(fpRaw.layerDown * _m)),
+            xiuLossPct: fpRaw.xiuLossPct * _m,
+            lifeLoss: Math.round(fpRaw.lifeLoss * _m)
+        };
         if ((player.realmLayer || 1) > fp.layerDown) {
             player.realmLayer -= fp.layerDown;
         } else if ((player.realmIdx || 0) > 0) {
