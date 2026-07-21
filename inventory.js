@@ -173,18 +173,18 @@ const Inventory = {
             if (typeof UI !== 'undefined') UI.toast('已达强化上限+100！', 'bad');
             return false;
         }
-        // 强化消耗灵石（随等级递增）
+        // 强化消耗修为（随等级递增）
         const q = getQuality(tpl.quality);
         const cost = Math.floor(tpl.price * 0.3 * (curEnhance + 1));
-        if (player.stone < cost) {
-            if (typeof UI !== 'undefined') UI.toast(`灵石不足！需要${cost}灵石`, 'bad');
+        if (player.xiu < cost) {
+            if (typeof UI !== 'undefined') UI.toast(`修为不足！需要${cost}修为`, 'bad');
             return false;
         }
-        player.stone -= cost;
+        player.xiu -= cost;
         eqInstance.enhance = curEnhance + 1;
         if (typeof UI !== 'undefined') {
-            UI.toast(`强化成功！+${curEnhance + 1}（耗${cost}灵石）`, 'gold');
-            UI.addLog(`${tpl.name}强化至+${curEnhance + 1}，耗${cost}灵石`, 'evt');
+            UI.toast(`强化成功！+${curEnhance + 1}（耗${cost}修为）`, 'gold');
+            UI.addLog(`${tpl.name}强化至+${curEnhance + 1}，耗${cost}修为`, 'evt');
         }
         this.save(player);
         return true;
