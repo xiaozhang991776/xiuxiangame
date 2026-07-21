@@ -1010,7 +1010,11 @@ const UI = {
         { title: '寿元将尽', body: '留意右上「<b>寿元</b>」：每过真实<b>一分钟减一</b>，闭关游历亦折寿元。寿元耗尽便<b>羽化归虚</b>，故当抓紧修行。', panel: 'cultivate', target: '#topLife' },
         { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得修为、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
         { title: '三界历练', body: '「<b>历练</b>」可访名山、探秘境、遇奇遇，收获随机机缘，妙不可言。', panel: 'explore', target: '#panel-explore' },
-        { title: '乾坤 · 神通 · 坊市', body: '「<b>乾坤袋</b>」藏装备丹药；「<b>神通</b>」可修习法术；「<b>坊市</b>」买卖物资、搜罗法宝。', panel: 'shop', target: '#panel-shop' },
+        { title: '坊市淘宝', body: '切到「<b>坊市</b>」可买卖物资、搜罗法宝。材料、丹药、装备皆可交易；修行所需的<b>轮回草</b>亦在此求购。', panel: 'shop', target: '#panel-shop' },
+        { title: '乾坤袋', body: '「<b>乾坤袋</b>」随身藏纳装备丹药。穿戴<b>武器·护甲·饰品·法宝</b>可增益气血、攻击、防御与灵力；丹药则提供临时裨益。战力强弱，半系于此。', panel: 'inventory', target: '#panel-inventory' },
+        { title: '神通', body: '「<b>神通</b>」可修习法术，临阵施展。攻伐、护身、辅助各具妙用，功法愈深，威能愈盛——是越阶斗法、闯荡秘境的底气。', panel: 'skill', target: '#panel-skill' },
+        { title: '道友', body: '「<b>道友</b>」凭<b>档案码</b>结交同道，<b>道友榜</b>按战力排序、彼此砥砺；亦可与道友切磋论道，互证修行。', panel: 'friends', target: '#panel-friends' },
+        { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>今生境界天花板</b>」（筑基 + 已轮回世数）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
     ],
     tutorialIndex: 0,
