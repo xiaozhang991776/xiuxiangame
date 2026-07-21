@@ -400,18 +400,19 @@ const Cultivate = {
         let spd = player.baseSpd;
         let crit = player.baseCrit;
 
-        // 装备加成
+        // 装备加成（锻造装备优先用实例属性，其余按模板×强化）
         for (const slot in player.equipped) {
             const eq = player.equipped[slot];
             if (eq) {
                 const tpl = getEquipTemplate(eq.baseId);
                 if (tpl) {
                     const enhance = 1 + (eq.enhance || 0) * 0.15;
-                    atk += Math.floor((tpl.atk || 0) * enhance);
-                    def += Math.floor((tpl.def || 0) * enhance);
-                    hp += Math.floor((tpl.hp || 0) * enhance);
-                    ling += Math.floor((tpl.ling || 0) * enhance);
-                    crit += (tpl.crit || 0);
+                    const instVal = (k) => (eq[k] !== undefined ? eq[k] : (tpl[k] || 0));
+                    atk += Math.floor(instVal('atk') * enhance);
+                    def += Math.floor(instVal('def') * enhance);
+                    hp += Math.floor(instVal('hp') * enhance);
+                    ling += Math.floor(instVal('ling') * enhance);
+                    crit += instVal('crit');
                 }
             }
         }

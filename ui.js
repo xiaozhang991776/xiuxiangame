@@ -330,6 +330,7 @@ const UI = {
             const enhanceBonus = 1 + enhance * 0.15;
             attrsHtml = `
                 <div>品质：<span style="color:${q.color}">${q.name}</span></div>
+                ${item.forgeTier !== undefined ? `<div>锻造品质：<span style="color:${getQuality(item.forgeTier).color}">${getQuality(item.forgeTier).name}</span></div>` : ''}
                 <div>攻击：+${Math.floor((item.atk || 0) * enhanceBonus)}</div>
                 <div>防御：+${Math.floor((item.def || 0) * enhanceBonus)}</div>
                 <div>气血：+${Math.floor((item.hp || 0) * enhanceBonus)}</div>
@@ -471,6 +472,10 @@ const UI = {
         const filters = document.getElementById('shopFilters');
         if (filters) filters.style.display = this.shopTab === 'buy' ? '' : 'none';
         grid.innerHTML = '';
+        if (this.shopTab === 'craft') {
+            this._renderCraft(grid, p);
+            return;
+        }
         if (this.shopTab === 'buy') {
             let list = Shop.getBuyList().filter(item => {
                 if (this.shopCategory !== 'all' && item.category !== this.shopCategory) return false;
@@ -547,6 +552,64 @@ const UI = {
         }
     },
 
+    /* ---------- 渲染炼制（丹炉 + 器炉） ---------- */
+    _renderCraft(grid, p) {
+        // 丹炉
+        const pillHead = document.createElement('div');
+        pillHead.className = 'forge-section-head';
+        pillHead.innerHTML = '🔥 丹炉 · 炼丹（材料 + 灵石，有几率大成功产出翻倍）';
+        grid.appendChild(pillHead);
+        const pills = Shop.getCraftList(p);
+        pills.forEach(item => {
+            const q = getQuality(item.quality);
+            const card = document.createElement('div');
+            card.className = 'shop-card forge-card';
+            card.innerHTML = `
+                <div class="shop-card-header">
+                    <span class="shop-item-name" style="color:${q.color}">${item.icon} ${item.name}</span>
+                    <span style="font-size:11px;color:${q.color}">${q.name}</span>
+                </div>
+                <div class="shop-item-desc">${item.desc || ''}</div>
+                <div class="forge-mats">
+                    ${item.mats.map(m => `<span class="forge-mat ${m.enough ? '' : 'lack'}">${m.name} ${m.have}/${m.need}</span>`).join('')}
+                    <span class="forge-mat">灵石 ${fmtNum(item.cost)}</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                    <button class="shop-buy-btn" ${item.canCraft ? '' : 'disabled'} onclick="UI.craftPill('${item.id}')">炼制</button>
+                </div>`;
+            grid.appendChild(card);
+        });
+        // 器炉
+        const eqHead = document.createElement('div');
+        eqHead.className = 'forge-section-head';
+        eqHead.style.marginTop = '14px';
+        eqHead.innerHTML = '⚒ 器炉 · 炼器（材料 + 灵石，品质随缘：凡→灵→宝→仙→神）';
+        grid.appendChild(eqHead);
+        const eqs = Shop.getForgeList(p);
+        eqs.forEach(item => {
+            const q = getQuality(item.quality);
+            const card = document.createElement('div');
+            card.className = 'shop-card forge-card';
+            card.innerHTML = `
+                <div class="shop-card-header">
+                    <span class="shop-item-name" style="color:${q.color}">${item.icon} ${item.name}</span>
+                    <span style="font-size:11px;color:${q.color}">${q.name}</span>
+                </div>
+                <div class="shop-item-desc">${item.desc || ''}</div>
+                <div class="forge-mats">
+                    ${item.mats.map(m => `<span class="forge-mat ${m.enough ? '' : 'lack'}">${m.name} ${m.have}/${m.need}</span>`).join('')}
+                    <span class="forge-mat">灵石 ${fmtNum(item.cost)}</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                    <button class="shop-buy-btn" ${item.canCraft ? '' : 'disabled'} onclick="UI.craftEquip('${item.id}')">锻造</button>
+                </div>`;
+            grid.appendChild(card);
+        });
+    },
+
+    craftPill(id) { Shop.craft(Game.player, id); },
+    craftEquip(id) { Shop.forge(Game.player, id); },
+
     buyItem(type, id) { Shop.buy(Game.player, type, id); this.renderAll(); },
     sellShopItem(idOrUid) {
         const p = Game.player;
@@ -590,6 +653,95 @@ const UI = {
     },
 
     claimQuest(id) { Quests.claim(Game.player, id); this.renderAll(); },
+
+    /* ---------- 渲染道友系统 ---------- */
+    renderFriends() {
+        const p = Game.player;
+        if (!p) return;
+        // ① 我的档案码
+        const myCode = document.getElementById('myProfileCode');
+        if (myCode) myCode.value = Friends.encodeProfile(p);
+        // ③ 馈赠物品下拉（持有可赠之物）
+        const sel = document.getElementById('giftItem');
+        if (sel) {
+            const opts = ['<option value="">— 无 —</option>'];
+            Object.entries(p.inventory.pill).filter(([_, c]) => c > 0).forEach(([id, c]) => {
+                const m = getPill(id); if (m) opts.push(`<option value="pill:${id}">${m.name}（持${c}）</option>`);
+            });
+            Object.entries(p.inventory.material).filter(([_, c]) => c > 0).forEach(([id, c]) => {
+                const m = getMaterial(id); if (m) opts.push(`<option value="material:${id}">${m.name}（持${c}）</option>`);
+            });
+            sel.innerHTML = opts.join('');
+        }
+        // ④ 道友榜（含自己，按战力排序）
+        const list = document.getElementById('friendsList');
+        if (list) {
+            const st = Cultivate.calcFinalStats(p);
+            const me = {
+                name: p.name + '（你）', realmName: getRealm(p.realmIdx).name, realmIdx: p.realmIdx,
+                atk: st.atk, def: st.def, hp: st.hp, ling: st.ling, crit: st.crit,
+                tXi: (p.tribulus && p.tribulus.xiuMult) || 0, tSt: (p.tribulus && p.tribulus.stoneMult) || 0,
+                power: Friends.power(st), isMe: true
+            };
+            const others = Friends.list().map(f => ({ ...f, isMe: false }));
+            const all = [me].concat(others).sort((a, b) => b.power - a.power);
+            list.innerHTML = all.map(f => `
+                <div class="friend-card ${f.isMe ? 'me' : ''}">
+                    <div class="friend-top">
+                        <span class="friend-name" style="color:${f.isMe ? '#7dd3c0' : '#d4af37'}">${f.name}</span>
+                        <span class="friend-power">战力 ${fmtNum(f.power)}</span>
+                        ${f.isMe ? '' : `<button class="friend-del" onclick="UI.removeFriend('${f.name.replace(/'/g, "\\'")}')">删除</button>`}
+                    </div>
+                    <div class="friend-meta">${f.realmName || ''} ${f.realmLayer ? f.realmLayer + '层' : ''} · 攻${fmtNum(f.atk)} 防${fmtNum(f.def)} 血${fmtNum(f.hp)} 灵${fmtNum(f.ling)}</div>
+                    <div class="friend-bonus">渡劫加成：修炼+${Math.round((f.tXi || 0) * 100)}% 灵石+${Math.round((f.tSt || 0) * 100)}%</div>
+                </div>`).join('') || '<p class="friend-empty">尚无道友，把档案码发给好友吧～</p>';
+        }
+    },
+    copyProfile() {
+        const el = document.getElementById('myProfileCode');
+        if (el) { el.select(); try { document.execCommand('copy'); } catch (e) {} if (navigator.clipboard) navigator.clipboard.writeText(el.value).catch(() => {}); }
+        if (typeof UI !== 'undefined') UI.toast('档案码已复制，发给好友吧', 'gold');
+    },
+    importCode() {
+        const el = document.getElementById('importCode');
+        const code = el ? el.value : '';
+        if (!code.trim()) { if (typeof UI !== 'undefined') UI.toast('请先粘贴分享码', 'bad'); return; }
+        try {
+            const r = Friends.import(Game.player, code);
+            if (r.kind === 'profile') { if (typeof UI !== 'undefined') { UI.toast(`已添加道友：${r.name}`, 'gold'); UI.addLog(`添加道友 ${r.name}`, 'evt'); } }
+            else if (r.kind === 'gift') {
+                const desc = Friends.describeGift(r);
+                if (typeof UI !== 'undefined') { UI.toast(`收到 ${r.from} 的馈赠：${desc}`, 'gold'); UI.addLog(`收到 ${r.from} 馈赠：${desc}`, 'evt'); }
+            }
+            if (el) el.value = '';
+            this.renderFriends(); this.renderStatus();
+        } catch (e) { if (typeof UI !== 'undefined') UI.toast(e.message || '导入失败', 'bad'); }
+    },
+    genGift() {
+        const p = Game.player;
+        const stone = parseInt(document.getElementById('giftStone').value) || 0;
+        const itemSel = document.getElementById('giftItem').value;
+        const count = parseInt(document.getElementById('giftCount').value) || 0;
+        let item = null;
+        if (itemSel && count > 0) { const [type, id] = itemSel.split(':'); item = { type, id, count }; }
+        try {
+            const code = Friends.makeGift(p, { stone, item });
+            const box = document.getElementById('giftCode');
+            if (box) box.value = code;
+            if (typeof UI !== 'undefined') UI.toast('馈赠码已生成，发给好友即到账（己方已扣除）', 'gold');
+            this.renderFriends(); this.renderStatus();
+        } catch (e) { if (typeof UI !== 'undefined') UI.toast(e.message || '生成失败', 'bad'); }
+    },
+    copyGift() {
+        const el = document.getElementById('giftCode');
+        if (el && el.value) { el.select(); try { document.execCommand('copy'); } catch (e) {} if (navigator.clipboard) navigator.clipboard.writeText(el.value).catch(() => {}); }
+        if (typeof UI !== 'undefined') UI.toast('馈赠码已复制', 'gold');
+    },
+    removeFriend(name) {
+        Friends.remove(name);
+        if (typeof UI !== 'undefined') UI.toast(`已删除道友 ${name}`, '');
+        this.renderFriends();
+    },
 
     /* ---------- 渲染属性面板 ---------- */
     renderStatus() {
@@ -757,6 +909,7 @@ const UI = {
         safe(this.renderSkillList);
         safe(this.renderShop);
         safe(this.renderQuests);
+        safe(this.renderFriends);
         safe(this.renderStatus);
     },
 
@@ -774,6 +927,7 @@ const UI = {
         else if (name === 'skill') this.renderSkillList();
         else if (name === 'shop') this.renderShop();
         else if (name === 'quest') this.renderQuests();
+        else if (name === 'friends') this.renderFriends();
     },
 
     /* ---------- 新手教程 ---------- */

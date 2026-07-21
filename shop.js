@@ -168,5 +168,24 @@ const Shop = {
             });
             return { ...p, canCraft, mats, cost: p.craft.cost };
         });
+    },
+
+    /* ---------- 炼器 ---------- */
+    forge(player, eqId) {
+        Inventory.craftEquip(player, eqId);
+        if (typeof UI !== 'undefined') UI.renderAll();
+    },
+
+    /* ---------- 获取炼器列表 ---------- */
+    getForgeList(player) {
+        return GameConfig.equipmentTemplates.filter(e => e.craft && e.type !== 'fabao').map(e => {
+            const canCraft = Inventory.hasMaterials(player, e.craft.materials) && player.stone >= e.craft.cost;
+            const mats = Object.entries(e.craft.materials).map(([mid, cnt]) => {
+                const m = getMaterial(mid);
+                const have = player.inventory.material[mid] || 0;
+                return { name: m.name, need: cnt, have, enough: have >= cnt };
+            });
+            return { ...e, canCraft, mats, cost: e.craft.cost };
+        });
     }
 };

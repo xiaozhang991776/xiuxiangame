@@ -308,14 +308,81 @@ const Inventory = {
             if (player.inventory.material[matId] <= 0) delete player.inventory.material[matId];
         }
         player.stone -= pill.craft.cost;
+        // 品质概率浮动：悟性越高，大成功（产出翻倍）概率越大
+        const luck = 0.12 + (player.wuxingLevel || 0) * 0.02;
+        const big = Math.random() < luck;
+        const count = big ? 2 : 1;
         // 添加丹药
-        this.addItem(player, pillId, 1);
+        this.addItem(player, pillId, count);
         if (typeof UI !== 'undefined') {
-            UI.toast(`炼制成功：${pill.name}×1`, 'gold');
-            UI.addLog(`炼制丹药 ${pill.name}`, 'evt');
+            UI.toast(big ? `炼丹大成功！${pill.name}×${count}` : `炼制成功：${pill.name}×1`, big ? 'gold' : 'gold');
+            UI.addLog(big ? `炼丹大成功，${pill.name}×${count}` : `炼制丹药 ${pill.name}`, 'evt');
         }
         this.save(player);
         return true;
+    },
+
+    /* ---------- 炼器：锻造装备（品质随缘） ---------- */
+    craftEquip(player, eqId) {
+        const tpl = getEquipTemplate(eqId);
+        if (!tpl || !tpl.craft || tpl.type === 'fabao') return false;
+        // 检查材料
+        for (const mid in tpl.craft.materials) {
+            const need = tpl.craft.materials[mid];
+            const have = player.inventory.material[mid] || 0;
+            if (have < need) {
+                if (typeof UI !== 'undefined') UI.toast(`材料不足：${getMaterial(mid).name}×${need - have}`, 'bad');
+                return false;
+            }
+        }
+        // 检查灵石
+        if (player.stone < tpl.craft.cost) {
+            if (typeof UI !== 'undefined') UI.toast(`灵石不足！需要${tpl.craft.cost}灵石`, 'bad');
+            return false;
+        }
+        // 扣除材料与灵石
+        for (const mid in tpl.craft.materials) {
+            player.inventory.material[mid] -= tpl.craft.materials[mid];
+            if (player.inventory.material[mid] <= 0) delete player.inventory.material[mid];
+        }
+        player.stone -= tpl.craft.cost;
+        // 品质概率浮动：悟性/境界越高，高品概率越大
+        const tier = this._rollForgeTier(player);
+        const scale = 1 + 0.15 * tier;
+        const inst = {
+            uid: genUid(),
+            baseId: eqId,
+            enhance: 0,
+            forgeTier: tier,
+            atk: Math.round((tpl.atk || 0) * scale),
+            def: Math.round((tpl.def || 0) * scale),
+            hp: Math.round((tpl.hp || 0) * scale),
+            ling: Math.round((tpl.ling || 0) * scale),
+            crit: (tpl.crit || 0)
+        };
+        player.inventory.equipment.push(inst);
+        const q = getQuality(tier);
+        if (typeof UI !== 'undefined') {
+            UI.toast(`锻造${tier >= 3 ? '极品' : '成功'}：${tpl.name}【${q.name}】`, 'gold');
+            UI.addLog(`于器炉锻造 ${tpl.name}（${q.name}）`, 'evt');
+        }
+        this.save(player);
+        return true;
+    },
+
+    // 锻造品质roll：白(凡)→绿(灵)→蓝(宝)→紫(仙)→橙(神)，luck 提升高品概率
+    _rollForgeTier(player) {
+        const luck = (player.wuxingLevel || 0) * 0.015 + (player.realmIdx || 0) * 0.005;
+        const base = [0.62, 0.23, 0.11, 0.035, 0.005];
+        const p = base.map((v, i) => v + (i >= 2 ? luck * 0.3 : (i === 0 ? -luck * 0.6 : 0)));
+        const sum = p.reduce((a, b) => a + b, 0);
+        const r = Math.random();
+        let acc = 0;
+        for (let i = 0; i < 5; i++) {
+            acc += p[i] / sum;
+            if (r < acc) return i;
+        }
+        return 4;
     },
 
     /* ---------- 学习功法 ---------- */

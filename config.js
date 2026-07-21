@@ -356,3 +356,21 @@ function fmtNum(n) {
     if (n >= 1000) return (n / 1000).toFixed(1) + '千';
     return Math.floor(n).toString();
 }
+
+// ===== 自动生成「炼器」配方：非法宝装备可按 材料+灵石 锻造 =====
+// 材料与灵石成本按品质分级，确保与既有丹药炼制体系一致
+(function initForgeRecipes() {
+    if (!GameConfig.equipmentTemplates) return;
+    GameConfig.equipmentTemplates.forEach(eq => {
+        if (eq.type === 'fabao' || eq.craft) return; // 法宝为天材地宝，不可锻造
+        const q = eq.quality || 0;
+        const materials = {};
+        if (eq.type === 'weapon')       materials.m_ore = 3 + q * 3;
+        else if (eq.type === 'armor')   { materials.m_ore = 2 + q * 3; materials.m_herb = 2 + q * 2; }
+        else if (eq.type === 'accessory'){ materials.m_herb = 2 + q * 2; materials.m_ore = 1 + q * 2; }
+        if (q >= 2) materials.m_spirit_wood = 2 + q;
+        if (q >= 3) { materials.m_geng_gold = 2 + q; materials.m_pearl = 1; }
+        if (q >= 4) { materials.m_chaos = 1 + (q - 3); materials.m_qi_essence = 1; }
+        eq.craft = { materials, cost: Math.round(eq.price * 0.35) };
+    });
+})();

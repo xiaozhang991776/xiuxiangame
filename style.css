@@ -913,6 +913,64 @@ input { font-family: inherit; }
 }
 .shop-buy-btn:hover:not(:disabled) { background: rgba(212,175,55,0.3); }
 .shop-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- 炼制（丹炉/器炉） ---------- */
+.forge-section-head {
+    grid-column: 1 / -1;
+    font-size: 13px; letter-spacing: 1px; color: var(--gold-light);
+    padding: 10px 12px; margin-bottom: 4px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.14), rgba(125,211,192,0.06));
+    border-left: 3px solid var(--gold); border-radius: var(--radius-sm);
+}
+.forge-card { border-color: rgba(125,211,192,0.35); }
+.forge-card:hover { border-color: var(--jade); box-shadow: 0 0 18px rgba(125,211,192,0.18); }
+.forge-mats { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
+.forge-mat {
+    font-size: 11px; padding: 3px 8px; border-radius: 10px;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(201,169,106,0.25); color: var(--text-main);
+}
+.forge-mat.lack { color: #f0936b; border-color: rgba(240,147,107,0.4); }
+
+/* ---------- 道友系统 ---------- */
+.friends-grid { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.friends-col { flex: 1 1 360px; display: flex; flex-direction: column; gap: 14px; min-width: 300px; }
+.friends-box {
+    background: var(--bg-card); border: 1px solid rgba(201,169,106,0.25);
+    border-radius: var(--radius); padding: 14px 16px;
+}
+.friends-box-title { font-size: 13px; color: var(--gold-light); letter-spacing: 1px; margin-bottom: 10px; }
+.friends-code {
+    width: 100%; height: 76px; resize: vertical; font-size: 11px; line-height: 1.5;
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(201,169,106,0.3);
+    border-radius: var(--radius-sm); color: var(--jade-light); padding: 8px 10px; margin-bottom: 8px;
+}
+.friends-btn {
+    padding: 7px 18px; font-size: 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--gold); background: rgba(212,175,55,0.18); color: var(--gold-light);
+    transition: all 0.3s; cursor: pointer;
+}
+.friends-btn:hover { background: rgba(212,175,55,0.32); }
+.friends-btn.ghost { border-color: var(--jade); color: var(--jade-light); background: rgba(125,211,192,0.12); margin-top: 6px; }
+.friends-gift-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: var(--text-dim); }
+.friends-gift-row label { color: var(--text-gold); }
+.friends-input, .friends-select {
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(201,169,106,0.3);
+    border-radius: var(--radius-sm); color: var(--text-main); padding: 6px 8px; font-size: 13px;
+}
+.friends-input { width: 78px; }
+.friends-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
+.friend-card {
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(201,169,106,0.2);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+}
+.friend-card.me { border-color: var(--jade); background: rgba(125,211,192,0.1); }
+.friend-top { display: flex; align-items: center; gap: 10px; }
+.friend-name { font-size: 14px; font-weight: 700; }
+.friend-power { margin-left: auto; font-size: 12px; color: var(--text-dim); }
+.friend-del { font-size: 11px; padding: 2px 10px; border-radius: 10px; border: 1px solid var(--q-shen); color: var(--q-shen); background: transparent; cursor: pointer; }
+.friend-meta { font-size: 12px; color: var(--text-main); margin-top: 4px; }
+.friend-bonus { font-size: 11px; color: var(--text-jade); opacity: 0.85; margin-top: 2px; }
+.friend-empty { color: var(--text-dim); font-size: 13px; text-align: center; padding: 20px; }
 .shop-sell-btn {
     padding: 6px 14px; font-size: 13px;
     border: 1px solid var(--q-shen); border-radius: var(--radius-sm);
