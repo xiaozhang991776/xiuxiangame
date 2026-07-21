@@ -766,11 +766,9 @@ const UI = {
         document.getElementById('attrSpd').textContent = stats.spd;
         document.getElementById('attrCrit').textContent = (stats.crit * 100).toFixed(0) + '%';
         document.getElementById('attrElem').textContent = GameConfig.elements[p.element].name;
-        // 战力 / 战力上限
+        // 战力（与道友榜同一口径）
         const powerEl = document.getElementById('attrPower');
         if (powerEl) powerEl.textContent = fmtNum(Cultivate.calcCombatPower(p));
-        const capEl = document.getElementById('attrPowerCap');
-        if (capEl) capEl.textContent = fmtNum(Cultivate.getPowerCap(p));
         // 装备
         const slots = { weapon: '武器', armor: '护甲', accessory: '饰品', fabao: '法宝' };
         const equipList = document.getElementById('equipList');
@@ -923,17 +921,16 @@ const UI = {
         const bonusEl = document.getElementById('rbBonus');
         const prevEl = document.getElementById('rbPreview');
         const hintEl = document.getElementById('rbHint');
-        const capEl = document.getElementById('rbPowerCap');
         if (cntEl) cntEl.textContent = n + ' 世';
         if (bonusEl) bonusEl.textContent = `气血 ×${rb.hpMult.toFixed(2)} · 攻击 ×${rb.atkMult.toFixed(2)}`;
-        if (capEl) capEl.textContent = fmtNum(Cultivate.getPowerCap(p));
         if (prevEl) {
             const nx = n + 1;
+            const xiuPct = Math.round(nx * ((GameConfig.rebirth && GameConfig.rebirth.xiuBonusPerRebirth) || 0) * 100);
             prevEl.innerHTML = `<div class="rb-line">下一世（第 ${nx} 世）将得：</div>` +
                 `<div class="rb-grid">` +
                 `<span>气血加成</span><b>×${(1 + nx * c.hp).toFixed(2)}</b>` +
                 `<span>攻击加成</span><b>×${(1 + nx * c.atk).toFixed(2)}</b>` +
-                `<span>战力上限</span><b>${fmtNum(Cultivate.getPowerCap(Object.assign({}, p, { rebirth: nx })))}</b>` +
+                `<span>修炼收益</span><b>+${xiuPct}%</b>` +
                 `</div>`;
         }
         if (hintEl) {
@@ -966,7 +963,7 @@ const UI = {
             const cfg = GameConfig.rebirth;
             const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
             if (have < cfg.herbCost) { this.toast(`需 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}`, 'bad'); return; }
-            this.showConfirm('确认轮回丹轮回？', `将消耗 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}，转世层数 +1，根基永久大进（战力照常重置）。`, doIt);
+            this.showConfirm('确认轮回丹轮回？', `将消耗 ${cfg.herbCost} 株${getMaterial(cfg.herbId).name}，转世层数 +1：气血/攻击永久加成，修炼收益再 +100%（永久）。`, doIt);
         }
     },
 

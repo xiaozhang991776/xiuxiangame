@@ -103,11 +103,6 @@ const Cultivate = {
                 if (typeof UI !== 'undefined') UI.toast('已达最高境界，无法突破！', 'bad');
                 return false;
             }
-            // 战力上限（今生境界天花板）：已达则需先轮回提升上限，方可突破更高境界
-            if (player.realmIdx >= this.getMaxRealm(player)) {
-                if (typeof UI !== 'undefined') UI.toast(`战力已达今生上限（第 ${player.rebirth || 0} 世），转世轮回可提升战力上限，进而突破至更高境界`, 'bad');
-                return false;
-            }
             const realm = getRealm(player.realmIdx);
             const cost = this.getBreakthroughCost(player);
             if (player.xiu < cost) {
@@ -503,17 +498,19 @@ const Cultivate = {
         const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth && GameConfig.rebirth.perLevel)
             ? GameConfig.rebirth.perLevel : { atk: 0, hp: 0 };
         const atk = c.atk || 0, hp = c.hp || 0;
-        // def/ling/xiu/stone 乘区固定为中性值，保证既有调用（修炼速率、灵石获取等）不报错
+        // def/ling/stone 乘区固定为中性值，保证既有调用（灵石获取等）不报错
+        // xiuMult 承载「每世 +100% 修炼收益」，供修炼速率明细(getRateDetail)与存档结算(save.js)共同使用
+        const xiuBonus = (typeof GameConfig !== 'undefined' && GameConfig.rebirth && GameConfig.rebirth.xiuBonusPerRebirth) || 0;
         return {
             atkMult: 1 + n * atk,
             hpMult: 1 + n * hp,
             defMult: 1,
             lingMult: 1,
-            xiuMult: 0,
+            xiuMult: n * xiuBonus,
             stoneMult: 0
         };
     },
-    /* ---------- 轮回相关：境界天花板 / 战力 / 战力上限 ---------- */
+    /* ---------- 轮回相关：境界天花板 / 战力 ---------- */
     // 今生可抵达的最高大境界索引（随轮回层数提升；不低于当前进度，避免旧档被锁死）
     getMaxRealm(player) {
         const n = (player && player.rebirth) || 0;
@@ -534,12 +531,6 @@ const Cultivate = {
         const s = this.calcFinalStats(player);
         player.realmIdx = oi; player.realmLayer = ol;
         return s;
-    },
-    // 战力上限：以「今生境界天花板」为基准估算的战力，随轮回层数提升（天花板越高，上限越高）
-    getPowerCap(player) {
-        const maxR = this.getMaxRealm(player);
-        const st = this.estimateStatsAt(player, maxR, getRealm(maxR).layers);
-        return Math.floor(st.atk + st.def + st.hp * 0.3 + st.ling);
     },
     _addTribBonus(player, b) {
         if (!player.tribulus) player.tribulus = { xiuMult: 0, stoneMult: 0 };
@@ -655,10 +646,10 @@ const Cultivate = {
         this.save(player);
         if (typeof UI !== 'undefined') {
             const rb = this.getRebirthBonus(player);
-            const cap = this.getPowerCap(player);
+            const xiuPct = Math.round((player.rebirth || 0) * ((GameConfig.rebirth && GameConfig.rebirth.xiuBonusPerRebirth) || 0) * 100);
             UI.toast(usedPill
-                ? `转世第 ${player.rebirth} 世！根基大进：气血 ×${rb.hpMult.toFixed(2)} · 攻击 ×${rb.atkMult.toFixed(2)} · 战力上限 ${fmtNum(cap)}`
-                : `已免费轮回至第 ${player.rebirth} 世，重立道基（生命/攻击加成保留，战力上限提升至 ${fmtNum(cap)}）`, 'gold');
+                ? `转世第 ${player.rebirth} 世！根基大进：气血 ×${rb.hpMult.toFixed(2)} · 攻击 ×${rb.atkMult.toFixed(2)} · 修炼收益 +${xiuPct}%`
+                : `已免费轮回至第 ${player.rebirth} 世，重立道基（生命/攻击加成与修炼收益 +${xiuPct}% 永久保留）`, 'gold');
             UI.addLog(usedPill ? `历经${player.rebirth}世轮回，道基愈发浑厚` : `${player.name}散功重修，再踏仙途（第 ${player.rebirth} 世）`, 'evt');
             UI.renderAll();
         }

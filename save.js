@@ -240,7 +240,10 @@ const SaveSystem = {
         if (player.tribulus && player.tribulus.xiuMult) {
             base *= (1 + player.tribulus.xiuMult);
         }
-        // 注：轮回加成现仅作用于 气血/攻击（见 Cultivate.getRebirthBonus），不再加成修炼速率
+        // 轮回加成：每世 +100% 修炼收益（永久），与气血/攻击加成叠加
+        if (GameConfig.rebirth && GameConfig.rebirth.xiuBonusPerRebirth) {
+            base *= (1 + (player.rebirth || 0) * GameConfig.rebirth.xiuBonusPerRebirth);
+        }
         return base;
     },
 
