@@ -153,8 +153,8 @@ const Cultivate = {
                 // 突破成功
                 player.realmIdx++;
                 player.realmLayer = 1;
-                // 大境界突破增寿元（按新境界）
-                player.lifespan = (player.lifespan || 0) + player.realmIdx * 200;
+                // 大境界突破增寿元（按新境界，调大：每突破一大境多给 500×境界序 年寿元）
+                player.lifespan = (player.lifespan || 0) + player.realmIdx * 500;
                 player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
                 // 突破大境界：觉醒天赋点（核心长线成长）
                 if (typeof Talent !== 'undefined') {
