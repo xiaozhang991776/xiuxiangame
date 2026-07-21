@@ -1,10 +1,12 @@
-# OS / 编辑器
+# Electron 构建产物（不进 git / 不部署到网页）
+node_modules/
+dist/
 .DS_Store
-Thumbs.db
-*.swp
-*~
-.idea/
-.vscode/
-
-# 本地临时预览
 *.log
+electron-builder-cache/
+
+# 桌面版不需要的旧副本与脚本
+game/
+game.zip
+push-to-github.bat
+push-to-github.ps1
