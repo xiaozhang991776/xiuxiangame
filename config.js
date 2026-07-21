@@ -381,8 +381,14 @@ function randomName() {
     return s[Math.floor(r() * s.length)] + s[Math.floor(r() * s.length)] + (r() < 0.4 ? x[Math.floor(r() * x.length)] : '');
 }
 
-// 数字格式化（逐级递进：千→万→亿→兆→京→垓→秭）
+// 修为存储硬上限：远低于 JS 的 Infinity(1.8e308)。修为在公式中只做「累加 / 与突破成本比较」，从不被乘到溢出，
+// 因此可放得很宽，使终局(道祖满层)点击修炼也能持续、可见地增长，不再被钳死在 9e15（9007.20兆）。
+const XIU_CAP = 1e30;
+
+// 数字格式化（逐级递进：千→万→亿→兆→京→垓→秭→穰→沟）
 function fmtNum(n) {
+    if (n >= 1e32) return (n / 1e32).toFixed(2) + '沟';
+    if (n >= 1e28) return (n / 1e28).toFixed(2) + '穰';
     if (n >= 1e24) return (n / 1e24).toFixed(2) + '秭';
     if (n >= 1e20) return (n / 1e20).toFixed(2) + '垓';
     if (n >= 1e16) return (n / 1e16).toFixed(2) + '京';

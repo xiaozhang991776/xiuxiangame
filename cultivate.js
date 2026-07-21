@@ -272,9 +272,9 @@ const Cultivate = {
             if (typeof UI !== 'undefined') UI.toast(`寿元不足，仅余${player.lifespan}年`, 'bad');
             return null;
         }
-        // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，直接钳到安全整数防止中间值/显示值爆炸
+        // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 XIU_CAP 防止极端长闭关越界（仍远低于 Infinity）
         const rate = SaveSystem.calcCultivateRate(player);
-        const SAFE = Number.MAX_SAFE_INTEGER;
+        const SAFE = XIU_CAP;
         const xiuGain = Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY), SAFE);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
@@ -287,7 +287,7 @@ const Cultivate = {
             }
             return { xiu: xiuGain, years, dead: true };
         }
-        // 防溢出：修为（及累计修为）严格限制在 JS 安全整数内，避免后期高阶功法/长闭关导致数值爆表（Infinity/NaN→战力超模）
+        // 修为（及累计修为）钳到 XIU_CAP：允许多次闭关/点击持续叠加增长，不再卡死在 9e15
         player.xiu = Math.min((player.xiu || 0) + xiuGain, SAFE);
         player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + xiuGain, SAFE);
         this.save(player);
@@ -504,8 +504,8 @@ const Cultivate = {
         }
         this.tapComboTimer = now;
         const comboMult = 1 + (this.tapCombo - 1) * 0.08; // 最高约 1.88x
-        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，直接钳到安全整数
-        const SAFE = Number.MAX_SAFE_INTEGER;
+        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，钳到 XIU_CAP 允许终局持续增长
+        const SAFE = XIU_CAP;
         const gain = Math.min(Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player))), SAFE);
         player.xiu = Math.min((player.xiu || 0) + gain, SAFE);
         player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + gain, SAFE);

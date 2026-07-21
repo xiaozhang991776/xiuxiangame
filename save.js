@@ -116,12 +116,13 @@ const SaveSystem = {
         }
         try {
             player.lastSave = Date.now();
-            // 防溢出：落盘前把修为/累计修为钳制到 JS 安全整数，避免历史存档里已膨胀的数值被原样写回
-            if (player.xiu != null && (player.xiu > Number.MAX_SAFE_INTEGER || !isFinite(player.xiu))) {
-                player.xiu = Number.MAX_SAFE_INTEGER;
+            // 防溢出：落盘前把修为/累计修为钳制到 XIU_CAP（远低于 Infinity），
+            // 既杜绝历史膨胀值写回，又允许 9e15 之上的终局修为持续保留、不被压回。
+            if (player.xiu != null && (player.xiu > XIU_CAP || !isFinite(player.xiu))) {
+                player.xiu = XIU_CAP;
             }
-            if (player.stats && player.stats.totalXiu != null && (player.stats.totalXiu > Number.MAX_SAFE_INTEGER || !isFinite(player.stats.totalXiu))) {
-                player.stats.totalXiu = Number.MAX_SAFE_INTEGER;
+            if (player.stats && player.stats.totalXiu != null && (player.stats.totalXiu > XIU_CAP || !isFinite(player.stats.totalXiu))) {
+                player.stats.totalXiu = XIU_CAP;
             }
             const data = this._safeStringify(player);
             // 序列化失败：绝不写 "null" 覆盖旧档（否则下次读档会清零全部进度）
@@ -271,7 +272,7 @@ const SaveSystem = {
     /* ---------- 应用离线收益 ---------- */
     applyOfflineReward(player) {
         const reward = this.calcOfflineReward(player);
-        const SAFE = Number.MAX_SAFE_INTEGER;
+        const SAFE = XIU_CAP;
         if (reward.xiu > 0) {
             player.xiu = Math.min((player.xiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
             player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
