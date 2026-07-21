@@ -1,0 +1,1065 @@
+/* ============================================
+   仙途·轮回诀 — UI 渲染层
+   各面板渲染 · 弹窗系统 · 动效 · 提示
+   ============================================ */
+
+const UI = {
+    selectedInvItem: null,
+    invCategory: 'equipment',
+    shopTab: 'buy',
+    shopCategory: 'all',
+    shopFilter: '',
+    sellCategory: 'pill',
+
+    /* ---------- 显示Toast提示 ---------- */
+    toast(msg, type = '') {
+        const c = document.getElementById('toast-container');
+        if (!c) return;
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    },
+
+    /* ---------- 添加日志 ---------- */
+    addLog(msg, type = '') {
+        const list = document.getElementById('logList');
+        if (!list) return;
+        const item = document.createElement('div');
+        item.className = 'log-item ' + (type ? 'log-' + type : '');
+        item.textContent = msg;
+        list.insertBefore(item, list.firstChild);
+        // 限制日志数量
+        while (list.children.length > 30) list.removeChild(list.lastChild);
+    },
+
+    /* ---------- 显示通用弹窗 ---------- */
+    showModal({ title, body, footer }) {
+        document.getElementById('modalTitle').textContent = title || '提示';
+        document.getElementById('modalBody').innerHTML = body || '';
+        const f = document.getElementById('modalFooter');
+        f.innerHTML = '';
+        if (footer && footer.length) {
+            footer.forEach(btn => {
+                const b = document.createElement('button');
+                b.className = 'modal-btn ' + (btn.type || '');
+                b.textContent = btn.text;
+                if (btn.disabled) {
+                    b.disabled = true;
+                    b.classList.add('disabled');
+                } else {
+                    b.onclick = btn.action;
+                }
+                f.appendChild(b);
+            });
+        }
+        document.getElementById('modal-overlay').classList.remove('hidden');
+    },
+
+    hideModal() {
+        document.getElementById('modal-overlay').classList.add('hidden');
+    },
+
+    /* ---------- 显示事件弹窗 ---------- */
+    showEvent(evt, eventId) {
+        document.getElementById('eventTitle').textContent = evt.title;
+        document.getElementById('eventIcon').textContent = evt.icon || '★';
+        document.getElementById('eventDesc').textContent = evt.desc;
+        const choices = document.getElementById('eventChoices');
+        choices.innerHTML = '';
+        evt.choices.forEach((c, i) => {
+            const b = document.createElement('button');
+            b.className = 'event-choice';
+            b.textContent = c.text;
+            b.onclick = () => Explore.handleChoice(eventId, i);
+            choices.appendChild(b);
+        });
+        document.getElementById('event-screen').classList.remove('hidden');
+    },
+
+    hideEvent() {
+        document.getElementById('event-screen').classList.add('hidden');
+    },
+
+    /* ---------- 突破特效 ---------- */
+    showBreakthroughFX(text) {
+        const fx = document.createElement('div');
+        fx.className = 'breakthrough-fx';
+        fx.innerHTML = `<div class="bt-glow"></div><div class="bt-text">${text}</div>`;
+        document.body.appendChild(fx);
+        setTimeout(() => fx.remove(), 2000);
+    },
+
+    /* ---------- 手动修炼飘字反馈 ---------- */
+    showTapGain(gain, combo) {
+        const btn = document.getElementById('cultivateTap');
+        if (!btn) return;
+        // 按钮按压反馈
+        btn.classList.remove('tap-pulse');
+        void btn.offsetWidth; // 强制重绘以重启动画
+        btn.classList.add('tap-pulse');
+        // 飘字
+        const rect = btn.getBoundingClientRect();
+        const float = document.createElement('div');
+        float.className = 'tap-gain' + (combo >= 5 ? ' combo-hot' : '');
+        let txt = '修为 +' + fmtNum(gain);
+        if (combo >= 2) txt += ` <span class="tap-combo">连击×${combo}</span>`;
+        float.innerHTML = txt;
+        float.style.left = (rect.left + rect.width / 2) + 'px';
+        float.style.top = (rect.top - 6) + 'px';
+        document.body.appendChild(float);
+        setTimeout(() => float.remove(), 900);
+    },
+
+    /* ---------- 更新顶部资源栏 ---------- */
+    updateResourceBar() {
+        const p = Game.player;
+        if (!p) return;
+        document.getElementById('topName').textContent = p.name;
+        document.getElementById('topRealm').textContent = Cultivate.getRealmName(p);
+        // 段位显示（当前层 / 本境界总层）
+        const layerNow = p.realmLayer;
+        const layerMax = getRealm(p.realmIdx).layers;
+        const topDuan = document.getElementById('topDuan');
+        if (topDuan) topDuan.textContent = `段位 ${layerNow} / ${layerMax}`;
+        const duanVal = document.getElementById('duanValue');
+        if (duanVal) duanVal.textContent = `${layerNow} / ${layerMax}`;
+        const duanFill = document.getElementById('duanBarFill');
+        if (duanFill) duanFill.style.width = Math.min(100, (layerNow / layerMax) * 100) + '%';
+        document.getElementById('topAvatar').textContent = ['道','仙','魔','佛'][p.avatar];
+        document.getElementById('topXiu').textContent = fmtNum(p.xiu);
+        const rate = SaveSystem.calcCultivateRate(p);
+        document.getElementById('topRate').textContent = '+' + rate.toFixed(1) + '/s';
+        document.getElementById('topStone').textContent = fmtNum(p.stone);
+        const stats = Cultivate.calcFinalStats(p);
+        document.getElementById('topLing').textContent = fmtNum(stats.ling);
+        const lifeEl = document.getElementById('topLife');
+        if (lifeEl) lifeEl.textContent = fmtNum(p.lifespan);
+    },
+
+    /* ---------- 更新修为进度条 ---------- */
+    updateCultivationBar() {
+        const p = Game.player;
+        if (!p) return;
+        const cost = Cultivate.getBreakthroughCost(p);
+        const pct = Math.min(100, (p.xiu / cost) * 100);
+        document.getElementById('xiuBarFill').style.width = pct + '%';
+        document.getElementById('xiuBarText').textContent = `${fmtNum(p.xiu)} / ${fmtNum(cost)}`;
+        const btn = document.getElementById('breakBtn');
+        const stoneCost = Cultivate.getBreakthroughStoneCost(p);
+        if (p.xiu >= cost && p.stone >= stoneCost) {
+            btn.classList.add('ready');
+        } else {
+            btn.classList.remove('ready');
+        }
+        btn.title = `突破需 ${fmtNum(cost)} 修为 · ${fmtNum(stoneCost)} 灵石`;
+    },
+
+    /* ---------- 渲染修炼面板 ---------- */
+    renderCultivate() {
+        const p = Game.player;
+        if (!p) return;
+        const detail = Cultivate.getRateDetail(p);
+        document.getElementById('baseRate').textContent = detail.base.toFixed(1) + '/s';
+        document.getElementById('realmBonus').textContent = '+' + (detail.realmBonus * 100).toFixed(0) + '%';
+        document.getElementById('gongfaBonus').textContent = '+' + (detail.gfBonus * 100).toFixed(0) + '%';
+        document.getElementById('equipBonus').textContent = '+' + (detail.equipBonus * 100).toFixed(0) + '%';
+        // 功法显示
+        const gf = getGongfa(p.gongfa);
+        const gfDisplay = document.getElementById('gongfaDisplay');
+        if (gf) {
+            gfDisplay.innerHTML = `
+                <div class="gongfa-card">
+                    <div class="gongfa-name">${gf.name}</div>
+                    <div class="gongfa-desc">${gf.desc}</div>
+                    <div class="gongfa-lv">修炼效率+${(gf.xiuBonus * 100).toFixed(0)}%</div>
+                </div>`;
+        }
+        document.getElementById('cultivateToggle').textContent = Game.cultivating ? '暂停修炼' : '开始修炼';
+        document.getElementById('cultivateStatus').textContent = Game.cultivating ? '气机流转，修为缓缓增长' : '修炼已暂停';
+        // 悟性显示
+        const wxLv = p.wuxingLevel || 0;
+        const wxLvEl = document.getElementById('wuxingLevel');
+        if (wxLvEl) wxLvEl.textContent = wxLv + ' 重';
+        const wxTxt = document.getElementById('wuxingBonusText');
+        if (wxTxt) wxTxt.textContent = `点击+${Math.round((Cultivate.wuxingTapMult(p) - 1) * 100)}% · 速率+${Math.round((Cultivate.wuxingRateMult(p) - 1) * 100)}%`;
+        // 闭关提示（寿元）
+        const seEl = document.getElementById('seclusionHint');
+        if (seEl) seEl.textContent = `寿元：${fmtNum(p.lifespan)}年 · 闭关可大幅增涨修为（每闭关一年折损一年寿元）`;
+    },
+
+    /* ---------- 渲染敌人列表 ---------- */
+    renderEnemyList() {
+        const p = Game.player;
+        const list = document.getElementById('enemyList');
+        list.innerHTML = '';
+        GameConfig.enemies.forEach(e => {
+            const locked = p.realmIdx < e.realmIdx || (p.realmIdx === e.realmIdx && p.realmLayer < e.realmLayer);
+            const card = document.createElement('div');
+            card.className = 'enemy-card' + (locked ? ' locked' : '');
+            card.innerHTML = `
+                <div class="enemy-name">${e.name} ${locked ? '<span class="enemy-lock-tip">🔒</span>' : ''}</div>
+                <div class="enemy-realm">${getRealm(e.realmIdx).name}${cnNum(e.realmLayer)}层 · ${GameConfig.elements[e.elem].name}属性</div>
+                <div class="enemy-stats">
+                    气血：${fmtNum(e.hp)}<br>
+                    攻击：${fmtNum(e.atk)} · 防御：${fmtNum(e.def)}<br>
+                    速度：${e.spd}
+                </div>
+                <div class="enemy-reward">
+                    修为+${fmtNum(e.xiuReward)} · 灵石+${fmtNum(e.stoneReward)}
+                </div>
+            `;
+            if (!locked) {
+                card.onclick = () => Combat.startBattle(p, e.id);
+            }
+            list.appendChild(card);
+        });
+    },
+
+    /* ---------- 渲染场景列表 ---------- */
+    renderSceneList() {
+        const p = Game.player;
+        const list = document.getElementById('sceneList');
+        list.innerHTML = '';
+        GameConfig.scenes.forEach(s => {
+            const locked = p.realmIdx < s.realmReq;
+            const card = document.createElement('div');
+            card.className = 'scene-card' + (locked ? ' locked' : '');
+            card.style.setProperty('--scene-color', s.color);
+            card.innerHTML = `
+                <div class="scene-icon">${s.icon}</div>
+                <div class="scene-name">${s.name}</div>
+                <div class="scene-desc">${s.desc}</div>
+                ${locked ? `<div class="scene-req">需${getRealm(s.realmReq).name}境界</div>` : ''}
+            `;
+            if (!locked) {
+                card.onclick = () => Explore.enterScene(s.id);
+            }
+            list.appendChild(card);
+        });
+    },
+
+    /* ---------- 渲染背包 ---------- */
+    renderInventory() {
+        const p = Game.player;
+        const grid = document.getElementById('invGrid');
+        grid.innerHTML = '';
+        const list = Inventory.getList(p, this.invCategory);
+        if (list.length === 0) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#9a8e7a;padding:40px">乾坤袋空空如也</p>';
+            return;
+        }
+        list.forEach(item => {
+            const slot = document.createElement('div');
+            const q = item.quality !== undefined ? getQuality(item.quality) : null;
+            slot.className = 'inv-slot' + (q ? ' q-' + q.key : '') + (this.selectedInvItem === (item.uid || item.id) ? ' selected' : '');
+            let count = item.count || 1;
+            let name = item.name;
+            let icon = item.icon;
+            // 装备实例显示强化等级
+            if (item.isInstance && item.enhance > 0) {
+                name = `${item.name}+${item.enhance}`;
+            }
+            slot.innerHTML = `
+                ${q ? `<div class="inv-slot-quality"></div>` : ''}
+                <div class="inv-slot-icon">${icon}</div>
+                <div class="inv-slot-name">${name}</div>
+                ${count > 1 ? `<div class="inv-slot-count">${count}</div>` : ''}
+            `;
+            slot.onclick = () => this.selectInventoryItem(item);
+            grid.appendChild(slot);
+        });
+    },
+
+    /* ---------- 选中物品显示详情 ---------- */
+    selectInventoryItem(item) {
+        this.selectedInvItem = item.uid || item.id;
+        const detail = document.getElementById('invDetail');
+        const q = item.quality !== undefined ? getQuality(item.quality) : null;
+        let attrsHtml = '';
+        let actionsHtml = '';
+
+        if (this.invCategory === 'equipment' || this.invCategory === 'fabao') {
+            // 装备
+            const enhance = item.enhance || 0;
+            const enhanceBonus = 1 + enhance * 0.15;
+            attrsHtml = `
+                <div>品质：<span style="color:${q.color}">${q.name}</span></div>
+                <div>攻击：+${Math.floor((item.atk || 0) * enhanceBonus)}</div>
+                <div>防御：+${Math.floor((item.def || 0) * enhanceBonus)}</div>
+                <div>气血：+${Math.floor((item.hp || 0) * enhanceBonus)}</div>
+                <div>灵力：+${Math.floor((item.ling || 0) * enhanceBonus)}</div>
+                ${item.crit ? `<div>暴击：+${(item.crit * 100).toFixed(0)}%</div>` : ''}
+                ${enhance > 0 ? `<div style="color:#d4af37">强化+${enhance}</div>` : ''}
+                <div class="inv-detail-intro">📜 介绍：${item.desc}</div>
+            `;
+            const isEquipped = Object.values(Game.player.equipped).some(e => e && e.uid === item.uid);
+            if (isEquipped) {
+                actionsHtml = `
+                    <button class="inv-action-btn" onclick="UI.enhanceItem('${item.uid}')">强化</button>
+                    <button class="inv-action-btn" onclick="UI.unequipItem('${item.uid}')">卸下</button>
+                `;
+            } else {
+                actionsHtml = `
+                    <button class="inv-action-btn" onclick="UI.equipItem('${item.uid}')">穿戴</button>
+                    <button class="inv-action-btn" onclick="UI.enhanceItem('${item.uid}')">强化</button>
+                    <button class="inv-action-btn danger" onclick="UI.decomposeItem('${item.uid}')">分解</button>
+                    <button class="inv-action-btn danger" onclick="UI.sellEquip('${item.uid}')">出售</button>
+                `;
+            }
+        } else if (this.invCategory === 'pill') {
+            attrsHtml = `<div>功效：${item.desc}</div><div>数量：${item.count}</div>`;
+            actionsHtml = `
+                <button class="inv-action-btn" onclick="UI.usePill('${item.id}')">使用</button>
+                <button class="inv-action-btn danger" onclick="UI.sellItem('pill','${item.id}',1)">出售</button>
+            `;
+        } else if (this.invCategory === 'material') {
+            attrsHtml = `<div class="inv-detail-intro">📜 介绍：${item.desc}</div><div>数量：${item.count}</div>`;
+            actionsHtml = `<button class="inv-action-btn danger" onclick="UI.sellItem('material','${item.id}',1)">出售</button>`;
+        } else if (this.invCategory === 'gongfa') {
+            const isEquipped = Game.player.gongfa === item.id;
+            attrsHtml = `<div>品质：<span style="color:${q.color}">${q.name}</span></div><div>修炼效率+${(item.xiuBonus * 100).toFixed(0)}%</div><div class="inv-detail-intro">📜 介绍：${item.desc}</div>`;
+            actionsHtml = isEquipped
+                ? `<span style="color:#7dd3c0">已装备</span>`
+                : `<button class="inv-action-btn" onclick="UI.equipGongfa('${item.id}')">装备</button>`;
+        }
+        detail.innerHTML = `
+            <div class="inv-detail-name" style="color:${q ? q.color : '#d4af37'}">${item.name}${item.enhance > 0 ? '+' + item.enhance : ''}</div>
+            <div class="inv-detail-desc">${item.desc || ''}</div>
+            <div class="inv-detail-attrs">${attrsHtml}</div>
+            <div class="inv-detail-actions">${actionsHtml}</div>
+        `;
+        this.renderInventory();
+    },
+
+    equipItem(uid) { Inventory.equip(Game.player, uid); this.renderAll(); },
+    unequipItem(uid) {
+        // 查找装备所在槽位
+        const p = Game.player;
+        for (const slot in p.equipped) {
+            if (p.equipped[slot] && p.equipped[slot].uid === uid) {
+                Inventory.unequip(p, slot);
+                break;
+            }
+        }
+        this.selectedInvItem = null;
+        this.renderAll();
+    },
+    enhanceItem(uid) {
+        const ok = Inventory.enhance(Game.player, uid);
+        if (ok) {
+            // 强化成功：立即刷新灵石顶栏与背包/详情，确保数值即时更新
+            this.updateResourceBar();
+            this.renderInventory();
+            const it = Inventory.getList(Game.player, this.invCategory).find(i => (i.uid || i.id) === uid);
+            if (it) this.selectInventoryItem(it);
+        }
+        this.renderAll();
+    },
+    decomposeItem(uid) {
+        this.showModal({
+            title: '分解确认',
+            body: '<p>确定要分解此装备吗？将获得部分灵石与材料。</p>',
+            footer: [
+                { text: '确认分解', type: 'danger', action: () => { Inventory.decompose(Game.player, uid); this.selectedInvItem = null; this.hideModal(); this.renderAll(); }},
+                { text: '取消', action: () => this.hideModal() }
+            ]
+        });
+    },
+    sellEquip(uid) {
+        this.showModal({
+            title: '出售确认',
+            body: '<p>确定要出售此装备吗？</p>',
+            footer: [
+                { text: '确认出售', type: 'danger', action: () => { Inventory.sellEquipment(Game.player, uid); this.selectedInvItem = null; this.hideModal(); this.renderAll(); }},
+                { text: '取消', action: () => this.hideModal() }
+            ]
+        });
+    },
+    usePill(id) { Inventory.usePill(Game.player, id); this.renderAll(); },
+    sellItem(cat, id, count) { Inventory.sellItem(Game.player, cat, id, count); this.renderAll(); },
+    equipGongfa(id) { Inventory.equipGongfa(Game.player, id); this.renderAll(); },
+
+    /* ---------- 渲染技能列表 ---------- */
+    renderSkillList() {
+        const p = Game.player;
+        const list = document.getElementById('skillList');
+        list.innerHTML = '';
+        GameConfig.skills.forEach(s => {
+            const learned = !!p.skills[s.id];
+            const lvl = p.skills[s.id] || 0;
+            const realmOk = p.realmIdx >= s.realmReq;
+            const xiuOk = p.xiu >= s.learnCost;
+            const canLearn = realmOk && xiuOk;
+            // 未解锁时给出明确门槛提示，避免误以为只是修为不够
+            let lockTip = '';
+            if (!learned && !realmOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">需${getRealm(s.realmReq).name}境界方可修习</div>`;
+            else if (!learned && !xiuOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">修为不足，尚缺${fmtNum(s.learnCost - p.xiu)}</div>`;
+            const card = document.createElement('div');
+            card.className = 'skill-card' + (learned ? '' : ' locked');
+            const elemHtml = s.elem ? `<span class="skill-elem" data-elem="${s.elem}">${GameConfig.elements[s.elem].name}</span>` : '';
+            const upCost = Math.floor(s.learnCost * Math.pow(s.upCostMult || 1.2, lvl));
+            card.innerHTML = `
+                <div class="skill-header">
+                    <span class="skill-name">${s.name}</span>
+                    <span class="skill-lv">${learned ? 'Lv.' + lvl : '未学习'}</span>
+                </div>
+                <div class="skill-desc">${elemHtml}${s.desc}</div>
+                <div class="skill-cost">灵力消耗：${s.cost} ${s.cd ? '· 冷却：' + s.cd + '回合' : ''}</div>
+                ${learned
+                    ? `<button class="skill-upgrade" ${lvl >= 100 ? 'disabled' : ''} onclick="UI.upgradeSkill('${s.id}')">升级 (消耗${fmtNum(upCost)}修为)</button>`
+                    : `<button class="skill-upgrade" ${canLearn ? '' : 'disabled'} onclick="UI.learnSkill('${s.id}')">${realmOk ? '学习 (消耗' + fmtNum(s.learnCost) + '修为)' : '需' + getRealm(s.realmReq).name + '境界'}</button>`
+                }
+                ${lockTip}
+            `;
+            list.appendChild(card);
+        });
+    },
+
+    learnSkill(id) { Inventory.learnSkill(Game.player, id); this.renderAll(); },
+    upgradeSkill(id) { Inventory.upgradeSkill(Game.player, id); this.renderAll(); },
+
+    /* ---------- 渲染商店 ---------- */
+    renderShop() {
+        const p = Game.player;
+        const grid = document.getElementById('shopGrid');
+        const filters = document.getElementById('shopFilters');
+        if (filters) filters.style.display = this.shopTab === 'buy' ? '' : 'none';
+        grid.innerHTML = '';
+        if (this.shopTab === 'buy') {
+            let list = Shop.getBuyList().filter(item => {
+                if (this.shopCategory !== 'all' && item.category !== this.shopCategory) return false;
+                if (!this.shopFilter) return true;
+                const kw = this.shopFilter.toLowerCase();
+                const name = (item.name || '').toLowerCase();
+                const desc = (item.desc || '').toLowerCase();
+                return name.includes(kw) || desc.includes(kw);
+            });
+            if (list.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#9a8e7a;padding:40px">未找到匹配物品</p>';
+                return;
+            }
+            list.forEach(item => {
+                const q = item.quality !== undefined ? getQuality(item.quality) : null;
+                const price = item.price;
+                const canBuy = p.stone >= price;
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-card-header">
+                        <span class="shop-item-name" style="color:${q ? q.color : '#d4af37'}">${item.icon} ${item.name}</span>
+                        ${q ? `<span style="font-size:11px;color:${q.color}">${q.name}</span>` : ''}
+                    </div>
+                    <div class="shop-item-desc">${item.desc || ''}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span class="shop-price">${fmtNum(price)}灵石</span>
+                        <button class="shop-buy-btn" ${canBuy ? '' : 'disabled'} onclick="UI.buyItem('${item.type}','${item.id}')">购买</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } else {
+            // 出售
+            const list = Shop.getSellList(p, this.sellCategory);
+            if (list.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#9a8e7a;padding:40px">无可出售物品</p>';
+                return;
+            }
+            // 出售分类切换
+            const tabs = document.createElement('div');
+            tabs.style.cssText = 'grid-column:1/-1;display:flex;gap:6px;margin-bottom:8px';
+            ['pill', 'material', 'equipment'].forEach(c => {
+                const t = document.createElement('button');
+                t.className = 'inv-tab' + (this.sellCategory === c ? ' active' : '');
+                t.textContent = c === 'pill' ? '丹药' : (c === 'material' ? '材料' : '装备');
+                t.onclick = () => { this.sellCategory = c; this.renderShop(); };
+                tabs.appendChild(t);
+            });
+            grid.appendChild(tabs);
+            list.forEach(item => {
+                const q = item.quality !== undefined ? getQuality(item.quality) : null;
+                let price = 0;
+                if (item.isInstance) {
+                    price = Math.floor(item.price * (q ? q.sellMult : 1) * 0.5) + (item.enhance || 0) * Math.floor(item.price * 0.1);
+                } else {
+                    price = Math.floor(item.price * 0.5) * (item.count || 1);
+                }
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-card-header">
+                        <span class="shop-item-name" style="color:${q ? q.color : '#d4af37'}">${item.icon} ${item.name}${item.enhance > 0 ? '+' + item.enhance : ''}</span>
+                        ${item.count > 1 ? `<span style="font-size:11px;color:#9a8e7a">×${item.count}</span>` : ''}
+                    </div>
+                    <div class="shop-item-desc">${item.desc || ''}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span class="shop-price">${fmtNum(price)}灵石</span>
+                        <button class="shop-sell-btn" onclick="UI.sellShopItem('${item.uid || item.id}')">出售</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+    },
+
+    buyItem(type, id) { Shop.buy(Game.player, type, id); this.renderAll(); },
+    sellShopItem(idOrUid) {
+        const p = Game.player;
+        if (this.sellCategory === 'equipment') {
+            Shop.sellEquipment(p, idOrUid);
+        } else {
+            Shop.sell(p, this.sellCategory, idOrUid, 1);
+        }
+    },
+
+    /* ---------- 渲染任务 ---------- */
+    renderQuests() {
+        const p = Game.player;
+        const list = document.getElementById('questList');
+        list.innerHTML = '';
+        const quests = Quests.getList(p);
+        quests.forEach(q => {
+            const card = document.createElement('div');
+            card.className = 'quest-card' + (q.claimed ? ' done' : '');
+            const pct = Math.min(100, (q.progress / q.target) * 100);
+            let rewardStr = '';
+            if (q.reward.stone) rewardStr += `${fmtNum(q.reward.stone)}灵石 `;
+            if (q.reward.xiu) rewardStr += `${fmtNum(q.reward.xiu)}修为 `;
+            if (q.reward.items) q.reward.items.forEach(it => {
+                const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
+                rewardStr += `${t.name}×${it.count} `;
+            });
+            card.innerHTML = `
+                <div class="quest-header">
+                    <span class="quest-name">${q.name}</span>
+                    <span class="quest-reward">奖励：${rewardStr}</span>
+                </div>
+                <div class="quest-desc">${q.desc}</div>
+                <div class="quest-progress">进度：${fmtNum(q.progress)} / ${fmtNum(q.target)} (${pct.toFixed(0)}%)</div>
+                ${q.claimed ? '<button class="quest-claim" disabled>已领取</button>'
+                  : (q.done ? '<button class="quest-claim" onclick="UI.claimQuest(\'' + q.id + '\')">领取奖励</button>'
+                            : '<button class="quest-claim" disabled>前往</button>')}
+            `;
+            list.appendChild(card);
+        });
+    },
+
+    claimQuest(id) { Quests.claim(Game.player, id); this.renderAll(); },
+
+    /* ---------- 渲染属性面板 ---------- */
+    renderStatus() {
+        const p = Game.player;
+        if (!p) return;
+        const stats = Cultivate.calcFinalStats(p);
+        document.getElementById('attrHp').textContent = fmtNum(stats.hp);
+        document.getElementById('attrLing').textContent = fmtNum(stats.ling);
+        document.getElementById('attrAtk').textContent = stats.atk;
+        document.getElementById('attrDef').textContent = stats.def;
+        document.getElementById('attrSpd').textContent = stats.spd;
+        document.getElementById('attrCrit').textContent = (stats.crit * 100).toFixed(0) + '%';
+        document.getElementById('attrElem').textContent = GameConfig.elements[p.element].name;
+        // 装备
+        const slots = { weapon: '武器', armor: '护甲', accessory: '饰品', fabao: '法宝' };
+        const equipList = document.getElementById('equipList');
+        equipList.innerHTML = '';
+        for (const slot in slots) {
+            const eq = p.equipped[slot];
+            const div = document.createElement('div');
+            div.className = 'equip-slot';
+            if (eq) {
+                const tpl = getEquipTemplate(eq.baseId);
+                const q = getQuality(tpl.quality);
+                div.innerHTML = `<span>${slots[slot]}</span><span class="equip-name" style="color:${q.color}">${tpl.name}${eq.enhance > 0 ? '+' + eq.enhance : ''}</span>`;
+                div.onclick = () => this.unequipItem(eq.uid);
+            } else {
+                div.innerHTML = `<span>${slots[slot]}</span><span class="equip-name empty">无</span>`;
+            }
+            equipList.appendChild(div);
+        }
+        // 灵宠
+        const petDisplay = document.getElementById('petDisplay');
+        if (p.pet) {
+            const pet = getPet(p.pet);
+            petDisplay.innerHTML = `
+                <div class="pet-card">
+                    <div class="pet-icon">${pet.icon}</div>
+                    <div class="pet-info">
+                        <div class="pet-name">${pet.name}</div>
+                        <div class="pet-stat">攻${pet.atk} 防${pet.def} 血${pet.hp}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            petDisplay.innerHTML = '<p class="pet-empty">尚未收服灵宠</p>';
+        }
+    },
+
+    /* ---------- 显示战斗界面 ---------- */
+    showBattle(state) {
+        document.getElementById('battle-screen').classList.remove('hidden');
+        this.updateBattle(state);
+        // 渲染技能按钮
+        const skillsDiv = document.getElementById('battleSkills');
+        skillsDiv.innerHTML = '';
+        const p = Game.player;
+        Object.keys(p.skills).forEach(sid => {
+            const skill = getSkill(sid);
+            if (!skill) return;
+            const btn = document.createElement('button');
+            btn.className = 'battle-skill-btn';
+            btn.innerHTML = `
+                <span class="bs-name">${skill.name}</span>
+                <span class="bs-cost">${skill.cost > 0 ? skill.cost + '灵' : ''}</span>
+            `;
+            btn.onclick = () => Combat.useSkill(sid);
+            skillsDiv.appendChild(btn);
+        });
+        // 法宝按钮
+        if (state.player.fabao) {
+            const fskill = GameConfig.fabaoSkills[state.player.fabao.skill];
+            if (fskill) {
+                const btn = document.createElement('button');
+                btn.className = 'battle-skill-btn';
+                btn.innerHTML = `<span class="bs-name">法宝·${fskill.name}</span><span class="bs-cost">${fskill.cost}灵</span>`;
+                btn.onclick = () => Combat.useFabao();
+                skillsDiv.appendChild(btn);
+            }
+        }
+    },
+
+    /* ---------- 更新战斗界面 ---------- */
+    updateBattle(state) {
+        document.getElementById('enemyName').textContent = state.enemy.name;
+        document.getElementById('enemyAvatar').textContent = state.enemy.avatar;
+        const ePct = state.enemy.maxHp > 0 ? Math.max(0, Math.min(100, (state.enemy.hp / state.enemy.maxHp) * 100)) : 100;
+        document.getElementById('enemyHpFill').style.width = ePct + '%';
+        document.getElementById('enemyHpText').textContent = `${Math.max(0, Math.floor(state.enemy.hp))}/${state.enemy.maxHp}`;
+        document.getElementById('playerBattleName').textContent = state.player.name;
+        document.getElementById('playerBattleAvatar').textContent = state.player.avatar;
+        const pPct = state.player.maxHp > 0 ? Math.max(0, Math.min(100, (state.player.hp / state.player.maxHp) * 100)) : 100;
+        document.getElementById('playerHpFill').style.width = pPct + '%';
+        document.getElementById('playerHpText').textContent = `${Math.max(0, Math.floor(state.player.hp))}/${state.player.maxHp}`;
+        // 更新技能按钮状态 + 回合指示
+        const myTurn = state.playerTurn !== false;
+        const buttons = document.querySelectorAll('.battle-skill-btn');
+        buttons.forEach(btn => {
+            btn.disabled = !myTurn;
+            btn.classList.toggle('disabled', !myTurn);
+        });
+        const atkBtn = document.getElementById('battleAttack');
+        if (atkBtn) {
+            atkBtn.disabled = !myTurn;
+            atkBtn.classList.toggle('disabled', !myTurn);
+        }
+        const fleeBtn = document.getElementById('battleFlee');
+        if (fleeBtn) {
+            fleeBtn.disabled = !myTurn;
+            fleeBtn.classList.toggle('disabled', !myTurn);
+        }
+        const turnEl = document.getElementById('battleTurn');
+        if (turnEl) {
+            turnEl.textContent = myTurn ? '⚔ 你的回合' : '☯ 敌方回合…';
+            turnEl.className = 'battle-turn ' + (myTurn ? 'my' : 'enemy');
+        }
+        // 五行提示
+        const elemMult = getElementMultiplier(state.player.elem, state.enemy.elem);
+        const hint = document.getElementById('battleElemHint');
+        if (elemMult > 1.3) hint.textContent = `你的${GameConfig.elements[state.player.elem].name}属性克制对方${GameConfig.elements[state.enemy.elem].name}属性，伤害+50%`;
+        else if (elemMult < 1) hint.textContent = `对方${GameConfig.elements[state.enemy.elem].name}属性克制你的${GameConfig.elements[state.player.elem].name}属性，小心！`;
+        else hint.textContent = '';
+    },
+
+    updateBattleLog(log) {
+        const div = document.getElementById('battleLog');
+        div.innerHTML = log.slice(-20).map(l => `<div class="battle-log-line ${l.type}">${l.msg}</div>`).join('');
+        div.scrollTop = div.scrollHeight;
+    },
+
+    hideBattle() {
+        document.getElementById('battle-screen').classList.add('hidden');
+    },
+
+    battleAnim(side) {
+        const av = document.getElementById(side === 'player' ? 'playerBattleAvatar' : 'enemyAvatar');
+        av.classList.add('attacking');
+        setTimeout(() => av.classList.remove('attacking'), 500);
+    },
+
+    showDamageFloat(target, value, type) {
+        const av = document.getElementById(target === 'player' ? 'playerBattleAvatar' : 'enemyAvatar');
+        if (!av) return;
+        const rect = av.getBoundingClientRect();
+        const float = document.createElement('div');
+        float.className = 'dmg-float ' + type;
+        float.textContent = type === 'heal' ? '+' + value : '-' + value;
+        float.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+        float.style.top = (rect.top + rect.height / 2) + 'px';
+        document.body.appendChild(float);
+        setTimeout(() => float.remove(), 1000);
+    },
+
+    /* ---------- 渲染所有 ---------- */
+    renderAll() {
+        if (!Game.player) return;
+        // 每个子渲染独立兜底，单个面板异常（如旧存档缺字段）不再中断整体刷新
+        const safe = (fn) => { try { fn.call(this); } catch (e) { if (typeof console !== 'undefined') console.warn('[render]', e && e.message); } };
+        safe(this.updateResourceBar);
+        safe(this.updateCultivationBar);
+        safe(this.renderCultivate);
+        safe(this.renderEnemyList);
+        safe(this.renderSceneList);
+        safe(this.renderInventory);
+        safe(this.renderSkillList);
+        safe(this.renderShop);
+        safe(this.renderQuests);
+        safe(this.renderStatus);
+    },
+
+    /* ---------- 切换面板 ---------- */
+    switchPanel(name) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + name).classList.add('active');
+        Game.currentPanel = name;
+        // 切换到面板时刷新对应内容
+        if (name === 'cultivate') this.renderCultivate();
+        else if (name === 'combat') this.renderEnemyList();
+        else if (name === 'explore') this.renderSceneList();
+        else if (name === 'inventory') this.renderInventory();
+        else if (name === 'skill') this.renderSkillList();
+        else if (name === 'shop') this.renderShop();
+        else if (name === 'quest') this.renderQuests();
+    },
+
+    /* ---------- 新手教程 ---------- */
+    TUTORIAL_STEPS: [
+        { title: '踏入仙途', body: '道友初临，且听我徐徐道来这方世界的门道。点击「下一步」即可层层展开，随时可点右上 📖 重看。', panel: 'cultivate' },
+        { title: '静心修炼', body: '<b>修为</b>乃修行根本。点「修炼（点击聚气）」可手动攒修为，平日亦会缓缓自增——顶部「气」即为修为。', panel: 'cultivate', target: '#cultivateTap' },
+        { title: '闭关 · 游历 · 兑换', body: '<b>闭关潜修</b>换大量修为；<b>游历天下</b>寻灵石、材料与丹药；<b>兑换灵石</b>以修为换灵石。三者皆耗<b>寿元</b>。', panel: 'cultivate', target: '#seclusionHint' },
+        { title: '突破境界', body: '修为攒满，便点「<b>突破</b>」精进境界、增寿元、强根基。境界越高，斗法历练所获愈丰。', panel: 'cultivate', target: '#breakBtn' },
+        { title: '寿元将尽', body: '留意右上「<b>寿元</b>」：每过真实<b>一分钟减一</b>，闭关游历亦折寿元。寿元耗尽便<b>羽化归虚</b>，故当抓紧修行。', panel: 'cultivate', target: '#topLife' },
+        { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得修为、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
+        { title: '三界历练', body: '「<b>历练</b>」可访名山、探秘境、遇奇遇，收获随机机缘，妙不可言。', panel: 'explore', target: '#panel-explore' },
+        { title: '乾坤 · 神通 · 坊市', body: '「<b>乾坤袋</b>」藏装备丹药；「<b>神通</b>」可修习法术；「<b>坊市</b>」买卖物资、搜罗法宝。', panel: 'shop', target: '#panel-shop' },
+        { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
+    ],
+    tutorialIndex: 0,
+
+    startTutorial() {
+        const p = Game.player;
+        if (!p) return;
+        this.tutorialIndex = 0;
+        const ov = document.getElementById('tutorial-overlay');
+        if (ov) ov.classList.remove('hidden');
+        this.renderTutorialStep();
+    },
+
+    renderTutorialStep() {
+        const p = Game.player;
+        if (!p) return;
+        const steps = this.TUTORIAL_STEPS;
+        const i = this.tutorialIndex;
+        const step = steps[i];
+        if (step.panel && Game.currentPanel !== step.panel) this.switchPanel(step.panel);
+        const titleEl = document.getElementById('tutorialTitle');
+        const bodyEl = document.getElementById('tutorialBody');
+        const stepEl = document.getElementById('tutorialStep');
+        if (titleEl) titleEl.innerHTML = step.title;
+        if (bodyEl) bodyEl.innerHTML = step.body || '';
+        if (stepEl) stepEl.textContent = (i + 1) + ' / ' + steps.length;
+        const prev = document.getElementById('tutorialPrev');
+        const next = document.getElementById('tutorialNext');
+        if (prev) prev.style.visibility = (i === 0) ? 'hidden' : 'visible';
+        if (next) next.textContent = (i === steps.length - 1) ? '完成' : '下一步';
+        // 聚光灯高亮
+        const spot = document.getElementById('tutorialSpot');
+        if (spot) {
+            if (step.target) {
+                const el = document.querySelector(step.target);
+                if (el) {
+                    requestAnimationFrame(() => {
+                        const r = el.getBoundingClientRect();
+                        spot.style.display = 'block';
+                        spot.style.top = (r.top - 8) + 'px';
+                        spot.style.left = (r.left - 8) + 'px';
+                        spot.style.width = (r.width + 16) + 'px';
+                        spot.style.height = (r.height + 16) + 'px';
+                    });
+                } else { spot.style.display = 'none'; }
+            } else { spot.style.display = 'none'; }
+        }
+    },
+
+    tutorialNext() {
+        if (this.tutorialIndex >= this.TUTORIAL_STEPS.length - 1) { this.endTutorial(); return; }
+        this.tutorialIndex++;
+        this.renderTutorialStep();
+    },
+
+    tutorialPrev() {
+        if (this.tutorialIndex > 0) { this.tutorialIndex--; this.renderTutorialStep(); }
+    },
+
+    endTutorial() {
+        const ov = document.getElementById('tutorial-overlay');
+        if (ov) ov.classList.add('hidden');
+        const spot = document.getElementById('tutorialSpot');
+        if (spot) spot.style.display = 'none';
+        const p = Game.player;
+        if (p) {
+            p.stats.tutorialDone = true;
+            if (typeof Game !== 'undefined' && typeof Game.save === 'function') Game.save();
+        }
+        this.toast('新手教程已毕，祝你仙途坦荡', 'gold');
+    },
+
+    /* ---------- 闭关潜修界面 ---------- */
+    /* ---------- 闭关选项确认 ---------- */
+    secludeAction(y) {
+        const p = Game.player;
+        if (!p) return;
+        const r = Cultivate.seclude(p, y);
+        if (r && r.dead) return; // 寿元耗尽，已进入羽化流程
+        this.hideModal();
+        if (r) {
+            this.toast(`闭关${r.years}年，悟得${fmtNum(r.xiu)}修为`, 'gold');
+            this.renderAll();
+        }
+    },
+
+    /* ---------- 游历天下 ---------- */
+    openYouli() {
+        const p = Game.player;
+        if (!p) return;
+        const realmIdx = p.realmIdx || 0;
+        const stonePerYear = Cultivate.YOULI_BASE_STONE * Math.pow(Cultivate.YOULI_GROWTH, realmIdx);
+        const opts = [
+            { y: 1,     label: '一年',   sub: '初出茅庐' },
+            { y: 10,    label: '十年',   sub: '云游四海' },
+            { y: 50,    label: '五十年', sub: '遍历名山' },
+            { y: 100,   label: '百年',   sub: '访遍洞天' },
+            { y: 1000,  label: '千年',   sub: '行走红尘' },
+            { y: 10000, label: '万年',   sub: '沧海桑田' }
+        ];
+        const cards = opts.map(o => {
+            const disabled = o.y > (p.lifespan || 0);
+            const stone = Math.floor(o.y * stonePerYear);
+            return `
+                <button class="seclusion-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.youliAction(${o.y})"`}>
+                    <span class="secl-label">${o.label}</span>
+                    <span class="secl-sub">${o.sub}</span>
+                    ${disabled ? '<span class="secl-gain">寿元不足</span>' : `<span class="secl-gain">约+${fmtNum(stone)}灵石·含随机宝物</span>`}
+                </button>
+            `;
+        }).join('');
+        const allIn = p.lifespan || 0;
+        const allInStone = Math.floor(allIn * stonePerYear);
+        const allInDisabled = allIn <= 0;
+        this.showModal({
+            title: '游历天下',
+            body: `<p style="line-height:1.7;margin-bottom:12px">游历四方，寻宝访仙。<b>每游历一年，折损一年寿元</b>，但可获<b>灵石</b>、<b>材料</b>、乃至<b>丹药</b>与<b>奇遇</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（与闭关潜修相对：闭关换修为，游历换资源）</p>
+                   <div class="seclusion-scroll-wrap">
+                       <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('youliOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
+                       <div class="seclusion-options" id="youliOptions">${cards}</div>
+                       <button class="seclusion-arrow seclusion-arrow-right" aria-label="向右滑动" onclick="document.getElementById('youliOptions').scrollBy({left:170,behavior:'smooth'})">›</button>
+                   </div>
+                   <div class="seclusion-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.youliAction(${allIn})"`}>
+                       <span class="secl-allin-label">耗尽全部寿元</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无寿元可用' : `约+${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}年`}</span>
+                   </div>`,
+            footer: [
+                { text: '关闭', action: () => this.hideModal() }
+            ]
+        });
+    },
+
+    youliAction(y) {
+        const p = Game.player;
+        if (!p) return;
+        const r = Cultivate.youli(p, y);
+        if (r && r.dead) return; // 寿元耗尽，已进入羽化流程
+        if (!r) return;
+        this.hideModal();
+        const matHtml = r.materials.length
+            ? r.materials.map(m => `<span class="loot-chip">${m.icon} ${m.name}×${m.count}</span>`).join('')
+            : '<span class="loot-empty">无</span>';
+        const pillHtml = r.pills.length
+            ? r.pills.map(m => `<span class="loot-chip">${m.icon} ${m.name}×${m.count}</span>`).join('')
+            : '<span class="loot-empty">无</span>';
+        const fortHtml = r.fortune ? `<p class="loot-fortune">✨ ${r.fortuneText}</p>` : '';
+        this.showModal({
+            title: `游历${r.years}年 · 收获`,
+            body: `<p style="margin-bottom:10px">遍历四方，所得如下：</p>
+                   <div class="loot-row"><span class="loot-label">灵石</span><span class="loot-val">+${fmtNum(r.stone)}</span></div>
+                   <div class="loot-row"><span class="loot-label">材料</span><div class="loot-chips">${matHtml}</div></div>
+                   <div class="loot-row"><span class="loot-label">丹药</span><div class="loot-chips">${pillHtml}</div></div>
+                   ${fortHtml}`,
+            footer: [
+                { text: '收下', action: () => { this.hideModal(); this.renderAll(); } }
+            ]
+        });
+    },
+
+    /* ---------- 拿修为换灵石 ---------- */
+    openExchange() {
+        const p = Game.player;
+        if (!p) return;
+        const rate = Cultivate.XIU_TO_STONE_RATE;
+        const tiers = [
+            { v: 1e5,  label: '10万修为' },
+            { v: 1e6,  label: '100万修为' },
+            { v: 1e7,  label: '1000万修为' },
+            { v: 1e8,  label: '1亿修为' },
+            { v: 1e9,  label: '10亿修为' }
+        ];
+        const cards = tiers.map(o => {
+            const disabled = o.v > (p.xiu || 0);
+            const stone = Math.floor(o.v * rate);
+            return `
+                <button class="seclusion-card exchange-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.exchangeAction(${o.v})"`}>
+                    <span class="secl-label">${o.label}</span>
+                    <span class="secl-sub">兑换</span>
+                    ${disabled ? '<span class="secl-gain">修为不足</span>' : `<span class="secl-gain">→ ${fmtNum(stone)}灵石</span>`}
+                </button>
+            `;
+        }).join('');
+        const allIn = Math.floor(p.xiu || 0);
+        const allInStone = Math.floor(allIn * rate);
+        const allInDisabled = allIn <= 0;
+        this.showModal({
+            title: '兑换灵石',
+            body: `<p style="line-height:1.7;margin-bottom:12px">将<b>修为</b>兑换为<b>灵石</b>，用于突破与坊市采买。当前修为：<b style="color:#7dd3c0">${fmtNum(p.xiu || 0)}</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:8px">汇率：约 ${fmtNum(2000)} 修为 ≈ 1 灵石。兑换所得灵石不计入任务进度；兑换会消耗修为，可能拖慢突破，请权衡。</p>
+                   <div class="seclusion-scroll-wrap">
+                       <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('exchangeOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
+                       <div class="seclusion-options" id="exchangeOptions">${cards}</div>
+                       <button class="seclusion-arrow seclusion-arrow-right" aria-label="向右滑动" onclick="document.getElementById('exchangeOptions').scrollBy({left:170,behavior:'smooth'})">›</button>
+                   </div>
+                   <div class="seclusion-allin exchange-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.exchangeAction(${allIn})"`}>
+                       <span class="secl-allin-label">全部可兑</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无修为可用' : `${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}修为`}</span>
+                   </div>`,
+            footer: [
+                { text: '关闭', action: () => this.hideModal() }
+            ]
+        });
+    },
+
+    exchangeAction(v) {
+        const p = Game.player;
+        if (!p) return;
+        const r = Cultivate.exchangeXiuForStone(p, v);
+        if (!r) return;
+        this.hideModal();
+        this.toast(`兑换成功：消耗${fmtNum(r.xiuSpent)}修为，得${fmtNum(r.stoneGot)}灵石`, 'gold');
+        this.renderAll();
+    },
+
+    openSeclusion() {
+        const p = Game.player;
+        if (!p) return;
+        const rate = SaveSystem.calcCultivateRate(p); // 每秒修为
+        const opts = [
+            { y: 1,     label: '一年',   sub: '初窥门径' },
+            { y: 10,    label: '十年',   sub: '小有所成' },
+            { y: 50,    label: '五十年', sub: '闭关半世' },
+            { y: 100,   label: '百年',   sub: '大道可期' },
+            { y: 1000,  label: '千年',   sub: '洞中方七日' },
+            { y: 10000, label: '万年',   sub: '世上已千年' }
+        ];
+        const cards = opts.map(o => {
+            const disabled = o.y > (p.lifespan || 0);
+            const gain = Math.floor(o.y * rate * 31536000 * Cultivate.SECLUDE_EFFICIENCY);
+            return `
+                <button class="seclusion-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.secludeAction(${o.y})"`}>
+                    <span class="secl-label">${o.label}</span>
+                    <span class="secl-sub">${o.sub}</span>
+                    ${disabled ? '<span class="secl-gain">寿元不足</span>' : `<span class="secl-gain">+${fmtNum(gain)}修为</span>`}
+                </button>
+            `;
+        }).join('');
+        const allIn = p.lifespan || 0;
+        const allInGain = Math.floor(allIn * rate * 31536000 * Cultivate.SECLUDE_EFFICIENCY);
+        const allInDisabled = allIn <= 0;
+        this.showModal({
+            title: '闭关潜修',
+            body: `<p style="line-height:1.7;margin-bottom:12px">闭关乃斩断尘缘、潜心悟道之法。闭关越久，修为增涨越多，但<b>每闭关一年，折损一年寿元</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（寿元即闭关上限，无法闭关超过自身寿元；每突破大境界可增寿元）</p>
+                   <div class="seclusion-scroll-wrap">
+                       <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('seclusionOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
+                       <div class="seclusion-options" id="seclusionOptions">${cards}</div>
+                       <button class="seclusion-arrow seclusion-arrow-right" aria-label="向右滑动" onclick="document.getElementById('seclusionOptions').scrollBy({left:170,behavior:'smooth'})">›</button>
+                   </div>
+                   <div class="seclusion-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.secludeAction(${allIn})"`}>
+                       <span class="secl-allin-label">耗尽全部寿元</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无寿元可用' : `+${fmtNum(allInGain)}修为 · ${fmtNum(allIn)}年`}</span>
+                   </div>`,
+            footer: [
+                { text: '关闭', action: () => this.hideModal() }
+            ]
+        });
+    },
+
+    /* ---------- 悟性·顿悟 ---------- */
+    openEnlighten() {
+        const p = Game.player;
+        if (!p) return;
+        const lv = p.wuxingLevel || 0;
+        const max = Cultivate.WUXING_MAX;
+        if (lv >= max) {
+            this.showModal({
+                title: '顿悟 · 悟性',
+                body: `<p>悟性已臻化境（<b style="color:#d4af37">${max} 重</b>），无法再顿悟。</p>`,
+                footer: [{ text: '关闭', action: () => this.hideModal() }]
+            });
+            return;
+        }
+        const c = Cultivate.enlightenCosts(p);
+        const tapNow = Math.round((Cultivate.wuxingTapMult(p) - 1) * 100);
+        const rateNow = Math.round((Cultivate.wuxingRateMult(p) - 1) * 100);
+        const tapNext = Math.round((Cultivate.wuxingTapMult({ wuxingLevel: lv + 1 }) - 1) * 100);
+        const rateNext = Math.round((Cultivate.wuxingRateMult({ wuxingLevel: lv + 1 }) - 1) * 100);
+        const canStone = p.stone >= c.stone;
+        const canXiu = p.xiu >= c.xiu;
+        const row = (label, costTxt, have, enough, type) => `
+            <button class="enl-row${enough ? '' : ' disabled'}" ${enough ? `onclick="UI.doEnlighten('${type}')"` : 'disabled'}>
+                <span class="enl-type">${label}</span>
+                <span class="enl-cost">耗 ${costTxt}</span>
+                <span class="enl-have">持有 ${fmtNum(have)}</span>
+            </button>`;
+        this.showModal({
+            title: '顿悟 · 悟性',
+            body: `<p style="line-height:1.7;margin-bottom:10px">顿悟可永久提升<b>每次点击修炼的修为</b>，并小幅提升<b>修炼速率</b>。当前悟性 <b style="color:#d4af37">${lv} 重</b>（点击+${tapNow}% · 速率+${rateNow}%），顿悟后 → 点击+${tapNext}% · 速率+${rateNext}%。</p>
+                   <div class="enl-list">
+                       ${row('灵石', fmtNum(c.stone) + ' 灵石', p.stone, canStone, 'stone')}
+                       ${row('修为', fmtNum(c.xiu) + ' 修为', p.xiu, canXiu, 'xiu')}
+                   </div>
+                   <p style="color:#9a8e7a;font-size:12px;margin-top:10px">二选其一消耗即可顿悟一级。</p>`,
+            footer: [{ text: '关闭', action: () => this.hideModal() }]
+        });
+    },
+    doEnlighten(type) {
+        const r = Cultivate.enlighten(Game.player, type);
+        if (r) {
+            this.hideModal();
+            this.openEnlighten();
+            this.renderAll();
+        }
+    },
+
+    /* ---------- 显示离线收益 ---------- */
+    showOfflineReward(reward) {
+        if (!reward || reward.xiu <= 0) return;
+        const hours = reward.time / 3600;
+        const timeStr = hours >= 1 ? `${hours.toFixed(1)}小时` : `${Math.floor(reward.time / 60)}分钟`;
+        this.showModal({
+            title: '离线修炼',
+            body: `<p>道友离线潜修${timeStr}，悟得：</p>
+                   <p style="font-size:20px;color:#d4af37;margin:14px 0;text-align:center">${fmtNum(reward.xiu)} 修为</p>
+                   <p style="color:#9a8e7a;font-size:12px;text-align:center">（离线修炼效率为在线50%）</p>`,
+            footer: [{ text: '收下', type: 'primary', action: () => this.hideModal() }]
+        });
+    }
+};
