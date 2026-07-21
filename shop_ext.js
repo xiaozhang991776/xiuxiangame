@@ -98,12 +98,12 @@
         { id: 'g_hongmeng', name: '鸿蒙紫气诀', icon: '功', xiuBonus: 1.8, realmReq: 4, price: 500000, desc: '采鸿蒙未判之紫气，道韵自生，化神以上方可承之。' },
         { id: 'g_hunyuanwuji', name: '混元无极功', icon: '功', xiuBonus: 2.5, realmReq: 4, price: 1200000, desc: '混元无极、周流不息，乃近乎大道的吐纳至法，非大能不可驭。' },
         // —— 大成期(大乘)以上方可习练的顶级功法，修炼速率呈指数暴涨，是后期战力的根本引擎 ——
-        { id: 'g_taiqing',   name: '太清紫极功', icon: '功', xiuBonus: 4.0,  realmReq: 7,  price: 5000000,   desc: '太清仙宗根本功法，紫极之气周转，修炼速率暴涨，大乘以上方窥门径。' },
-        { id: 'g_ziixiao',   name: '紫霄混元功', icon: '功', xiuBonus: 8.0,  realmReq: 8,  price: 30000000,  desc: '引紫霄神雷入丹田，吐纳间道韵自生，真仙大修方能承之。' },
-        { id: 'g_lihuo',    name: '离火焚天功', icon: '功', xiuBonus: 16.0, realmReq: 9,  price: 150000000, desc: '离火真炎炼形神，修炼如浴火重生，金仙以上方可驭使。' },
-        { id: 'g_xuantian', name: '玄天镇魔功', icon: '功', xiuBonus: 32.0, realmReq: 10, price: 800000000, desc: '玄天之力镇万魔，一呼一吸皆是大神通，太乙天尊之传承。' },
-        { id: 'g_ruzun',    name: '儒尊浩然功', icon: '功', xiuBonus: 64.0, realmReq: 11, price: 4000000000, desc: '浩然正气贯长虹，修炼速率近乎夺天地造化，大罗金仙方成大器。' },
-        { id: 'g_daodao',   name: '无上道经',   icon: '功', xiuBonus: 128.0, realmReq: 12, price: 20000000000, desc: '大道无上之总纲，吐纳即与道同频，道祖方窥其万一。' }
+        { id: 'g_taiqing',   name: '太清紫极功', icon: '功', xiuBonus: 1.5,  realmReq: 7,  price: 5000000,   desc: '太清仙宗根本功法，紫极之气周转，修炼速率大增，大乘以上方窥门径。' },
+        { id: 'g_ziixiao',   name: '紫霄混元功', icon: '功', xiuBonus: 2.0,  realmReq: 8,  price: 30000000,  desc: '引紫霄神雷入丹田，吐纳间道韵自生，真仙大修方能承之。' },
+        { id: 'g_lihuo',    name: '离火焚天功', icon: '功', xiuBonus: 2.5, realmReq: 9,  price: 150000000, desc: '离火真炎炼形神，修炼如浴火重生，金仙以上方可驭使。' },
+        { id: 'g_xuantian', name: '玄天镇魔功', icon: '功', xiuBonus: 3.0, realmReq: 10, price: 800000000, desc: '玄天之力镇万魔，一呼一吸皆是大神通，太乙天尊之传承。' },
+        { id: 'g_ruzun',    name: '儒尊浩然功', icon: '功', xiuBonus: 3.5, realmReq: 11, price: 4000000000, desc: '浩然正气贯长虹，修炼速率夺天地造化，大罗金仙方成大器。' },
+        { id: 'g_daodao',   name: '无上道经',   icon: '功', xiuBonus: 4.0, realmReq: 12, price: 20000000000, desc: '大道无上之总纲，吐纳即与道同频，道祖方窥其万一。' }
     ];
     newGongfa.forEach(g => { C.gongfas.push(g); C.shopItems.gongfa.push(g.id); });
 

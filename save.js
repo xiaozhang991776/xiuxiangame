@@ -116,6 +116,13 @@ const SaveSystem = {
         }
         try {
             player.lastSave = Date.now();
+            // 防溢出：落盘前把修为/累计修为钳制到 JS 安全整数，避免历史存档里已膨胀的数值被原样写回
+            if (player.xiu != null && (player.xiu > Number.MAX_SAFE_INTEGER || !isFinite(player.xiu))) {
+                player.xiu = Number.MAX_SAFE_INTEGER;
+            }
+            if (player.stats && player.stats.totalXiu != null && (player.stats.totalXiu > Number.MAX_SAFE_INTEGER || !isFinite(player.stats.totalXiu))) {
+                player.stats.totalXiu = Number.MAX_SAFE_INTEGER;
+            }
             const data = this._safeStringify(player);
             // 序列化失败：绝不写 "null" 覆盖旧档（否则下次读档会清零全部进度）
             if (!data) {

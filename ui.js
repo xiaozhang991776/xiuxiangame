@@ -377,7 +377,7 @@ const UI = {
             const isEquipped = Game.player.gongfa === item.id;
             attrsHtml = `<div>品质：<span style="color:${q.color}">${q.name}</span></div><div>修炼效率+${(item.xiuBonus * 100).toFixed(0)}%</div><div class="inv-detail-intro">📜 介绍：${item.desc}</div>`;
             actionsHtml = isEquipped
-                ? `<span style="color:#7dd3c0">已装备</span>`
+                ? `<button class="inv-action-btn danger" onclick="UI.unequipGongfa()">卸下</button>`
                 : `<button class="inv-action-btn" onclick="UI.equipGongfa('${item.id}')">装备</button>`;
         }
         detail.innerHTML = `
@@ -436,6 +436,7 @@ const UI = {
     usePill(id) { Inventory.usePill(Game.player, id); this.renderAll(); },
     sellItem(cat, id, count) { Inventory.sellItem(Game.player, cat, id, count); this.renderAll(); },
     equipGongfa(id) { Inventory.equipGongfa(Game.player, id); this.renderAll(); },
+    unequipGongfa() { Inventory.unequipGongfa(Game.player); this.renderAll(); },
 
     /* ---------- 渲染技能列表 ---------- */
     renderSkillList() {

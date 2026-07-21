@@ -435,6 +435,22 @@ const Inventory = {
         return true;
     },
 
+    /* ---------- 卸下功法 ---------- */
+    unequipGongfa(player) {
+        if (!player.gongfa) {
+            if (typeof UI !== 'undefined') UI.toast('当前未装备任何功法', 'bad');
+            return false;
+        }
+        const gf = getGongfa(player.gongfa);
+        player.gongfa = null;
+        if (typeof UI !== 'undefined') {
+            UI.toast(`已卸下功法：${gf ? gf.name : ''}`, 'good');
+            UI.addLog(`卸下功法 ${gf ? gf.name : ''}`);
+        }
+        this.save(player);
+        return true;
+    },
+
     /* ---------- 收服灵宠 ---------- */
     catchPet(player, petId) {
         const pet = getPet(petId);

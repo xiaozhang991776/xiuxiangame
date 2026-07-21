@@ -283,8 +283,11 @@ const Cultivate = {
             }
             return { xiu: xiuGain, years, dead: true };
         }
-        player.xiu += xiuGain;
-        player.stats.totalXiu = (player.stats.totalXiu || 0) + xiuGain;
+        // 防溢出：修为（及累计修为）严格限制在 JS 安全整数内，避免后期高阶功法/长闭关导致数值爆表（Infinity/NaN→战力超模）
+        const SAFE = Number.MAX_SAFE_INTEGER;
+        xiuGain = Math.min(xiuGain, SAFE);
+        player.xiu = Math.min((player.xiu || 0) + xiuGain, SAFE);
+        player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + xiuGain, SAFE);
         this.save(player);
         if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
         if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}修为（耗寿元${years}年）`, 'evt');
@@ -501,8 +504,10 @@ const Cultivate = {
         const comboMult = 1 + (this.tapCombo - 1) * 0.08; // 最高约 1.88x
         // 每次点击 ≈ 3 秒被动修炼收益，再乘连击
         const gain = Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player)));
-        player.xiu += gain;
-        player.stats.totalXiu = (player.stats.totalXiu || 0) + gain;
+        // 防溢出：点击修炼所得同样限制在安全整数内
+        const SAFE = Number.MAX_SAFE_INTEGER;
+        player.xiu = Math.min((player.xiu || 0) + gain, SAFE);
+        player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + gain, SAFE);
         // 任务进度
         if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
         // 视觉反馈
