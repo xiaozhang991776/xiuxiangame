@@ -188,6 +188,17 @@ for (let i = 0; i < GameConfig.realms.length; i++) {
 ok('全 13 境界满层成本均 < 9e15（无溢出）', safe);
 ok('境界难度随境界单调递增', mono);
 
+// 后期满配速率绝不可逼近安全整数上限（不应“应顶/超模”）
+const pFull = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+pFull.realmIdx = 12; pFull.realmLayer = 15;
+pFull.wuxingLevel = 30;
+pFull.gongfa = 'g_daodao';
+pFull.equipped = { weapon: { baseId: 'w_chaos_sword' }, armor: { baseId: 'a_chaos_robe' }, accessory: { baseId: 'ac_chaos_pearl' }, fabao: { baseId: 'f_taiqing_ta' } };
+const rateFull = SaveSystem.calcCultivateRate(pFull);
+ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率 < 1e11（不逼近上限/不超模）', rateFull < 1e11, rateFull);
+const rateBareDz = SaveSystem.calcCultivateRate(bareAt(12, 15));
+ok('道祖L15 裸境界速率 < 1e8（基础值受控）', rateBareDz < 1e8, rateBareDz);
+
 console.log('\n[11] 大成期(大乘)以上解锁内容（realmReq 门禁）');
 ok('高阶功法 太清紫极功 需大乘(7)', !!GameConfig.gongfas.find(g => g.id === 'g_taiqing' && g.realmReq === 7));
 ok('高阶神通 太清剑诀 需大乘(7)', !!GameConfig.skills.find(s => s.id === 's_taiqing' && s.realmReq === 7));

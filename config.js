@@ -19,17 +19,17 @@ const GameConfig = {
         { name: '筑基', layers: 15, baseXiu: 1200,   xiuMult: 1.30, atkBonus: 8,      defBonus: 5,      hpBonus: 80,      lingBonus: 30,       breakthroughRate: 0.80 },
         { name: '金丹', layers: 15, baseXiu: 15000,  xiuMult: 1.35, atkBonus: 30,     defBonus: 20,     hpBonus: 300,     lingBonus: 100,      breakthroughRate: 0.65 },
         { name: '元婴', layers: 15, baseXiu: 2e5,    xiuMult: 1.40, atkBonus: 120,    defBonus: 80,     hpBonus: 1200,    lingBonus: 400,      breakthroughRate: 0.50 },
-        { name: '化神', layers: 15, baseXiu: 6e7,    xiuMult: 1.80, atkBonus: 500,    defBonus: 320,    hpBonus: 5000,    lingBonus: 1500,     breakthroughRate: 0.35 },
-        { name: '炼虚', layers: 15, baseXiu: 2e9,    xiuMult: 1.90, atkBonus: 1200,   defBonus: 800,    hpBonus: 12000,   lingBonus: 4000,     breakthroughRate: 0.30 },
-        { name: '合体', layers: 15, baseXiu: 1e11,   xiuMult: 1.95, atkBonus: 2800,   defBonus: 1800,   hpBonus: 28000,   lingBonus: 10000,    breakthroughRate: 0.25 },
+        { name: '化神', layers: 15, baseXiu: 6e7,    xiuMult: 1.60, atkBonus: 500,    defBonus: 320,    hpBonus: 5000,    lingBonus: 1500,     breakthroughRate: 0.35 },
+        { name: '炼虚', layers: 15, baseXiu: 2e9,    xiuMult: 1.60, atkBonus: 1200,   defBonus: 800,    hpBonus: 12000,   lingBonus: 4000,     breakthroughRate: 0.30 },
+        { name: '合体', layers: 15, baseXiu: 1e11,   xiuMult: 1.60, atkBonus: 2800,   defBonus: 1800,   hpBonus: 28000,   lingBonus: 10000,    breakthroughRate: 0.25 },
         // 注：高境界(大乘+)的 baseXiu 已重缩放，使「满层突破成本 = baseXiu × xiuMult^14」恒 < 9e15(JS 安全整数)，
         // 否则原数值(5e12×2^14≈8e16 起)会溢出安全整数，导致大乘满层后永远卡死、无法突破。
-        { name: '大乘', layers: 15, baseXiu: 2.0e11,  xiuMult: 2.00, atkBonus: 6500,   defBonus: 4200,   hpBonus: 65000,   lingBonus: 24000,     breakthroughRate: 0.20 },
-        { name: '真仙', layers: 15, baseXiu: 2.15e11, xiuMult: 2.00, atkBonus: 15000,  defBonus: 10000,  hpBonus: 150000,  lingBonus: 60000,     breakthroughRate: 0.15 },
-        { name: '金仙', layers: 15, baseXiu: 2.3e11,  xiuMult: 2.00, atkBonus: 35000,  defBonus: 23000,  hpBonus: 350000,  lingBonus: 150000,    breakthroughRate: 0.12 },
-        { name: '太乙', layers: 15, baseXiu: 2.4e11,  xiuMult: 2.00, atkBonus: 80000,  defBonus: 55000,  hpBonus: 800000,  lingBonus: 400000,    breakthroughRate: 0.10 },
-        { name: '大罗', layers: 15, baseXiu: 2.45e11, xiuMult: 2.00, atkBonus: 180000, defBonus: 120000, hpBonus: 1800000, lingBonus: 1000000,   breakthroughRate: 0.08 },
-        { name: '道祖', layers: 15, baseXiu: 2.5e11,  xiuMult: 2.00, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 }
+        { name: '大乘', layers: 15, baseXiu: 2.0e11,  xiuMult: 1.60, atkBonus: 6500,   defBonus: 4200,   hpBonus: 65000,   lingBonus: 24000,     breakthroughRate: 0.20 },
+        { name: '真仙', layers: 15, baseXiu: 2.15e11, xiuMult: 1.60, atkBonus: 15000,  defBonus: 10000,  hpBonus: 150000,  lingBonus: 60000,     breakthroughRate: 0.15 },
+        { name: '金仙', layers: 15, baseXiu: 2.3e11,  xiuMult: 1.60, atkBonus: 35000,  defBonus: 23000,  hpBonus: 350000,  lingBonus: 150000,    breakthroughRate: 0.12 },
+        { name: '太乙', layers: 15, baseXiu: 2.4e11,  xiuMult: 1.60, atkBonus: 80000,  defBonus: 55000,  hpBonus: 800000,  lingBonus: 400000,    breakthroughRate: 0.10 },
+        { name: '大罗', layers: 15, baseXiu: 2.45e11, xiuMult: 1.60, atkBonus: 180000, defBonus: 120000, hpBonus: 1800000, lingBonus: 1000000,   breakthroughRate: 0.08 },
+        { name: '道祖', layers: 15, baseXiu: 2.5e11,  xiuMult: 1.60, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 }
     ],
 
     /* ---------- 品质配置 ---------- */
@@ -381,10 +381,14 @@ function randomName() {
     return s[Math.floor(r() * s.length)] + s[Math.floor(r() * s.length)] + (r() < 0.4 ? x[Math.floor(r() * x.length)] : '');
 }
 
-// 数字格式化
+// 数字格式化（逐级递进：千→万→亿→兆→京→垓→秭）
 function fmtNum(n) {
-    if (n >= 1e8) return (n / 1e8).toFixed(2) + '亿';
-    if (n >= 1e4) return (n / 1e4).toFixed(2) + '万';
+    if (n >= 1e24) return (n / 1e24).toFixed(2) + '秭';
+    if (n >= 1e20) return (n / 1e20).toFixed(2) + '垓';
+    if (n >= 1e16) return (n / 1e16).toFixed(2) + '京';
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + '兆';
+    if (n >= 1e8)  return (n / 1e8).toFixed(2) + '亿';
+    if (n >= 1e4)  return (n / 1e4).toFixed(2) + '万';
     if (n >= 1000) return (n / 1000).toFixed(1) + '千';
     return Math.floor(n).toString();
 }

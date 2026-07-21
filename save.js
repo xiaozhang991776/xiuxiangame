@@ -237,7 +237,7 @@ const SaveSystem = {
         // 功法加成
         const gf = getGongfa(player.gongfa);
         if (gf) base *= (1 + gf.xiuBonus);
-        // 装备加成（所有装备灵力总和的5%）
+        // 装备加成（所有装备灵力总和的0.15%）
         let equipLing = 0;
         for (const slot in player.equipped) {
             const eq = player.equipped[slot];
@@ -249,7 +249,7 @@ const SaveSystem = {
                 }
             }
         }
-        base *= (1 + equipLing * 0.005);
+        base *= (1 + equipLing * 0.0015);
         // 悟性加成（顿悟系统；运行时 Cultivate 已定义）
         if (typeof Cultivate !== 'undefined' && Cultivate.wuxingRateMult) {
             base *= Cultivate.wuxingRateMult(player);

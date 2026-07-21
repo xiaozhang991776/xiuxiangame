@@ -34,7 +34,7 @@ const Cultivate = {
                 }
             }
         }
-        const equipMult = 1 + equipLing * 0.005;
+        const equipMult = 1 + equipLing * 0.0015;
         base *= equipMult;
 
         // 悟性加成
@@ -224,8 +224,8 @@ const Cultivate = {
 
     // 悟性系统：顿悟消耗资源，永久提升每次点击修为与修炼速率
     WUXING_MAX: 50,            // 悟性上限（重）
-    WUXING_TAP_PER: 1.0,    // 每重：每次点击修炼修为 +100%（50重共×51，强力但数字受控）
-    WUXING_RATE_PER: 0.5,    // 每重：修炼速率 +50%（50重共×26，后期显著但不再爆表）
+    WUXING_TAP_PER: 0.15,   // 每重：每次点击修炼修为 +15%（50重共×8.5，强力但数字受控）
+    WUXING_RATE_PER: 0.15,   // 每重：修炼速率 +15%（50重共×8.5，后期显著但不再爆表）
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
     // 顿悟到下一级的资源成本（指数增长，门槛较高）

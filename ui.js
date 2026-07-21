@@ -182,7 +182,7 @@ const UI = {
         document.getElementById('topAvatar').textContent = ['道','仙','魔','佛'][p.avatar];
         document.getElementById('topXiu').textContent = fmtNum(p.xiu);
         const rate = SaveSystem.calcCultivateRate(p);
-        document.getElementById('topRate').textContent = '+' + rate.toFixed(1) + '/s';
+        document.getElementById('topRate').textContent = '+' + fmtNum(rate) + '/s';
         document.getElementById('topStone').textContent = fmtNum(p.stone);
         const stats = Cultivate.calcFinalStats(p);
         document.getElementById('topLing').textContent = fmtNum(stats.ling);
@@ -213,7 +213,7 @@ const UI = {
         const p = Game.player;
         if (!p) return;
         const detail = Cultivate.getRateDetail(p);
-        document.getElementById('baseRate').textContent = detail.base.toFixed(1) + '/s';
+        document.getElementById('baseRate').textContent = fmtNum(detail.base) + '/s';
         document.getElementById('realmBonus').textContent = '+' + (detail.realmBonus * 100).toFixed(0) + '%';
         document.getElementById('gongfaBonus').textContent = '+' + (detail.gfBonus * 100).toFixed(0) + '%';
         document.getElementById('equipBonus').textContent = '+' + (detail.equipBonus * 100).toFixed(0) + '%';
