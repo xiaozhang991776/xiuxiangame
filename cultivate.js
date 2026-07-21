@@ -103,6 +103,11 @@ const Cultivate = {
                 if (typeof UI !== 'undefined') UI.toast('已达最高境界，无法突破！', 'bad');
                 return false;
             }
+            // 战力上限（今生境界天花板）：已达则需先轮回提升上限，方可突破更高境界
+            if (player.realmIdx >= this.getMaxRealm(player)) {
+                if (typeof UI !== 'undefined') UI.toast(`战力已达今生上限（第 ${player.rebirth || 0} 世），转世轮回可提升战力上限，进而突破至更高境界`, 'bad');
+                return false;
+            }
             const realm = getRealm(player.realmIdx);
             const cost = this.getBreakthroughCost(player);
             if (player.xiu < cost) {
@@ -437,12 +442,10 @@ const Cultivate = {
             }
         }
 
-        // 转世轮回加成（根基越厚，属性越强）
+        // 转世轮回加成（仅 攻击 / 气血，根基越厚属性越强）
         const rb = this.getRebirthBonus(player);
         atk = Math.floor(atk * rb.atkMult);
-        def = Math.floor(def * rb.defMult);
         hp = Math.floor(hp * rb.hpMult);
-        ling = Math.floor(ling * rb.lingMult);
 
         return { atk, def, hp, ling, spd, crit, realmAtk, realmDef, realmHp, realmLing };
     },
@@ -494,19 +497,49 @@ const Cultivate = {
         const t = (player && player.tribulus) || { xiuMult: 0, stoneMult: 0 };
         return { xiuMult: t.xiuMult || 0, stoneMult: t.stoneMult || 0 };
     },
-    // 转世轮回永久加成（与劫后余韵、悟性等叠加）
+    // 转世轮回永久加成（仅保留 生命/攻击，更聚焦）
     getRebirthBonus(player) {
         const n = (player && player.rebirth) || 0;
-        const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth.perLevel
-            : { atk: 0, def: 0, hp: 0, ling: 0, xiu: 0, stone: 0 };
+        const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth && GameConfig.rebirth.perLevel)
+            ? GameConfig.rebirth.perLevel : { atk: 0, hp: 0 };
+        const atk = c.atk || 0, hp = c.hp || 0;
+        // def/ling/xiu/stone 乘区固定为中性值，保证既有调用（修炼速率、灵石获取等）不报错
         return {
-            atkMult: 1 + n * c.atk,
-            defMult: 1 + n * c.def,
-            hpMult: 1 + n * c.hp,
-            lingMult: 1 + n * c.ling,
-            xiuMult: n * c.xiu,
-            stoneMult: n * c.stone
+            atkMult: 1 + n * atk,
+            hpMult: 1 + n * hp,
+            defMult: 1,
+            lingMult: 1,
+            xiuMult: 0,
+            stoneMult: 0
         };
+    },
+    /* ---------- 轮回相关：境界天花板 / 战力 / 战力上限 ---------- */
+    // 今生可抵达的最高大境界索引（随轮回层数提升；不低于当前进度，避免旧档被锁死）
+    getMaxRealm(player) {
+        const n = (player && player.rebirth) || 0;
+        const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth : {};
+        const formula = (c.baseRealm || 0) + n * (c.realmPerRebirth || 1);
+        const capped = Math.min(GameConfig.realms.length - 1, formula);
+        return Math.max(player ? (player.realmIdx || 0) : 0, capped);
+    },
+    // 玩家当前战力（与道友榜同一口径：atk + def + hp*0.3 + ling）
+    calcCombatPower(player) {
+        const s = this.calcFinalStats(player);
+        return Math.floor(s.atk + s.def + s.hp * 0.3 + s.ling);
+    },
+    // 估算某境界下的属性（临时改写 realm 字段后还原，不污染原对象）
+    estimateStatsAt(player, realmIdx, realmLayer) {
+        const oi = player.realmIdx, ol = player.realmLayer;
+        player.realmIdx = realmIdx; player.realmLayer = realmLayer;
+        const s = this.calcFinalStats(player);
+        player.realmIdx = oi; player.realmLayer = ol;
+        return s;
+    },
+    // 战力上限：以「今生境界天花板」为基准估算的战力，随轮回层数提升（天花板越高，上限越高）
+    getPowerCap(player) {
+        const maxR = this.getMaxRealm(player);
+        const st = this.estimateStatsAt(player, maxR, getRealm(maxR).layers);
+        return Math.floor(st.atk + st.def + st.hp * 0.3 + st.ling);
     },
     _addTribBonus(player, b) {
         if (!player.tribulus) player.tribulus = { xiuMult: 0, stoneMult: 0 };
@@ -589,9 +622,10 @@ const Cultivate = {
     /* ---------- 转世轮回 ---------- */
     reincarnate(player, mode) {
         const cfg = GameConfig.rebirth;
-        if ((player.realmIdx || 0) < cfg.unlockRealmIdx) {
-            if (typeof UI !== 'undefined') UI.toast(`需先达${getRealm(cfg.unlockRealmIdx).name}期方可轮回`, 'bad');
-            return { ok: false, reason: 'locked' };
+        // 轮回上限 100 世
+        if ((player.rebirth || 0) >= (cfg.maxRebirth || 100)) {
+            if (typeof UI !== 'undefined') UI.toast(`已达轮回上限 ${cfg.maxRebirth || 100} 世，不可再轮回`, 'bad');
+            return { ok: false, reason: 'cap' };
         }
         let usedPill = false;
         if (mode === 'pill') {
@@ -603,8 +637,16 @@ const Cultivate = {
             player.inventory.material[cfg.herbId] -= cfg.herbCost;
             player.rebirth = (player.rebirth || 0) + 1;
             usedPill = true;
+        } else {
+            // 免费轮回：需先达「今生境界天花板」，门槛随轮回次数递增
+            const need = this.getMaxRealm(player);
+            if ((player.realmIdx || 0) < need) {
+                if (typeof UI !== 'undefined') UI.toast(`需先达${getRealm(need).name}期（今生境界天花板）方可免费轮回`, 'bad');
+                return { ok: false, reason: 'locked' };
+            }
+            player.rebirth = (player.rebirth || 0) + 1;
         }
-        // 重置战力（保留属性加成/资源/功法/灵宠/好友等）
+        // 重置境界/修为/装备/寿元（保留属性加成/资源/功法/灵宠/好友等）
         player.realmIdx = 0;
         player.realmLayer = 1;
         player.xiu = 0;
@@ -613,10 +655,11 @@ const Cultivate = {
         this.save(player);
         if (typeof UI !== 'undefined') {
             const rb = this.getRebirthBonus(player);
+            const cap = this.getPowerCap(player);
             UI.toast(usedPill
-                ? `转世第 ${player.rebirth} 世！根基大进：基础属性 ×${rb.atkMult.toFixed(2)} · 修炼 ×${(1 + rb.xiuMult).toFixed(2)} · 灵石 ×${(1 + rb.stoneMult).toFixed(2)}`
-                : `已免费轮回，重立道基（属性加成保留）`, 'gold');
-            UI.addLog(usedPill ? `历经${player.rebirth}世轮回，道基愈发浑厚` : `${player.name}散功重修，再踏仙途`, 'evt');
+                ? `转世第 ${player.rebirth} 世！根基大进：气血 ×${rb.hpMult.toFixed(2)} · 攻击 ×${rb.atkMult.toFixed(2)} · 战力上限 ${fmtNum(cap)}`
+                : `已免费轮回至第 ${player.rebirth} 世，重立道基（生命/攻击加成保留，战力上限提升至 ${fmtNum(cap)}）`, 'gold');
+            UI.addLog(usedPill ? `历经${player.rebirth}世轮回，道基愈发浑厚` : `${player.name}散功重修，再踏仙途（第 ${player.rebirth} 世）`, 'evt');
             UI.renderAll();
         }
         return { ok: true, usedPill, rebirth: player.rebirth };

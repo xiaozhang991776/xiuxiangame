@@ -392,15 +392,16 @@
                 <!-- 转世轮回面板 -->
                 <div class="panel" id="panel-reincarnate">
                     <h3 class="panel-title">转世轮回</h3>
-                    <p class="panel-desc">超脱轮回，重立道基。转世层数越高，根基越厚——诸般属性与修炼、灵石皆受永久加持。</p>
+                    <p class="panel-desc">超脱轮回，重立道基。转世层数越高，根基越厚——轮回仅永久加持 <b>气血</b> 与 <b>攻击</b>，并抬升你的 <b>战力上限</b>，令今生可攀登的境界更高。</p>
                     <div class="rebirth-stat">
-                        <div class="rs-item"><span>转世层数</span><b id="rbCount">0</b></div>
+                        <div class="rs-item"><span>转世层数</span><b id="rbCount">0 世</b></div>
                         <div class="rs-item"><span>当前轮回加成</span><b id="rbBonus" class="text-gold">—</b></div>
+                        <div class="rs-item"><span>战力上限</span><b id="rbPowerCap" class="text-gold">—</b></div>
                     </div>
                     <div class="rebirth-preview" id="rbPreview"></div>
                     <div class="rebirth-actions">
-                        <button class="btn-rebirth free" id="btnRebirthFree" onclick="UI.doReincarnate('free')">免费轮回（重置战力，保留属性加成）</button>
-                        <button class="btn-rebirth pill" id="btnRebirthPill" onclick="UI.doReincarnate('pill')">轮回丹轮回（耗 100 株轮回草）</button>
+                        <button class="btn-rebirth free" id="btnRebirthFree" onclick="UI.doReincarnate('free')">免费轮回（重置境界，保留生命/攻击加成）</button>
+                        <button class="btn-rebirth pill" id="btnRebirthPill" onclick="UI.doReincarnate('pill')">轮回草轮回（耗 100 株轮回草）</button>
                     </div>
                     <div class="rebirth-hint" id="rbHint"></div>
                 </div>
@@ -417,6 +418,8 @@
                         <div class="attr-row"><span>防御</span><span id="attrDef">5</span></div>
                         <div class="attr-row"><span>速度</span><span id="attrSpd">10</span></div>
                         <div class="attr-row"><span>暴击</span><span id="attrCrit">5%</span></div>
+                        <div class="attr-row"><span>战力</span><span id="attrPower">0</span></div>
+                        <div class="attr-row"><span>战力上限</span><span id="attrPowerCap">0</span></div>
                         <div class="attr-row"><span>五行</span><span id="attrElem">金</span></div>
                     </div>
                 </div>

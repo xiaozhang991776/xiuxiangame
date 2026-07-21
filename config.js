@@ -238,7 +238,7 @@ const GameConfig = {
     shopItems: {
         equipment: ['w_short_sword', 'a_cloth_robe', 'ac_jade_pendant', 'w_flame_blade', 'a_silk_robe', 'ac_fire_ring', 'w_zither', 'a_spirit_armor', 'ac_spirit_band', 'w_thunder_sword', 'a_starlight', 'ac_star_pendant', 'w_azure_spear', 'w_sun_moon', 'w_pangu_axe', 'a_bronze_mirror', 'a_azure_robe', 'a_celestial', 'ac_wind_charm', 'ac_dragon_jade', 'ac_void_orb'],
         pill: ['p_qi_pill', 'p_hp_pill', 'p_xiu_pill', 'p_atk_pill', 'p_def_pill', 'p_breakthrough', 'p_permanent_hp', 'p_permanent_atk', 'p_grand_hp', 'p_grand_ling', 'p_ningshen'],
-        material: ['m_herb', 'm_ore', 'm_beast', 'm_pearl', 'm_spirit_wood', 'm_geng_gold', 'm_qi_essence'],
+        material: ['m_herb', 'm_ore', 'm_beast', 'm_pearl', 'm_spirit_wood', 'm_geng_gold', 'm_qi_essence', 'm_rebirth_herb'],
         gongfa: ['g_five_elem', 'g_purple', 'g_chaos', 'g_immortal', 'g_void'],
         fabao: ['f_bell', 'f_mountain', 'f_mirror', 'f_pagoda', 'f_jade_ruyi', 'f_void_banner'],
         pet: ['pet_wolf', 'pet_turtle', 'pet_phoenix', 'pet_dragon']
@@ -261,10 +261,13 @@ const GameConfig = {
     /* ---------- 转世轮回 ---------- */
     rebirth: {
         herbId: 'm_rebirth_herb',   // 轮回草
-        herbCost: 100,               // 轮回丹轮回需耗 100 株
-        unlockRealmIdx: 1,           // 需先达筑基期方可轮回
-        // 每转世一层，永久加持（与劫后余韵、悟性等叠加）
-        perLevel: { atk: 0.30, def: 0.30, hp: 0.30, ling: 0.30, xiu: 0.15, stone: 0.12 }
+        herbCost: 100,               // 轮回草轮回需耗 100 株
+        maxRebirth: 100,             // 轮回上限 100 世
+        // 今生可抵达的最高大境界（随轮回层数提升，形成「攀登→轮回→天花板升高」的正向循环）
+        baseRealm: 1,               // 第 0 世：最高达 筑基
+        realmPerRebirth: 1,          // 每轮回一世，境界天花板 +1
+        // 轮回加成：仅保留 生命(气血) 与 攻击（更聚焦、更纯粹）
+        perLevel: { atk: 0.30, hp: 0.30 }
     },
 
     /* ---------- 默认初始玩家 ---------- */

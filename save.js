@@ -240,10 +240,7 @@ const SaveSystem = {
         if (player.tribulus && player.tribulus.xiuMult) {
             base *= (1 + player.tribulus.xiuMult);
         }
-        // 转世轮回加成（根基越厚，修炼越快）
-        if (player.rebirth && GameConfig.rebirth) {
-            base *= (1 + player.rebirth * GameConfig.rebirth.perLevel.xiu);
-        }
+        // 注：轮回加成现仅作用于 气血/攻击（见 Cultivate.getRebirthBonus），不再加成修炼速率
         return base;
     },
 

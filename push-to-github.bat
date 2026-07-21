@@ -8,21 +8,22 @@ if exist "E:\Git\cmd\git.exe" (set "GIT=E:\Git\cmd\git.exe") else (set "GIT=git"
 REM === go to the script's own folder ===
 cd /d "%~dp0"
 
+set "USER=xiaozhang991776"
+
 echo ============================================
 echo   Push xiuxian-game to GitHub Pages
 echo ============================================
 echo.
+echo Account: %USER%
+echo.
 
-REM === read credentials (native cmd input, very stable) ===
-set "USER="
-set /p USER="GitHub username (ENTER = xiaozhang991776): "
-if "%USER%"=="" set "USER=xiaozhang991776"
-
+REM === only ask for PAT (avoid pasting token into username field) ===
 set "PAT="
-set /p PAT="Paste your GitHub PAT token: "
+set /p PAT="Paste your GitHub PAT token (ghp_...): "
 if "%PAT%"=="" (
   echo.
   echo ERROR: PAT is empty. Run again and paste the token.
+  echo To create/revoke tokens: github.com/settings/tokens
   pause
   exit /b 1
 )
@@ -42,14 +43,14 @@ set "PUSHERR=%errorlevel%"
 echo.
 if %PUSHERR%==0 (
   echo *** PUSH OK ***
-  echo Site will be live at: https://xiaozhang991776.github.io/xiuxiangame/
-  echo (If first time: repo Settings - Pages - Source: main branch, then wait ~1 min)
+  echo Site: https://xiaozhang991776.github.io/xiuxiangame/
+  echo (Wait ~1 minute, then refresh)
 ) else (
   echo *** PUSH FAILED (code %PUSHERR%) ***
   echo Common causes:
   echo   1. PAT wrong / expired / missing "repo" scope
-  echo   2. PAT not owned by account xiaozhang991776
-  echo   3. Remote already has conflicting history (rare for fresh repo)
+  echo   2. Network reset: try again, or turn on your proxy/VPN for GitHub
+  echo   3. Remote has conflicting history
 )
 echo.
 pause

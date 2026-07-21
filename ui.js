@@ -766,6 +766,11 @@ const UI = {
         document.getElementById('attrSpd').textContent = stats.spd;
         document.getElementById('attrCrit').textContent = (stats.crit * 100).toFixed(0) + '%';
         document.getElementById('attrElem').textContent = GameConfig.elements[p.element].name;
+        // 战力 / 战力上限
+        const powerEl = document.getElementById('attrPower');
+        if (powerEl) powerEl.textContent = fmtNum(Cultivate.calcCombatPower(p));
+        const capEl = document.getElementById('attrPowerCap');
+        if (capEl) capEl.textContent = fmtNum(Cultivate.getPowerCap(p));
         // 装备
         const slots = { weapon: '武器', armor: '护甲', accessory: '饰品', fabao: '法宝' };
         const equipList = document.getElementById('equipList');
@@ -918,30 +923,37 @@ const UI = {
         const bonusEl = document.getElementById('rbBonus');
         const prevEl = document.getElementById('rbPreview');
         const hintEl = document.getElementById('rbHint');
-        if (cntEl) cntEl.textContent = n;
-        if (bonusEl) bonusEl.textContent = `属性 ×${rb.atkMult.toFixed(2)} · 修炼 ×${(1 + rb.xiuMult).toFixed(2)} · 灵石 ×${(1 + rb.stoneMult).toFixed(2)}`;
+        const capEl = document.getElementById('rbPowerCap');
+        if (cntEl) cntEl.textContent = n + ' 世';
+        if (bonusEl) bonusEl.textContent = `气血 ×${rb.hpMult.toFixed(2)} · 攻击 ×${rb.atkMult.toFixed(2)}`;
+        if (capEl) capEl.textContent = fmtNum(Cultivate.getPowerCap(p));
         if (prevEl) {
             const nx = n + 1;
             prevEl.innerHTML = `<div class="rb-line">下一世（第 ${nx} 世）将得：</div>` +
                 `<div class="rb-grid">` +
-                `<span>基础属性</span><b>×${(1 + nx * c.atk).toFixed(2)}</b>` +
-                `<span>修炼速率</span><b>×${(1 + nx * c.xiu).toFixed(2)}</b>` +
-                `<span>灵石获取</span><b>×${(1 + nx * c.stone).toFixed(2)}</b>` +
+                `<span>气血加成</span><b>×${(1 + nx * c.hp).toFixed(2)}</b>` +
+                `<span>攻击加成</span><b>×${(1 + nx * c.atk).toFixed(2)}</b>` +
+                `<span>战力上限</span><b>${fmtNum(Cultivate.getPowerCap(Object.assign({}, p, { rebirth: nx })))}</b>` +
                 `</div>`;
         }
         if (hintEl) {
-            if ((p.realmIdx || 0) < cfg.unlockRealmIdx) {
-                hintEl.innerHTML = `<span class="rb-lock">需先达 ${getRealm(cfg.unlockRealmIdx).name}期 方可轮回。当前境界：${getRealm(p.realmIdx || 0).name}。</span>`;
+            const need = Cultivate.getMaxRealm(p);
+            if ((p.realmIdx || 0) < need) {
+                hintEl.innerHTML = `<span class="rb-lock">免费轮回需先达 <b>${getRealm(need).name}</b>期（今生境界天花板，随轮回次数递增）。当前境界：${getRealm(p.realmIdx || 0).name}。</span>`;
             } else {
                 const herbName = getMaterial(cfg.herbId).name;
                 const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
-                hintEl.innerHTML = `轮回丹轮回需 ${cfg.herbCost} 株${herbName}（坊市 ${fmtNum(getMaterial(cfg.herbId).price)}灵石/株）。你现有 <b>${have}</b> 株。`;
+                hintEl.innerHTML = `轮回草轮回需 ${cfg.herbCost} 株${herbName}（坊市 ${fmtNum(getMaterial(cfg.herbId).price)}灵石/株）。你现有 <b>${have}</b> 株。`;
             }
         }
         const pillBtn = document.getElementById('btnRebirthPill');
         if (pillBtn) {
             const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
             pillBtn.disabled = have < cfg.herbCost;
+        }
+        const freeBtn = document.getElementById('btnRebirthFree');
+        if (freeBtn) {
+            freeBtn.disabled = (p.realmIdx || 0) < Cultivate.getMaxRealm(p);
         }
     },
     doReincarnate(mode) {
