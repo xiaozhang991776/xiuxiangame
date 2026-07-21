@@ -188,12 +188,6 @@
                 <button class="nav-btn" data-panel="skill" title="神通">
                     <span class="nav-icon">符</span><span class="nav-label">神通</span>
                 </button>
-                <button class="nav-btn" data-panel="pet" title="灵宠">
-                    <span class="nav-icon">宠</span><span class="nav-label">灵宠</span>
-                </button>
-                <button class="nav-btn" data-panel="talent" title="天赋">
-                    <span class="nav-icon">赋</span><span class="nav-label">天赋</span>
-                </button>
                 <button class="nav-btn" data-panel="shop" title="坊市">
                     <span class="nav-icon">市</span><span class="nav-label">坊市</span>
                 </button>
@@ -212,6 +206,12 @@
             <section class="content-area" id="contentArea">
                 <!-- 修炼面板 -->
                 <div class="panel active" id="panel-cultivate">
+                    <div class="cult-subtabs">
+                        <button class="cult-subtab active" data-sub="cult" onclick="UI.switchCultSub('cult')">修炼</button>
+                        <button class="cult-subtab" data-sub="pet" onclick="UI.switchCultSub('pet')">灵宠</button>
+                        <button class="cult-subtab" data-sub="talent" onclick="UI.switchCultSub('talent')">天赋</button>
+                    </div>
+                    <div class="cult-subview active" id="cultSubCult">
                     <div class="cultivate-scene">
                         <div class="cultivate-circle">
                             <div class="cultivate-glyph" id="cultivateGlyph">☯</div>
@@ -285,6 +285,25 @@
                             </div>
                         </div>
                     </div>
+                    </div><!-- /cultSubCult -->
+                    <!-- 灵宠子视图（原 panel-pet 移入） -->
+                    <div class="cult-subview" id="cultSubPet">
+                        <h3 class="panel-title">灵宠培养</h3>
+                        <p class="panel-desc">喂养、修炼、化形进阶，养成与你同生共死的本命灵宠。坊市可购灵宠，历练东海龙宫可得幼龙。</p>
+                        <div class="pet-cult-list" id="petCultList"></div>
+                        <div class="pet-cult-detail" id="petCultDetail">
+                            <p class="inv-detail-empty">选中灵宠查看详情</p>
+                        </div>
+                    </div>
+                    <!-- 天赋子视图（原 panel-talent 移入） -->
+                    <div class="cult-subview" id="cultSubTalent">
+                        <div class="talent-head">
+                            <h3 class="panel-title">天赋</h3>
+                            <div class="talent-pts">天赋点：<b id="talentPts">0</b></div>
+                        </div>
+                        <p class="panel-desc">突破大境界觉醒天赋点（每满 5 小境界再得 1 点）。修习六系天赋，永久增益道途。</p>
+                        <div class="talent-tree" id="talentTree"></div>
+                    </div>
                 </div>
 
                 <!-- 斗法面板 -->
@@ -308,7 +327,6 @@
                     <div class="inv-tabs">
                         <button class="inv-tab active" data-tab="equipment">装备</button>
                         <button class="inv-tab" data-tab="pill">丹药</button>
-                        <button class="inv-tab" data-tab="material">材料</button>
                         <button class="inv-tab" data-tab="gongfa">功法</button>
                         <button class="inv-tab" data-tab="fabao">法宝</button>
                     </div>
@@ -325,26 +343,6 @@
                     <div class="skill-list" id="skillList"></div>
                 </div>
 
-                <!-- 灵宠面板 -->
-                <div class="panel" id="panel-pet">
-                    <h3 class="panel-title">灵宠培养</h3>
-                    <p class="panel-desc">喂养、修炼、化形进阶，养成与你同生共死的本命灵宠。坊市可购灵宠，历练东海龙宫可得幼龙。</p>
-                    <div class="pet-cult-list" id="petCultList"></div>
-                    <div class="pet-cult-detail" id="petCultDetail">
-                        <p class="inv-detail-empty">选中灵宠查看详情</p>
-                    </div>
-                </div>
-
-                <!-- 天赋面板 -->
-                <div class="panel" id="panel-talent">
-                    <div class="talent-head">
-                        <h3 class="panel-title">天赋</h3>
-                        <div class="talent-pts">天赋点：<b id="talentPts">0</b></div>
-                    </div>
-                    <p class="panel-desc">突破大境界觉醒天赋点（每满 5 小境界再得 1 点）。修习六系天赋，永久增益道途。</p>
-                    <div class="talent-tree" id="talentTree"></div>
-                </div>
-
                 <!-- 坊市面板 -->
                 <div class="panel" id="panel-shop">
                     <div class="shop-tabs">
@@ -358,7 +356,6 @@
                             <button class="shop-category active" data-cat="all">全部</button>
                             <button class="shop-category" data-cat="equipment">装备</button>
                             <button class="shop-category" data-cat="pill">丹药</button>
-                            <button class="shop-category" data-cat="material">材料</button>
                             <button class="shop-category" data-cat="gongfa">功法</button>
                             <button class="shop-category" data-cat="fabao">法宝</button>
                             <button class="shop-category" data-cat="pet">灵宠</button>
@@ -427,6 +424,9 @@
                     <div class="rebirth-actions">
                         <button class="btn-rebirth free" id="btnRebirthFree" onclick="UI.doReincarnate('free')">免费轮回（重置境界，保留生命/攻击加成）</button>
                         <button class="btn-rebirth pill" id="btnRebirthPill" onclick="UI.doReincarnate('pill')">轮回草轮回（耗 100 株轮回草）</button>
+                    </div>
+                    <div class="rebirth-buy">
+                        <button class="btn-buy-herb" id="btnBuyRebirthHerb" onclick="UI.buyItem('material','m_rebirth_herb')">购买轮回草</button>
                     </div>
                     <div class="rebirth-hint" id="rbHint"></div>
                 </div>

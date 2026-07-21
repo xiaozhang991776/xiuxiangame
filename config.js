@@ -238,7 +238,7 @@ const GameConfig = {
     shopItems: {
         equipment: ['w_short_sword', 'a_cloth_robe', 'ac_jade_pendant', 'w_flame_blade', 'a_silk_robe', 'ac_fire_ring', 'w_zither', 'a_spirit_armor', 'ac_spirit_band', 'w_thunder_sword', 'a_starlight', 'ac_star_pendant', 'w_azure_spear', 'w_sun_moon', 'w_pangu_axe', 'a_bronze_mirror', 'a_azure_robe', 'a_celestial', 'ac_wind_charm', 'ac_dragon_jade', 'ac_void_orb'],
         pill: ['p_qi_pill', 'p_hp_pill', 'p_xiu_pill', 'p_atk_pill', 'p_def_pill', 'p_breakthrough', 'p_permanent_hp', 'p_permanent_atk', 'p_grand_hp', 'p_grand_ling', 'p_ningshen'],
-        material: ['m_herb', 'm_ore', 'm_beast', 'm_pearl', 'm_spirit_wood', 'm_geng_gold', 'm_qi_essence', 'm_rebirth_herb'],
+        material: [], // 坊市不再设「材料」分类；灵兽粮/化形丹由灵宠面板购买，轮回草由转世面板购买，基础材料仅供炼制/掉落
         gongfa: ['g_five_elem', 'g_purple', 'g_chaos', 'g_immortal', 'g_void'],
         fabao: ['f_bell', 'f_mountain', 'f_mirror', 'f_pagoda', 'f_jade_ruyi', 'f_void_banner'],
         pet: ['pet_wolf', 'pet_turtle', 'pet_phoenix', 'pet_dragon']

@@ -987,7 +987,11 @@ const UI = {
                 <button class="pd-btn" onclick="UI.petTrain('${inst.id}')">修炼（耗 ${fmtNum(trainCost)} 修为）</button>
                 <button class="pd-btn${canEvo ? '' : ' disabled'}" ${canEvo ? '' : 'disabled'} onclick="UI.petEvolve('${inst.id}')">化形进阶${canEvo ? '' : `（需 Lv.${evoNeed}）`}</button>
             </div>
-            <div class="pd-hint">持有：灵兽粮 ${food} · 化形丹 ${evoDan}（坊市可购）</div>
+            <div class="pd-buy">
+                <button class="pd-btn ghost" onclick="UI.buyItem('material','m_pet_food')">购买灵兽粮（${fmtNum(getMaterial('m_pet_food').price)}灵石）</button>
+                <button class="pd-btn ghost" onclick="UI.buyItem('material','m_pet_evo')">购买化形丹（${fmtNum(getMaterial('m_pet_evo').price)}灵石）</button>
+            </div>
+            <div class="pd-hint">持有：灵兽粮 ${food} · 化形丹 ${evoDan}（不足可在上方直接购买）</div>
         `;
     },
     setPetActive(id) {
@@ -1088,13 +1092,19 @@ const UI = {
             } else {
                 const herbName = getMaterial(cfg.herbId).name;
                 const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
-                hintEl.innerHTML = `轮回草轮回需 ${cfg.herbCost} 株${herbName}（坊市 ${fmtNum(getMaterial(cfg.herbId).price)}灵石/株）。你现有 <b>${have}</b> 株。`;
+                hintEl.innerHTML = `轮回草轮回需 ${cfg.herbCost} 株${herbName}（每株 ${fmtNum(getMaterial(cfg.herbId).price)}灵石，下方可直接购买）。你现有 <b>${have}</b> 株。`;
             }
         }
         const pillBtn = document.getElementById('btnRebirthPill');
         if (pillBtn) {
             const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
             pillBtn.disabled = have < cfg.herbCost;
+        }
+        const buyBtn = document.getElementById('btnBuyRebirthHerb');
+        if (buyBtn) {
+            const price = getMaterial(cfg.herbId).price;
+            buyBtn.textContent = `购买轮回草（${fmtNum(price)}灵石/株）`;
+            buyBtn.disabled = (p.stone || 0) < price;
         }
         const freeBtn = document.getElementById('btnRebirthFree');
         if (freeBtn) {
@@ -1136,14 +1146,38 @@ const UI = {
         safe(this.renderTalent);
     },
 
+    /* ---------- 修炼区子标签切换（灵宠/天赋并入） ---------- */
+    switchCultSub(sub) {
+        const map = { cult: 'cultSubCult', pet: 'cultSubPet', talent: 'cultSubTalent' };
+        const id = map[sub]; if (!id) return;
+        // 确保修炼面板为当前激活面板
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.panel === 'cultivate'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        const cp = document.getElementById('panel-cultivate');
+        if (cp) cp.classList.add('active');
+        Game.currentPanel = 'cultivate';
+        // 切换子视图显隐
+        document.querySelectorAll('.cult-subview').forEach(v => v.classList.remove('active'));
+        const sv = document.getElementById(id);
+        if (sv) sv.classList.add('active');
+        document.querySelectorAll('.cult-subtab').forEach(t => t.classList.toggle('active', t.dataset.sub === sub));
+        // 渲染对应内容
+        if (sub === 'cult') this.renderCultivate();
+        else if (sub === 'pet') this.renderPetPanel();
+        else if (sub === 'talent') this.renderTalent();
+    },
+
     /* ---------- 切换面板 ---------- */
     switchPanel(name) {
+        // 灵宠/天赋已并入修炼区子标签，快捷键与教程经此统一路由
+        if (name === 'pet' || name === 'talent') { this.switchCultSub(name); return; }
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-' + name).classList.add('active');
+        const panel = document.getElementById('panel-' + name);
+        if (panel) panel.classList.add('active');
         Game.currentPanel = name;
         // 切换到面板时刷新对应内容
-        if (name === 'cultivate') this.renderCultivate();
+        if (name === 'cultivate') this.switchCultSub('cult');
         else if (name === 'combat') this.renderEnemyList();
         else if (name === 'explore') this.renderSceneList();
         else if (name === 'inventory') this.renderInventory();
@@ -1152,8 +1186,6 @@ const UI = {
         else if (name === 'quest') this.renderQuests();
         else if (name === 'friends') this.renderFriends();
         else if (name === 'reincarnate') this.renderReincarnate();
-        else if (name === 'pet') this.renderPetPanel();
-        else if (name === 'talent') this.renderTalent();
     },
 
     /* ---------- 新手教程 ---------- */
@@ -1165,13 +1197,13 @@ const UI = {
         { title: '寿元将尽', body: '留意右上「<b>寿元</b>」：每过真实<b>一分钟减一</b>，闭关游历亦折寿元。寿元耗尽便<b>羽化归虚</b>，故当抓紧修行。', panel: 'cultivate', target: '#topLife' },
         { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得修为、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
         { title: '三界历练', body: '「<b>历练</b>」可访名山、探秘境、遇奇遇，收获随机机缘，妙不可言。', panel: 'explore', target: '#panel-explore' },
-        { title: '坊市淘宝', body: '切到「<b>坊市</b>」可买卖物资、搜罗法宝。材料、丹药、装备皆可交易；修行所需的<b>轮回草</b>亦在此求购。', panel: 'shop', target: '#panel-shop' },
+        { title: '坊市淘宝', body: '切到「<b>坊市</b>」可买卖物资、搜罗法宝。装备、丹药、功法、法宝、灵宠皆可交易；修行所需的<b>轮回草</b>则于「转世轮回」面板内直达购买。', panel: 'shop', target: '#panel-shop' },
         { title: '乾坤袋', body: '「<b>乾坤袋</b>」随身藏纳装备丹药。穿戴<b>武器·护甲·饰品·法宝</b>可增益气血、攻击、防御与灵力；丹药则提供临时裨益。战力强弱，半系于此。', panel: 'inventory', target: '#panel-inventory' },
         { title: '神通', body: '「<b>神通</b>」可修习法术，临阵施展。攻伐、护身、辅助各具妙用，功法愈深，威能愈盛——是越阶斗法、闯荡秘境的底气。', panel: 'skill', target: '#panel-skill' },
         { title: '道友', body: '「<b>道友</b>」凭<b>档案码</b>结交同道，<b>道友榜</b>按战力排序、彼此砥砺；亦可与道友切磋论道，互证修行。', panel: 'friends', target: '#panel-friends' },
         { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>今生境界天花板</b>」（筑基 + 已轮回世数）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
-        { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；选中灵宠可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗修为）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'pet', target: '#panel-pet' },
-        { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。六系天赋（攻伐/守御/长生/悟道/御兽/天命）永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'talent', target: '#panel-talent' },
+        { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；在<b>修炼区·灵宠</b>子标签中选中灵宠，可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗修为）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'cultivate', sub: 'pet', target: '#cultSubPet' },
+        { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。在<b>修炼区·天赋</b>子标签修习六系天赋（攻伐/守御/长生/悟道/御兽/天命），永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'cultivate', sub: 'talent', target: '#cultSubTalent' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
     ],
     tutorialIndex: 0,
@@ -1192,6 +1224,7 @@ const UI = {
         const i = this.tutorialIndex;
         const step = steps[i];
         if (step.panel && Game.currentPanel !== step.panel) this.switchPanel(step.panel);
+        if (step.sub) this.switchCultSub(step.sub);
         const titleEl = document.getElementById('tutorialTitle');
         const bodyEl = document.getElementById('tutorialBody');
         const stepEl = document.getElementById('tutorialStep');

@@ -1,6 +1,6 @@
 /* ============================================
    仙途·轮回诀 — 坊市拓展包（生成）
-   共 117 件新物品：材料 40 / 丹药 30 / 装备 24 / 法宝 8 / 功法 6 / 灵宠 9
+   共 77 件新物品：丹药 30 / 装备 24 / 法宝 8 / 功法 6 / 灵宠 9（通用材料已移出，仅保留炼制/转世所需的灵草·灵矿等基础材料与灵兽粮·化形丹·轮回草）
    本文件在 config.js 之后加载，仅向 GameConfig 注入数据，不改动原配置。
    每件物品均含「详细介绍」（desc 字段），坊市卡片与乾坤袋详情中显示。
    ============================================ */
@@ -8,50 +8,6 @@
     if (typeof GameConfig === 'undefined') return;
     const C = GameConfig;
 
-    // 材料（40）
-    const newMaterials = [
-        { id: 'm_qingling', name: '青灵草', icon: '草', quality: 0, price: 15, desc: '生于灵脉旁的淡青小草，晨露含灵，是炼制聚气丹最基础的药引，凡修士入门必识。' },
-        { id: 'm_ziyun', name: '紫云芝', icon: '芝', quality: 1, price: 45, desc: '芝盖紫气缭绕，服之宁神静气，乃炼制中品丹药的上佳药基。' },
-        { id: 'm_youlan', name: '幽兰草', icon: '草', quality: 1, price: 55, desc: '长于幽谷的墨兰，夜吐幽香引灵气，多用于凝灵类丹方。' },
-        { id: 'm_longxue', name: '龙血草', icon: '草', quality: 2, price: 180, desc: '叶脉如龙血蜿蜒，蕴磅礴生机，是疗伤续命丹的核心药引。' },
-        { id: 'm_xingwen', name: '星纹草', icon: '草', quality: 2, price: 200, desc: '叶面天生星纹，可引星光入药，助修行者开窍悟道。' },
-        { id: 'm_xuanbing', name: '玄冰花', icon: '花', quality: 3, price: 700, desc: '生于万载玄冰之上的奇花，性至寒，炼液可镇心魔、凝神识。' },
-        { id: 'm_chiyan', name: '赤焰莲', icon: '莲', quality: 3, price: 760, desc: '扎根地火脉的火莲，花心藏赤焰，乃火属丹方不可缺的引子。' },
-        { id: 'm_jiuling', name: '九叶灵芝', icon: '芝', quality: 4, price: 3000, desc: '九叶同生、千年一现的灵芝王，一口灵气沛然，是炼制仙丹的主药。' },
-        { id: 'm_yugu', name: '玉骨参', icon: '参', quality: 4, price: 3200, desc: '通体如玉的人参，骨节藏灵，服之可固本培元、延寿增根。' },
-        { id: 'm_hunhua', name: '混沌花', icon: '花', quality: 5, price: 12000, desc: '根植混沌裂隙的诡花，吸太初之气而开，凡人近之即迷，唯大能可采。' },
-        { id: 'm_xuantie', name: '玄铁', icon: '矿', quality: 0, price: 12, desc: '最寻常的含铁灵矿，虽质地粗粝，却是炼器的入门之材。' },
-        { id: 'm_chitong', name: '赤铜', icon: '矿', quality: 0, price: 14, desc: '泛赤光的铜矿，性偏火，铸出的法器自带三分炎威。' },
-        { id: 'm_hantie', name: '寒铁', icon: '矿', quality: 1, price: 40, desc: '采自极北冰渊的玄铁，质沉而冷，最宜锻防御之器。' },
-        { id: 'm_gengjing', name: '庚精', icon: '矿', quality: 2, price: 150, desc: '庚金之精凝成的金属块，锋锐无比，乃上品飞剑的核心料。' },
-        { id: 'm_xingtie', name: '星辰铁', icon: '矿', quality: 3, price: 600, desc: '陨星核心所化，内藏星力，铸器可引星光破邪。' },
-        { id: 'm_taiyijing', name: '太乙精金', icon: '矿', quality: 3, price: 680, desc: '太乙之气淬炼万载的金精，坚逾金刚，仙器之基。' },
-        { id: 'm_xuanhuang', name: '玄黄石', icon: '石', quality: 1, price: 60, desc: '黄土中孕出的道纹石，厚重载物，多用于镇器、压阵。' },
-        { id: 'm_xukong', name: '虚空晶', icon: '晶', quality: 4, price: 2600, desc: '虚空裂隙析出的晶体，可纳乾坤，是空间类法宝的至宝材。' },
-        { id: 'm_buzhou', name: '不周山石', icon: '石', quality: 4, price: 2800, desc: '上古撑天之山崩落的一块残石，重若山岳，镇一切虚妄。' },
-        { id: 'm_hunmujin', name: '混沌母金', icon: '石', quality: 5, price: 12000, desc: '混沌未分时的母金，万金之源，铸神器必不可缺。' },
-        { id: 'm_yaodan', name: '妖丹', icon: '丹', quality: 1, price: 40, desc: '妖兽内丹，凝其一生修为，乃炼制虎力、凝神等丹的贵料。' },
-        { id: 'm_shouhun', name: '兽魂', icon: '魂', quality: 2, price: 160, desc: '妖兽陨落不散的残魂，封入器可赋灵，亦能炼聚魂丹。' },
-        { id: 'm_longlin', name: '龙鳞粉', icon: '粉', quality: 3, price: 600, desc: '真龙褪下的鳞研成的粉，护身至宝，炼甲可刀枪难入。' },
-        { id: 'm_fengyu', name: '凤羽', icon: '羽', quality: 3, price: 640, desc: '不死凤凰脱落的火羽，蕴重生之意，炼丹可续命还魂。' },
-        { id: 'm_qilin', name: '麒麟血', icon: '血', quality: 4, price: 2600, desc: '仁兽麒麟心头之血，一滴可活死人，是造化类仙丹主引。' },
-        { id: 'm_xuanwu', name: '玄武甲', icon: '甲', quality: 3, price: 620, desc: '玄龟本命之甲，水属至坚，研粉入丹可固元抗毒。' },
-        { id: 'm_zhuyan', name: '朱厌牙', icon: '牙', quality: 2, price: 170, desc: '凶兽朱厌的獠牙，煞气极重，炼器可成破甲之锋。' },
-        { id: 'm_taotie', name: '饕餮筋', icon: '筋', quality: 4, price: 2700, desc: '上古凶兽饕餮的筋脉，韧性无双，束于身可增力御击。' },
-        { id: 'm_baize', name: '白泽角', icon: '角', quality: 4, price: 2900, desc: '通万物之白的白泽之角，悬之辟百邪，炼器可成护身神物。' },
-        { id: 'm_zhulong', name: '烛龙齿', icon: '齿', quality: 5, price: 12000, desc: '烛龙一枚逆鳞齿，含光阴之力，是大能炼器的无上材。' },
-        { id: 'm_lingtan', name: '灵檀木', icon: '木', quality: 1, price: 30, desc: '散发清香的灵木，燃之可净室驱浊，亦为温养法器的好料。' },
-        { id: 'm_chenxiang', name: '万年沉香', icon: '木', quality: 2, price: 130, desc: '沉于灵泉万载的奇香木，香气凝神，炼丹可稳火候。' },
-        { id: 'm_yanghun', name: '养魂木', icon: '木', quality: 3, price: 520, desc: '天生养魂的阴木，贴近可安魂魄，是炼制护神丹的秘材。' },
-        { id: 'm_puti', name: '菩提子', icon: '子', quality: 2, price: 140, desc: '菩提树下所结之子，藏佛理禅机，服之可破迷开悟。' },
-        { id: 'm_wudao', name: '悟道茶', icon: '茶', quality: 3, price: 560, desc: '生于道崖的灵茶，三叶一采，饮之如当面听道，悟性大增。' },
-        { id: 'm_huangquan', name: '黄泉泥', icon: '泥', quality: 4, price: 2400, desc: '幽冥黄泉之畔的淤泥，污秽中藏生灭之理，炼器可成阴煞之物。' },
-        { id: 'm_bian', name: '彼岸花', icon: '花', quality: 4, price: 2500, desc: '花开彼岸、叶落此岸的冥花，引魂亦镇魂，乃鬼修至爱。' },
-        { id: 'm_sanguang', name: '三光神水', icon: '水', quality: 5, price: 11000, desc: '日月光华与星辉同淬的神水，洗髓伐毛第一奇物。' },
-        { id: 'm_xiantian', name: '先天一气', icon: '气', quality: 5, price: 13000, desc: '开天前便存在的太初之气，一点可补全道基残缺。' },
-        { id: 'm_taichu', name: '太初玄气', icon: '气', quality: 5, price: 14000, desc: '比先天更古的玄气，万法之母，唯道祖可炼用分毫。' }
-    ];
-    newMaterials.forEach(m => { C.materials.push(m); C.shopItems.material.push(m.id); });
 
     // 丹药（30）—— 含 4 个新增效果类型：perm_def / perm_crit / perm_spd / stone
     const newPills = [

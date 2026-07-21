@@ -123,6 +123,5 @@ const PetSys = {
         { id: 'm_pet_evo',  name: '化形丹', icon: '丹', quality: 3, price: 20000,  desc: '灵宠化形进阶之丹，等级足时可令其蜕变' }
     ];
     mats.forEach(m => { if (!GameConfig.materials.find(x => x.id === m.id)) GameConfig.materials.push(m); });
-    GameConfig.shopItems.material = GameConfig.shopItems.material || [];
-    mats.forEach(m => { if (!GameConfig.shopItems.material.includes(m.id)) GameConfig.shopItems.material.push(m.id); });
+    // 灵兽粮/化形丹不再进坊市「材料」分类（该分类已移除），改由「灵宠」面板内直接购买
 })();

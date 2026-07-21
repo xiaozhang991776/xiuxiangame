@@ -150,11 +150,11 @@ console.log('\n[7] 战斗伤害乘区');
 ok('玩家伤害 ×1.4（戮仙10级）', approx(Talent.dmgDealMult({ talents:{pts:0,learned:{t_dmg:10}} }), 1.4));
 ok('玩家减伤 0.30（护身10级）', approx(Talent.dmgReduce({ talents:{pts:0,learned:{t_guard:10}} }), 0.30));
 
-console.log('\n[8] 坊市注入新材料');
-ok('灵兽粮在 materials', !!GameConfig.materials.find(m=>m.id==='m_pet_food'));
-ok('化形丹在 materials', !!GameConfig.materials.find(m=>m.id==='m_pet_evo'));
-ok('灵兽粮在 shopItems.material', GameConfig.shopItems.material.includes('m_pet_food'));
-ok('化形丹在 shopItems.material', GameConfig.shopItems.material.includes('m_pet_evo'));
+console.log('\n[8] 灵宠材料注入（材料分类已从坊市/乾坤袋移出）');
+ok('灵兽粮在 materials（供灵宠面板购买）', !!GameConfig.materials.find(m=>m.id==='m_pet_food'));
+ok('化形丹在 materials（供灵宠面板购买）', !!GameConfig.materials.find(m=>m.id==='m_pet_evo'));
+ok('坊市不再设「材料」分类（shopItems.material 为空）', Array.isArray(GameConfig.shopItems.material) && GameConfig.shopItems.material.length === 0);
+ok('轮回草在 materials（供转世面板购买）', !!GameConfig.materials.find(m=>m.id==='m_rebirth_herb'));
 
 console.log('\n[9] 突破觉醒天赋点');
 (async () => {
