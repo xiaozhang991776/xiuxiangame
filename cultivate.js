@@ -55,6 +55,9 @@ const Cultivate = {
         const talentXiu = (typeof Talent !== 'undefined') ? Talent.xiuRateMult(player) : 1;
         base *= talentXiu;
 
+        // 硬顶：最终修炼速率不得超过 JS 安全整数，防止界面上出现无法阅读的超大数字，也避免后续点击/闭关收益中间值溢出
+        base = Math.min(base, Number.MAX_SAFE_INTEGER);
+
         return {
             base,
             realmMult,
@@ -221,8 +224,8 @@ const Cultivate = {
 
     // 悟性系统：顿悟消耗资源，永久提升每次点击修为与修炼速率
     WUXING_MAX: 50,            // 悟性上限（重）
-    WUXING_TAP_PER: 1000,    // 每重：每次点击修炼修为 ×10000（+100000%）
-    WUXING_RATE_PER: 500,    // 每重：修炼速率 ×10000（+50000%）
+    WUXING_TAP_PER: 1.0,    // 每重：每次点击修炼修为 +100%（50重共×51，强力但数字受控）
+    WUXING_RATE_PER: 0.5,    // 每重：修炼速率 +50%（50重共×26，后期显著但不再爆表）
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
     // 顿悟到下一级的资源成本（指数增长，门槛较高）
@@ -269,9 +272,10 @@ const Cultivate = {
             if (typeof UI !== 'undefined') UI.toast(`寿元不足，仅余${player.lifespan}年`, 'bad');
             return null;
         }
-        // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数
+        // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，直接钳到安全整数防止中间值/显示值爆炸
         const rate = SaveSystem.calcCultivateRate(player);
-        const xiuGain = Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY);
+        const SAFE = Number.MAX_SAFE_INTEGER;
+        const xiuGain = Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY), SAFE);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
         if (player.lifespan <= 0) {
@@ -284,8 +288,6 @@ const Cultivate = {
             return { xiu: xiuGain, years, dead: true };
         }
         // 防溢出：修为（及累计修为）严格限制在 JS 安全整数内，避免后期高阶功法/长闭关导致数值爆表（Infinity/NaN→战力超模）
-        const SAFE = Number.MAX_SAFE_INTEGER;
-        xiuGain = Math.min(xiuGain, SAFE);
         player.xiu = Math.min((player.xiu || 0) + xiuGain, SAFE);
         player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + xiuGain, SAFE);
         this.save(player);
@@ -502,10 +504,9 @@ const Cultivate = {
         }
         this.tapComboTimer = now;
         const comboMult = 1 + (this.tapCombo - 1) * 0.08; // 最高约 1.88x
-        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击
-        const gain = Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player)));
-        // 防溢出：点击修炼所得同样限制在安全整数内
+        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，直接钳到安全整数
         const SAFE = Number.MAX_SAFE_INTEGER;
+        const gain = Math.min(Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player))), SAFE);
         player.xiu = Math.min((player.xiu || 0) + gain, SAFE);
         player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + gain, SAFE);
         // 任务进度

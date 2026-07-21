@@ -264,15 +264,17 @@ const SaveSystem = {
         }
         // 天赋加成（悟道系·明悟）
         if (typeof Talent !== 'undefined') base *= Talent.xiuRateMult(player);
-        return base;
+        // 硬顶：最终速率不得超过 JS 安全整数，防止 UI/离线收益出现无法阅读的超大数字
+        return Math.min(base, Number.MAX_SAFE_INTEGER);
     },
 
     /* ---------- 应用离线收益 ---------- */
     applyOfflineReward(player) {
         const reward = this.calcOfflineReward(player);
+        const SAFE = Number.MAX_SAFE_INTEGER;
         if (reward.xiu > 0) {
-            player.xiu += reward.xiu;
-            player.stats.totalXiu = (player.stats.totalXiu || 0) + reward.xiu;
+            player.xiu = Math.min((player.xiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
+            player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
         }
         player.lastOffline = Date.now();
         player.lastSave = Date.now(); // 防止下次用旧lastSave重复结算离线收益
