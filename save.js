@@ -236,6 +236,10 @@ const SaveSystem = {
         if (typeof Cultivate !== 'undefined' && Cultivate.wuxingRateMult) {
             base *= Cultivate.wuxingRateMult(player);
         }
+        // 渡劫加成（劫后余韵永久提升修炼速率）
+        if (player.tribulus && player.tribulus.xiuMult) {
+            base *= (1 + player.tribulus.xiuMult);
+        }
         return base;
     },
 

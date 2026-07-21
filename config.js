@@ -39,6 +39,25 @@ const GameConfig = {
         { key: 'shen', name: '神品', color: '#f43f5e', mult: 7.0,  sellMult: 120}
     ],
 
+    /* ---------- 渡劫天劫配置 ---------- */
+    tribulations: [
+        { id: 'lei',    name: '九天雷劫', icon: '⚡', elem: 'metal',
+          desc: '天穹裂开，紫霄神雷劈落，淬炼道躯。以攻伐之威硬抗，方显道心。',
+          baseChance: 0.60, successBonus: { xiuMult: 0.06, stoneMult: 0.04 },
+          protectCostBase: 300, protectBonus: { xiuMult: 0.02, stoneMult: 0.015 },
+          failPenalty: { layerDown: 2, xiuLossPct: 0.30, lifeLoss: 5 } },
+        { id: 'xinmo', name: '心魔大劫', icon: '🌀', elem: 'wood',
+          desc: '心中妄念化形，幻境叠生。需灵台清明、悟性通明方能勘破。',
+          baseChance: 0.58, successBonus: { xiuMult: 0.07, stoneMult: 0.05 },
+          protectCostBase: 500, protectBonus: { xiuMult: 0.02, stoneMult: 0.02 },
+          failPenalty: { layerDown: 1, xiuLossPct: 0.40, lifeLoss: 8 } },
+        { id: 'yehuo', name: '无量业火', icon: '🔥', elem: 'fire',
+          desc: '红莲业火自足底燃起，焚尽业障亦焚道基。须气血雄浑方可熬过。',
+          baseChance: 0.56, successBonus: { xiuMult: 0.08, stoneMult: 0.06 },
+          protectCostBase: 800, protectBonus: { xiuMult: 0.025, stoneMult: 0.025 },
+          failPenalty: { layerDown: 3, xiuLossPct: 0.50, lifeLoss: 10 } }
+    ],
+
     /* ---------- 装备模板 ---------- */
     equipmentTemplates: [
         // 武器
@@ -272,6 +291,8 @@ const GameConfig = {
         quests: {},
         // 统计
         stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0, tutorialDone: false },
+        // 渡劫天劫永久加成（劫后余韵）
+        tribulus: { xiuMult: 0, stoneMult: 0 },
         // 寿元（闭关上限）：每闭关一年折损一年，境界突破可增寿
         lifespan: 100,
         // 时间戳

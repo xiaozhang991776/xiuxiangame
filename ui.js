@@ -61,6 +61,47 @@ const UI = {
         document.getElementById('modal-overlay').classList.add('hidden');
     },
 
+    /* ---------- 渡劫天劫弹窗 ---------- */
+    openTribulation({ player, trib, chance, cost, onDone }) {
+        const pct = Math.round((chance || 0) * 100);
+        const body = `
+            <div class="trib-box">
+                <div class="trib-icon">${trib.icon}</div>
+                <div class="trib-name">${trib.name} 降临！</div>
+                <p class="trib-desc">${trib.desc}</p>
+                <div class="trib-stats">
+                    <div>硬抗成功率：<b style="color:#6dbe6d">${pct}%</b></div>
+                    <div>请护道人需：<b style="color:#d4af37">${fmtNum(cost)}</b> 灵石</div>
+                </div>
+                <p class="trib-tip">渡劫成功获「劫后余韵」永久加成；失败则境界回落、修为受损。</p>
+            </div>`;
+        this.showModal({
+            title: '⚡ 天劫降临',
+            body,
+            footer: [
+                { text: `硬抗天劫 (${pct}%)`, type: 'primary', action: () => this._resolveTrib(player, 'resist', onDone) },
+                { text: `请护道人 (${fmtNum(cost)}灵石)`, type: '', action: () => this._resolveTrib(player, 'protect', onDone) }
+            ]
+        });
+    },
+    _resolveTrib(player, mode, onDone) {
+        if (typeof Cultivate === 'undefined') return;
+        const res = Cultivate.resolveTribulation(player, mode);
+        if (!res) return;
+        if (res.fail) {
+            this.showModal({ title: '灵石不足', body: `<p style="color:#f43f5e">${res.msg}</p>`, footer: [{ text: '返回', action: () => this.hideModal() }] });
+            return;
+        }
+        const color = res.success ? '#6dbe6d' : '#e74c3c';
+        const bonusHtml = res.bonus ? `<div class="trib-bonus" style="color:#d4af37">修炼速率 +${Math.round(res.bonus.xiuMult*100)}% · 灵石获取 +${Math.round(res.bonus.stoneMult*100)}%</div>` : '';
+        const title = res.protected ? '🛡 平安渡劫' : (res.success ? '✨ 劫后余韵' : '💥 道基受损');
+        this.showModal({
+            title,
+            body: `<div class="trib-box"><div class="trib-icon">${res.success ? '✨' : '💥'}</div><div class="trib-name" style="color:${color}">${res.success ? '渡劫成功' : '渡劫失败'}</div><p class="trib-desc">${res.msg}</p>${bonusHtml}</div>`,
+            footer: [{ text: '继续修行', type: 'primary', action: () => { this.hideModal(); if (onDone) onDone(); } }]
+        });
+    },
+
     /* ---------- 显示事件弹窗 ---------- */
     showEvent(evt, eventId) {
         document.getElementById('eventTitle').textContent = evt.title;
@@ -165,6 +206,9 @@ const UI = {
         document.getElementById('realmBonus').textContent = '+' + (detail.realmBonus * 100).toFixed(0) + '%';
         document.getElementById('gongfaBonus').textContent = '+' + (detail.gfBonus * 100).toFixed(0) + '%';
         document.getElementById('equipBonus').textContent = '+' + (detail.equipBonus * 100).toFixed(0) + '%';
+        // 渡劫加成显示
+        const tribEl = document.getElementById('tribulusBonus');
+        if (tribEl) tribEl.textContent = '+' + Math.round((detail.tribulusBonus || 0) * 100) + '%';
         // 功法显示
         const gf = getGongfa(p.gongfa);
         const gfDisplay = document.getElementById('gongfaDisplay');

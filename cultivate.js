@@ -37,12 +37,19 @@ const Cultivate = {
         const wuxingMult = this.wuxingRateMult(player);
         base *= wuxingMult;
 
+        // 渡劫加成（劫后余韵）
+        const trib = this.getTribulusBonus(player);
+        const tribulusMult = 1 + trib.xiuMult;
+        base *= tribulusMult;
+
         return {
             base,
             realmMult,
             gfBonus,
             equipMult,
             wuxingMult,
+            tribulusMult,
+            tribulusBonus: (tribulusMult - 1),
             realmBonus: (realmMult - 1),
             equipBonus: (equipMult - 1),
             wuxingBonus: (wuxingMult - 1)
@@ -129,6 +136,8 @@ const Cultivate = {
                     UI.toast(`恭喜突破至${newRealm.name}境界！`, 'gold');
                     UI.addLog(`道心通明，突破至${newRealm.name}一层！`, 'evt');
                 }
+                // 突破大境界成功，触发天劫
+                this.tribulateAfterBreakthrough(player);
                 // 触发任务进度
                 if (typeof Quests !== 'undefined') {
                     Quests.tickProgress('realm_idx', player.realmIdx + 1);
@@ -328,7 +337,7 @@ const Cultivate = {
         player.lifespan -= years;
         if (player.lifespan <= 0) {
             player.lifespan = 0;
-            player.stone += stoneGain;
+            player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1));
             this.save(player);
             if (typeof UI !== 'undefined') UI.addLog(`${player.name}游历${years}年，寿元已尽，羽化归虚……`, 'evt');
             if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
@@ -336,7 +345,7 @@ const Cultivate = {
             }
             return { years, dead: true, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
         }
-        player.stone += stoneGain;
+        player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1));
         this.save(player);
         if (typeof UI !== 'undefined') UI.addLog(`游历${years}年，收获${fmtNum(stoneGain)}灵石及诸多宝物`, 'evt');
         return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
@@ -361,7 +370,7 @@ const Cultivate = {
             return null;
         }
         player.xiu -= xiuAmount;
-        player.stone += stone;
+        player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1));
         this.save(player);
         if (typeof UI !== 'undefined') {
             UI.addLog(`以${fmtNum(xiuAmount)}修为，兑换得${fmtNum(stone)}灵石`, 'evt');
@@ -459,6 +468,90 @@ const Cultivate = {
         }
         this.save(player);
         return gain;
+    },
+
+    /* ---------- 渡劫天劫系统 ---------- */
+    // 取劫后余韵永久加成（兼容旧档）
+    getTribulusBonus(player) {
+        const t = (player && player.tribulus) || { xiuMult: 0, stoneMult: 0 };
+        return { xiuMult: t.xiuMult || 0, stoneMult: t.stoneMult || 0 };
+    },
+    _addTribBonus(player, b) {
+        if (!player.tribulus) player.tribulus = { xiuMult: 0, stoneMult: 0 };
+        player.tribulus.xiuMult = (player.tribulus.xiuMult || 0) + (b.xiuMult || 0);
+        player.tribulus.stoneMult = (player.tribulus.stoneMult || 0) + (b.stoneMult || 0);
+    },
+    // 按突破后的新境界选取天劫类型（循环）
+    pickTribulation(player) {
+        const arr = GameConfig.tribulations;
+        return arr[(player.realmIdx || 0) % arr.length];
+    },
+    // 硬抗成功率：随境界与悟性小幅提升，但始终保留翻车风险
+    calcTribSuccess(player, trib) {
+        const base = (trib && trib.baseChance) || 0.6;
+        const realmAdj = (player.realmIdx || 0) * 0.03;
+        const wxAdj = (player.wuxingLevel || 0) * 0.004;
+        return Math.max(0.35, Math.min(0.95, base + realmAdj + wxAdj));
+    },
+    // 请护道人化解的灵石成本（随境界指数增长）
+    protectCost(player, trib) {
+        const base = (trib && trib.protectCostBase) || 300;
+        return Math.floor(base * Math.pow(2.6, player.realmIdx || 0));
+    },
+    // 突破大境界成功后调用：先落地存档，再弹天劫
+    tribulateAfterBreakthrough(player) {
+        this.save(player);
+        const trib = this.pickTribulation(player);
+        this._pendingTrib = trib;
+        const chance = this.calcTribSuccess(player, trib);
+        const cost = this.protectCost(player, trib);
+        if (typeof UI !== 'undefined') {
+            UI.openTribulation({ player, trib, chance, cost, onDone: () => { if (typeof UI !== 'undefined') UI.renderAll(); } });
+        }
+    },
+    // 结算天劫（硬抗 / 护道人）
+    resolveTribulation(player, mode) {
+        const trib = this._pendingTrib;
+        if (!trib) return null;
+        this._pendingTrib = null;
+        if (mode === 'protect') {
+            const cost = this.protectCost(player, trib);
+            if ((player.stone || 0) < cost) {
+                return { mode, fail: true, msg: '灵石不足，无法请护道人化解天劫' };
+            }
+            player.stone -= cost;
+            const pb = trib.protectBonus || { xiuMult: 0.02, stoneMult: 0.015 };
+            this._addTribBonus(player, pb);
+            this.save(player);
+            return { mode, success: true, protected: true, bonus: pb,
+                msg: `请护道人耗${fmtNum(cost)}灵石化解${trib.name}，平安渡过（修炼速率+${Math.round(pb.xiuMult*100)}%、灵石获取+${Math.round(pb.stoneMult*100)}%）` };
+        }
+        // 硬抗
+        const chance = this.calcTribSuccess(player, trib);
+        if (Math.random() < chance) {
+            const sb = trib.successBonus || { xiuMult: 0.06, stoneMult: 0.04 };
+            this._addTribBonus(player, sb);
+            this.save(player);
+            return { mode, success: true, bonus: sb,
+                msg: `硬抗${trib.name}成功！劫后余韵加身：修炼速率+${Math.round(sb.xiuMult*100)}%、灵石获取+${Math.round(sb.stoneMult*100)}%` };
+        }
+        // 硬抗失败：境界回落 + 损修为 + 损寿元
+        const fp = trib.failPenalty || { layerDown: 2, xiuLossPct: 0.3, lifeLoss: 5 };
+        if ((player.realmLayer || 1) > fp.layerDown) {
+            player.realmLayer -= fp.layerDown;
+        } else if ((player.realmIdx || 0) > 0) {
+            player.realmIdx -= 1;
+            const r = getRealm(player.realmIdx);
+            player.realmLayer = Math.max(1, r.layers - (fp.layerDown - (player.realmLayer || 1)));
+        } else {
+            player.realmLayer = 1;
+        }
+        const loss = Math.floor((player.xiu || 0) * fp.xiuLossPct);
+        player.xiu = Math.max(0, player.xiu - loss);
+        player.lifespan = Math.max(0, (player.lifespan || 0) - fp.lifeLoss);
+        this.save(player);
+        return { mode, success: false, penalty: fp, xiuLost: loss,
+            msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}修为、寿元-${fp.lifeLoss}` };
     },
 
     /* ---------- 立即保存 ---------- */
