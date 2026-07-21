@@ -9,8 +9,12 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         let base = 1.0;
 
-        // 境界加成
-        const realmMult = 1 + player.realmIdx * 0.5 + (player.realmLayer - 1) * 0.1;
+        // 境界加成：让修炼速率随「下一层突破所需修为」同步指数增长。
+        // 原线性加成(1+realmIdx*0.5+...)导致高境界(大乘+)修为需求爆炸、速率却线性增长，
+        // 曾需数十万年闭关，且满层成本溢出 JS 安全整数(9e15)而永远卡死。
+        // 现令 base ∝ baseXiu * xiuMult^(layer-1)（即下一层突破成本），使每层所需闭关时长与境界无关。
+        const layerExp = Math.pow(realm.xiuMult, player.realmLayer - 1);
+        const realmMult = Math.max(1, (realm.baseXiu * layerExp) / 5e6);
         base *= realmMult;
 
         // 功法加成

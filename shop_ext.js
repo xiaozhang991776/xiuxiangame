@@ -77,7 +77,11 @@
         { id: 'f_shanhe', type: 'fabao', name: '山河社稷图', icon: '图', quality: 4, atk: 280, def: 200, hp: 2600, ling: 650, crit: 0.2, skill: 'f_pagoda_skill', price: 98000, desc: '图卷展开便纳山河，困敌于一方天地，演绎造化之威。' },
         { id: 'f_liangyi', type: 'fabao', name: '两仪轮', icon: '轮', quality: 3, atk: 60, def: 40, hp: 600, ling: 150, crit: 0.1, skill: 'f_mirror_skill', price: 11500, desc: '轮转两仪生四象，反弹伤害、化守为攻，玄妙非常。' },
         { id: 'f_dinghai', type: 'fabao', name: '定海神针', icon: '针', quality: 2, atk: 20, def: 50, hp: 420, ling: 90, crit: 0.05, skill: 'f_mountain_skill', price: 2400, desc: '针落如定沧海，镇压一切波澜，守势无双。' },
-        { id: 'f_jiuxiao', type: 'fabao', name: '九霄环', icon: '环', quality: 1, atk: 8, def: 15, hp: 110, ling: 35, crit: 0, skill: 'f_bell_skill', price: 600, desc: '环鸣九霄，危急时护主挡击，轻盈易驭的护身环。' }
+        { id: 'f_jiuxiao', type: 'fabao', name: '九霄环', icon: '环', quality: 1, atk: 8, def: 15, hp: 110, ling: 35, crit: 0, skill: 'f_bell_skill', price: 600, desc: '环鸣九霄，危急时护主挡击，轻盈易驭的护身环。' },
+        // —— 大成期(大乘)以上方可请回的仙界重宝，属性碾压凡间法宝，是后期最直接的战力引擎 ——
+        { id: 'f_taiqing_ta', type: 'fabao', name: '太清宝塔', icon: '塔', quality: 4, atk: 800, def: 600, hp: 8000, ling: 2000, crit: 0.3, skill: 'f_pagoda_skill', realmReq: 7, price: 5000000, desc: '太清仙宗镇派之宝塔，塔影垂落便镇万法，大乘以上方能请回。' },
+        { id: 'f_zhutian_ding', type: 'fabao', name: '诸天鼎', icon: '鼎', quality: 4, atk: 1200, def: 900, hp: 12000, ling: 3000, crit: 0.35, skill: 'f_mountain_skill', realmReq: 8, price: 30000000, desc: '古战场夺来的诸天炼器鼎，鼎气压塌虚空，真仙以上方可驭使。' },
+        { id: 'f_wuheng_jing', type: 'fabao', name: '无衡镜', icon: '镜', quality: 4, atk: 1800, def: 1400, hp: 18000, ling: 4500, crit: 0.4, skill: 'f_mirror_skill', realmReq: 9, price: 150000000, desc: '映照诸天平衡的无衡古镜，照敌则反照其伤，金仙以上方承其力。' }
     ];
     newEquip.forEach(e => {
         C.equipmentTemplates.push(e);
@@ -92,7 +96,14 @@
         { id: 'g_liangyi', name: '两仪微尘诀', icon: '功', xiuBonus: 0.75, realmReq: 2, price: 12000, desc: '演两仪生灭之机，吐纳间微尘化乾坤，金丹以上方窥门径。' },
         { id: 'g_zhoutian', name: '周天星辰诀', icon: '功', xiuBonus: 1.2, realmReq: 3, price: 80000, desc: '引周天星辰之力入体，修炼如沐星河，元婴大修方成。' },
         { id: 'g_hongmeng', name: '鸿蒙紫气诀', icon: '功', xiuBonus: 1.8, realmReq: 4, price: 500000, desc: '采鸿蒙未判之紫气，道韵自生，化神以上方可承之。' },
-        { id: 'g_hunyuanwuji', name: '混元无极功', icon: '功', xiuBonus: 2.5, realmReq: 4, price: 1200000, desc: '混元无极、周流不息，乃近乎大道的吐纳至法，非大能不可驭。' }
+        { id: 'g_hunyuanwuji', name: '混元无极功', icon: '功', xiuBonus: 2.5, realmReq: 4, price: 1200000, desc: '混元无极、周流不息，乃近乎大道的吐纳至法，非大能不可驭。' },
+        // —— 大成期(大乘)以上方可习练的顶级功法，修炼速率呈指数暴涨，是后期战力的根本引擎 ——
+        { id: 'g_taiqing',   name: '太清紫极功', icon: '功', xiuBonus: 4.0,  realmReq: 7,  price: 5000000,   desc: '太清仙宗根本功法，紫极之气周转，修炼速率暴涨，大乘以上方窥门径。' },
+        { id: 'g_ziixiao',   name: '紫霄混元功', icon: '功', xiuBonus: 8.0,  realmReq: 8,  price: 30000000,  desc: '引紫霄神雷入丹田，吐纳间道韵自生，真仙大修方能承之。' },
+        { id: 'g_lihuo',    name: '离火焚天功', icon: '功', xiuBonus: 16.0, realmReq: 9,  price: 150000000, desc: '离火真炎炼形神，修炼如浴火重生，金仙以上方可驭使。' },
+        { id: 'g_xuantian', name: '玄天镇魔功', icon: '功', xiuBonus: 32.0, realmReq: 10, price: 800000000, desc: '玄天之力镇万魔，一呼一吸皆是大神通，太乙天尊之传承。' },
+        { id: 'g_ruzun',    name: '儒尊浩然功', icon: '功', xiuBonus: 64.0, realmReq: 11, price: 4000000000, desc: '浩然正气贯长虹，修炼速率近乎夺天地造化，大罗金仙方成大器。' },
+        { id: 'g_daodao',   name: '无上道经',   icon: '功', xiuBonus: 128.0, realmReq: 12, price: 20000000000, desc: '大道无上之总纲，吐纳即与道同频，道祖方窥其万一。' }
     ];
     newGongfa.forEach(g => { C.gongfas.push(g); C.shopItems.gongfa.push(g.id); });
 
@@ -106,7 +117,12 @@
         { id: 'pet_moqilin', name: '墨麒麟', icon: '麒', elem: 'earth', realmReq: 3, atk: 90, def: 50, hp: 700, skill: 'pet_roar', price: 85000, desc: '通体墨玉的麒麟，一声长吟震散敌防，瑞兽之威。' },
         { id: 'pet_baize', name: '白泽', icon: '泽', elem: 'wood', realmReq: 3, atk: 30, def: 60, hp: 600, skill: 'pet_shield', price: 90000, desc: '通万物之白的白泽，悬角辟邪，护主万邪难近。' },
         { id: 'pet_zhuque', name: '朱雀', icon: '雀', elem: 'fire', realmReq: 3, atk: 100, def: 45, hp: 680, skill: 'pet_flame', price: 95000, desc: '浴火重生的朱雀，火羽焚天，群攻之极致。' },
-        { id: 'pet_zulong', name: '祖龙', icon: '龙', elem: 'water', realmReq: 4, atk: 200, def: 120, hp: 1600, skill: 'pet_roar', price: 300000, desc: '传说中龙族始祖的一缕血脉，龙吟镇万灵，至强灵宠。' }
+        { id: 'pet_zulong', name: '祖龙', icon: '龙', elem: 'water', realmReq: 4, atk: 200, def: 120, hp: 1600, skill: 'pet_roar', price: 300000, desc: '传说中龙族始祖的一缕血脉，龙吟镇万灵，至强灵宠。' },
+        // —— 大成期(大乘)以上方可收服/购买的洪荒灵宠，属性碾压寻常灵兽，出战即定乾坤 ——
+        { id: 'pet_qilinwang', name: '麒麟王', icon: '麒', elem: 'earth', realmReq: 7, atk: 600, def: 400, hp: 5000, skill: 'pet_roar', price: 2000000, desc: '统御瑞兽一脉的麒麟王，一声长吟震碎敌防，大乘修士的护道至尊。' },
+        { id: 'pet_baizewang', name: '白泽王', icon: '泽', elem: 'wood', realmReq: 8, atk: 300, def: 600, hp: 4800, skill: 'pet_shield', price: 3000000, desc: '通晓万物之白的白泽之王，悬角辟尽诸邪，真仙方可收为护法。' },
+        { id: 'pet_zhuquehuang', name: '朱雀皇', icon: '雀', elem: 'fire', realmReq: 9, atk: 700, def: 300, hp: 5200, skill: 'pet_flame', price: 4000000, desc: '焚天重生的朱雀女皇，火羽燎原、群攻无双，金仙座下圣禽。' },
+        { id: 'pet_zulong_tc', name: '祖龙·太初', icon: '龙', elem: 'water', realmReq: 10, atk: 1500, def: 900, hp: 12000, skill: 'pet_roar', price: 12000000, desc: '龙族太初始祖的本源血脉，龙吟镇万灵、吐息溺星河，太乙天尊方能驭使。' }
     ];
     newPets.forEach(p => { C.pets.push(p); C.shopItems.pet.push(p.id); });
 

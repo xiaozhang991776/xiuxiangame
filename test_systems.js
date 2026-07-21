@@ -156,6 +156,47 @@ ok('化形丹在 materials（供灵宠面板购买）', !!GameConfig.materials.f
 ok('坊市不再设「材料」分类（shopItems.material 为空）', Array.isArray(GameConfig.shopItems.material) && GameConfig.shopItems.material.length === 0);
 ok('轮回草在 materials（供转世面板购买）', !!GameConfig.materials.find(m=>m.id==='m_rebirth_herb'));
 
+console.log('\n[10] 大乘+ 修炼速率修复（防卡死/防溢出）');
+const SELF = 31536000 * 0.0015;
+function bareAt(realmIdx, realmLayer) {
+    const p = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+    p.realmIdx = realmIdx; p.realmLayer = realmLayer;
+    p.wuxingLevel = 0; p.gongfa = undefined; p.talents = { pts: 0, learned: {} };
+    p.equipped = { weapon: null, armor: null, accessory: null, fabao: null };
+    p.tribulus = undefined; p.rebirth = 0;
+    return p;
+}
+const pDc = bareAt(7, 1);
+const costDc = Cultivate.getBreakthroughCost(pDc);
+ok('大乘L1 突破成本 < JS安全整数(无溢出）', costDc < Number.MAX_SAFE_INTEGER, costDc);
+const rateDc = SaveSystem.calcCultivateRate(pDc);
+ok('大乘L1 修炼速率已随成本暴涨（>1e4）', rateDc > 1e4, rateDc);
+const yrsDc = costDc / (rateDc * SELF);
+ok('大乘L1 无投入闭关攒满一层 ≤ 200 年（修复前需数十万年）', yrsDc <= 200, yrsDc.toFixed(1));
+// 道祖满层成本亦不可溢出（修复前 8.5e25 远超 9e15）
+const pDz = bareAt(12, 15);
+const costDz = Cultivate.getBreakthroughCost(pDz);
+ok('道祖L15 突破成本 < JS安全整数', costDz < Number.MAX_SAFE_INTEGER, costDz);
+// 全境界单调递增且均不溢出
+let prev = -1, mono = true, safe = true;
+for (let i = 0; i < GameConfig.realms.length; i++) {
+    const c = Cultivate.getBreakthroughCost(bareAt(i, 15));
+    if (c >= Number.MAX_SAFE_INTEGER) safe = false;
+    if (c <= prev) mono = false;
+    prev = c;
+}
+ok('全 13 境界满层成本均 < 9e15（无溢出）', safe);
+ok('境界难度随境界单调递增', mono);
+
+console.log('\n[11] 大成期(大乘)以上解锁内容（realmReq 门禁）');
+ok('高阶功法 太清紫极功 需大乘(7)', !!GameConfig.gongfas.find(g => g.id === 'g_taiqing' && g.realmReq === 7));
+ok('高阶神通 太清剑诀 需大乘(7)', !!GameConfig.skills.find(s => s.id === 's_taiqing' && s.realmReq === 7));
+ok('高阶灵宠 麒麟王 需大乘(7)', !!GameConfig.pets.find(p => p.id === 'pet_qilinwang' && p.realmReq === 7));
+ok('高阶法宝 太清宝塔 需大乘(7)', !!GameConfig.equipmentTemplates.find(e => e.id === 'f_taiqing_ta' && e.realmReq === 7));
+ok('高阶秘境 九重天 需大乘(7)', !!GameConfig.scenes.find(s => s.id === 'sc_taiqing' && s.realmReq === 7));
+ok('高阶神通 道·无上 需道祖(12)', !!GameConfig.skills.find(s => s.id === 's_daodao' && s.realmReq === 12));
+ok('高阶灵宠 祖龙·太初 需太乙(10)', !!GameConfig.pets.find(p => p.id === 'pet_zulong_tc' && p.realmReq === 10));
+
 console.log('\n[9] 突破觉醒天赋点');
 (async () => {
     try {

@@ -22,12 +22,14 @@ const GameConfig = {
         { name: '化神', layers: 15, baseXiu: 6e7,    xiuMult: 1.80, atkBonus: 500,    defBonus: 320,    hpBonus: 5000,    lingBonus: 1500,     breakthroughRate: 0.35 },
         { name: '炼虚', layers: 15, baseXiu: 2e9,    xiuMult: 1.90, atkBonus: 1200,   defBonus: 800,    hpBonus: 12000,   lingBonus: 4000,     breakthroughRate: 0.30 },
         { name: '合体', layers: 15, baseXiu: 1e11,   xiuMult: 1.95, atkBonus: 2800,   defBonus: 1800,   hpBonus: 28000,   lingBonus: 10000,    breakthroughRate: 0.25 },
-        { name: '大乘', layers: 15, baseXiu: 5e12,   xiuMult: 2.00, atkBonus: 6500,   defBonus: 4200,   hpBonus: 65000,   lingBonus: 24000,     breakthroughRate: 0.20 },
-        { name: '真仙', layers: 15, baseXiu: 2e14,   xiuMult: 2.05, atkBonus: 15000,  defBonus: 10000,  hpBonus: 150000,  lingBonus: 60000,     breakthroughRate: 0.15 },
-        { name: '金仙', layers: 15, baseXiu: 1e16,   xiuMult: 2.10, atkBonus: 35000,  defBonus: 23000,  hpBonus: 350000,  lingBonus: 150000,    breakthroughRate: 0.12 },
-        { name: '太乙', layers: 15, baseXiu: 5e17,   xiuMult: 2.15, atkBonus: 80000,  defBonus: 55000,  hpBonus: 800000,  lingBonus: 400000,    breakthroughRate: 0.10 },
-        { name: '大罗', layers: 15, baseXiu: 2e19,   xiuMult: 2.20, atkBonus: 180000, defBonus: 120000, hpBonus: 1800000, lingBonus: 1000000,   breakthroughRate: 0.08 },
-        { name: '道祖', layers: 15, baseXiu: 1e21,   xiuMult: 2.25, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 }
+        // 注：高境界(大乘+)的 baseXiu 已重缩放，使「满层突破成本 = baseXiu × xiuMult^14」恒 < 9e15(JS 安全整数)，
+        // 否则原数值(5e12×2^14≈8e16 起)会溢出安全整数，导致大乘满层后永远卡死、无法突破。
+        { name: '大乘', layers: 15, baseXiu: 2.0e11,  xiuMult: 2.00, atkBonus: 6500,   defBonus: 4200,   hpBonus: 65000,   lingBonus: 24000,     breakthroughRate: 0.20 },
+        { name: '真仙', layers: 15, baseXiu: 2.15e11, xiuMult: 2.00, atkBonus: 15000,  defBonus: 10000,  hpBonus: 150000,  lingBonus: 60000,     breakthroughRate: 0.15 },
+        { name: '金仙', layers: 15, baseXiu: 2.3e11,  xiuMult: 2.00, atkBonus: 35000,  defBonus: 23000,  hpBonus: 350000,  lingBonus: 150000,    breakthroughRate: 0.12 },
+        { name: '太乙', layers: 15, baseXiu: 2.4e11,  xiuMult: 2.00, atkBonus: 80000,  defBonus: 55000,  hpBonus: 800000,  lingBonus: 400000,    breakthroughRate: 0.10 },
+        { name: '大罗', layers: 15, baseXiu: 2.45e11, xiuMult: 2.00, atkBonus: 180000, defBonus: 120000, hpBonus: 1800000, lingBonus: 1000000,   breakthroughRate: 0.08 },
+        { name: '道祖', layers: 15, baseXiu: 2.5e11,  xiuMult: 2.00, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 }
     ],
 
     /* ---------- 品质配置 ---------- */
@@ -149,7 +151,14 @@ const GameConfig = {
         { id: 's_soul_seal',    name: '封魂印',   elem: null,   cost: 80, cd: 5, dmgMult: 2.0,  desc: '封印敌人灵力',     learnCost: 150000, realmReq: 3, upCostMult: 1.25, debuff: { type: 'seal', value: 0.5, turns: 2 } },
         { id: 's_chaos_slash',  name: '混沌斩',   elem: null,   cost: 120,cd: 5, dmgMult: 5.0,  desc: '混沌之力斩击，无视防御', learnCost: 500000, realmReq: 3, upCostMult: 1.28, ignoreDef: true },
         { id: 's_immortal_art', name: '仙法·万剑归宗', elem: null, cost: 200, cd: 6, dmgMult: 8.0, desc: '万剑齐发，灭杀一切', learnCost: 2000000, realmReq: 4, upCostMult: 1.30 },
-        { id: 's_xuanyuan',     name: '玄元无极功',   elem: null, cost: 30, cd: 2, dmgMult: 2.2, desc: '无极玄力，攻伐凌厉，等级越高威能越盛', learnCost: 12000, realmReq: 1, upCostMult: 1.20 }
+        { id: 's_xuanyuan',     name: '玄元无极功',   elem: null, cost: 30, cd: 2, dmgMult: 2.2, desc: '无极玄力，攻伐凌厉，等级越高威能越盛', learnCost: 12000, realmReq: 1, upCostMult: 1.20 },
+        // —— 大成期(大乘)以上方可修习的绝学，威能远超凡术，可大幅提升斗法战力 ——
+        { id: 's_taiqing',     name: '太清剑诀',   elem: 'metal', cost: 150, cd: 4, dmgMult: 15,  desc: '太清仙宗剑诀，一剑化万道清光，大乘修士的杀伐绝学', learnCost: 5000000,  realmReq: 7, upCostMult: 1.35, ignoreDef: true },
+        { id: 's_zixiao',     name: '紫霄神雷',   elem: 'metal', cost: 180, cd: 5, dmgMult: 25,  desc: '引紫霄神雷灌体，雷光所至万法崩摧', learnCost: 20000000, realmReq: 8, upCostMult: 1.38, debuff: { type: 'seal', value: 0.4, turns: 3 } },
+        { id: 's_lihuo',      name: '离火焚天',   elem: 'fire',  cost: 220, cd: 5, dmgMult: 40,  desc: '离火真炎焚尽八荒，触者形神俱灭', learnCost: 80000000,  realmReq: 9, upCostMult: 1.40, debuff: { type: 'burn', value: 0.25, turns: 3 } },
+        { id: 's_xuantian',   name: '玄天镇魔',   elem: null,   cost: 280, cd: 6, dmgMult: 60,  desc: '玄天之力镇封亘古大魔，一击定乾坤', learnCost: 300000000, realmReq: 10, upCostMult: 1.42, ignoreDef: true },
+        { id: 's_ruzun',      name: '儒尊·浩然', elem: null,   cost: 360, cd: 7, dmgMult: 100, desc: '浩然正气贯长虹，言出法随、灭度诸邪', learnCost: 1200000000, realmReq: 11, upCostMult: 1.45, combo: 2 },
+        { id: 's_daodao',    name: '道·无上',  elem: null,   cost: 500, cd: 8, dmgMult: 200, desc: '大道无上，一念生灭轮回，乃诸天至高的攻伐道法', learnCost: 5000000000, realmReq: 12, upCostMult: 1.50, ignoreDef: true, combo: 3 }
     ],
 
     /* ---------- 法宝技能 ---------- */
@@ -206,7 +215,10 @@ const GameConfig = {
         { id: 'sc_mine',     name: '灵矿洞',   icon: '矿', desc: '灵矿丰富，藏有奇珍',               realmReq: 1,  color: 'rgba(196,149,90,0.15)',   events: ['mine_ore', 'miner_conflict', 'cave_in'] },
         { id: 'sc_secret1',  name: '上古秘境', icon: '境', desc: '上古大能遗留，机缘无数',           realmReq: 2,  color: 'rgba(168,85,247,0.15)',   events: ['find_treasure', 'ancient_beast', 'inheritance'] },
         { id: 'sc_deep_sea', name: '东海龙宫', icon: '海', desc: '龙族居所，宝物云集',               realmReq: 3,  color: 'rgba(93,173,226,0.15)',   events: ['dragon_test', 'sea_treasure', 'dragon_pet'] },
-        { id: 'sc_chaos',    name: '混沌秘境', icon: '虚', desc: '混沌之力充斥，至强机缘所在',       realmReq: 4,  color: 'rgba(244,63,94,0.15)',    events: ['chaos_inherit', 'chaos_beast', 'immortal_test'] }
+        { id: 'sc_chaos',    name: '混沌秘境', icon: '虚', desc: '混沌之力充斥，至强机缘所在',       realmReq: 4,  color: 'rgba(244,63,94,0.15)',    events: ['chaos_inherit', 'chaos_beast', 'immortal_test'] },
+        // —— 大成期(大乘)以上方能踏足的仙界绝境，产出最顶级的仙缘与重宝 ——
+        { id: 'sc_taiqing',  name: '九重天',   icon: '霄', desc: '大乘以上方可飞升的仙界绝境，云海深处藏着太清传承与诸天重宝', realmReq: 7, color: 'rgba(250,204,21,0.18)', events: ['immortal_test', 'chaos_inherit', 'find_treasure', 'ancient_beast'] },
+        { id: 'sc_zzxianjie', name: '诸天战场', icon: '战', desc: '诸天陨落之古战场，煞气滔天，唯真仙以上可入，夺将臣残魂与战兵', realmReq: 8, color: 'rgba(239,68,68,0.18)', events: ['ancient_beast', 'chaos_beast', 'find_treasure', 'inheritance'] }
     ],
 
     /* ---------- 随机事件 ---------- */

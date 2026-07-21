@@ -58,6 +58,10 @@ const Shop = {
                 if (player.realmIdx < (tpl.quality - 1) && tpl.quality > 1) {
                     canBuy = false; reason = '境界不足';
                 }
+                // 高阶法宝/装备：按 realmReq 精确解锁（大成期以上专属重宝）
+                if (tpl.realmReq && player.realmIdx < tpl.realmReq) {
+                    canBuy = false; reason = '需' + getRealm(tpl.realmReq).name + '境界';
+                }
                 break;
             }
             case 'pill': {
