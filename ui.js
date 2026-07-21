@@ -940,6 +940,10 @@ const UI = {
                    <div class="seclusion-allin exchange-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.exchangeAction(${allIn})"`}>
                        <span class="secl-allin-label">全部可兑</span>
                        <span class="secl-allin-gain">${allInDisabled ? '无修为可用' : `${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}修为`}</span>
+                   </div>
+                   <div class="ex-custom">
+                       <input id="exCustomInput" class="ex-input" type="number" min="1" inputmode="numeric" placeholder="输入想兑换的修为数量" />
+                       <button class="ex-custom-btn" onclick="UI.exchangeAction(parseFloat(document.getElementById('exCustomInput').value)||0)">兑 换</button>
                    </div>`,
             footer: [
                 { text: '关闭', action: () => this.hideModal() }

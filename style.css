@@ -1463,6 +1463,23 @@ input { font-family: inherit; }
         background: linear-gradient(135deg, rgba(168,85,247,0.24), rgba(168,85,247,0.08));
         box-shadow: 0 0 14px rgba(168,85,247,0.25);
     }
+    .ex-custom {
+        display: flex; gap: 10px; margin-top: 14px; align-items: center;
+    }
+    .ex-input {
+        flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px;
+        background: rgba(0,0,0,0.25); color: var(--text);
+        border: 1px solid rgba(168,85,247,0.4); font-size: 14px; outline: none;
+    }
+    .ex-input::placeholder { color: var(--text-dim); }
+    .ex-input:focus { border-color: rgba(168,85,247,0.85); box-shadow: 0 0 10px rgba(168,85,247,0.3); }
+    .ex-custom-btn {
+        flex: 0 0 auto; padding: 10px 22px; border-radius: 10px; cursor: pointer;
+        background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff;
+        border: none; font-size: 14px; letter-spacing: 2px; font-weight: 600;
+        transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s;
+    }
+    .ex-custom-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(124,58,237,0.45); }
 
 /* ---------- 开始界面（封面） ---------- */
 .start-screen {
