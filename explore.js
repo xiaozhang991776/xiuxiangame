@@ -142,7 +142,7 @@ const Explore = {
                 // 行善积德，小概率获得奇遇
                 if (Math.random() < 0.3) {
                     const reward = Math.floor(player.xiu * 0.01) + 50;
-                    player.xiu += reward;
+                    player.xiu = Math.min(player.xiu + reward, XIU_CAP);
                     if (typeof UI !== 'undefined') {
                         UI.toast(`善有善报，获得${fmtNum(reward)}修为`, 'gold');
                         UI.addLog('行善积德，福报降临', 'evt');

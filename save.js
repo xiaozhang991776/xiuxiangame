@@ -502,8 +502,17 @@ const Game = {
     /* 启动寿命衰减（真实时间每 60 秒 -1 寿元） */
     startLifespanDecay() {
         this.stopLifespanDecay();
+        const atMaxRealm = () => {
+            try { return (this.player.realmIdx || 0) >= (GameConfig.realms.length - 1); }
+            catch (e) { return false; }
+        };
         this.lifespanTimer = setInterval(() => {
             if (!this.player) return;
+            // 已达最高境界：解除被动寿元衰减（终局不再有“限时墙”），但闭关/游历消耗寿元仍照常
+            if (atMaxRealm()) {
+                if (typeof UI !== 'undefined' && UI.updateResourceBar) UI.updateResourceBar();
+                return;
+            }
             this.player.lifespan = (this.player.lifespan || 0) - 1;
             if (typeof UI !== 'undefined' && UI.updateResourceBar) UI.updateResourceBar();
             if (this.player.lifespan <= 0) {

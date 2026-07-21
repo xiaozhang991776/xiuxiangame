@@ -89,7 +89,8 @@ const Cultivate = {
     getBreakthroughStoneCost(player) {
         const realm = getRealm(player.realmIdx);
         const seq = player.realmIdx * realm.layers + (player.realmLayer - 1);
-        return Math.floor(200 + seq * 40000);
+        // 随坊市物价 ×10 同步上调，使突破灵石门槛与坊市（同为灵石支付）重新挂钩
+        return Math.floor(2000 + seq * 400000);
     },
 
     /* ---------- 是否可以突破当前小境界 ---------- */
@@ -226,14 +227,17 @@ const Cultivate = {
     WUXING_MAX: 50,            // 悟性上限（重）
     WUXING_TAP_PER: 0.15,   // 每重：每次点击修炼修为 +15%（50重共×8.5，强力但数字受控）
     WUXING_RATE_PER: 0.15,   // 每重：修炼速率 +15%（50重共×8.5，后期显著但不再爆表）
+    // 顿悟成本增长：基底小、指数温和，确保 50 重全程在「修为上限 XIU_CAP」与「灵石安全整数」内可达，不再卡死
+    WUXING_XIU_BASE: 50000, WUXING_XIU_GROWTH: 3,       // 修为路径：50 重单级峰值≈1.2e28，远低于 XIU_CAP(1e30)
+    WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.7,  // 灵石路径：50 重单级峰值≈9.8e14，低于 Number.MAX_SAFE_INTEGER
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
-    // 顿悟到下一级的资源成本（指数增长，门槛较高）
+    // 顿悟到下一级的资源成本（指数增长，门槛较高；双路径分别钳制，确保全程可达）
     enlightenCosts(player) {
         const lv = player.wuxingLevel || 0;
         return {
-            stone: Math.floor(5000 * Math.pow(5, lv)),
-            xiu:   Math.floor(50000 * Math.pow(5, lv))
+            stone: Math.floor(Math.min(this.WUXING_STONE_BASE * Math.pow(this.WUXING_STONE_GROWTH, lv), Number.MAX_SAFE_INTEGER)),
+            xiu:   Math.floor(Math.min(this.WUXING_XIU_BASE * Math.pow(this.WUXING_XIU_GROWTH, lv), XIU_CAP))
         };
     },
     // 顿悟：消耗指定类型资源，提升一级悟性
