@@ -275,6 +275,22 @@ const Inventory = {
                 msg = `破障丹已使用，下次突破成功率+20%`;
                 player.breakBonus = (player.breakBonus || 0) + eff.value;
                 break;
+            case 'perm_def':
+                player.permBonus.def = (player.permBonus.def || 0) + eff.value;
+                msg = `永久防御+${eff.value}`;
+                break;
+            case 'perm_crit':
+                player.permBonus.crit = (player.permBonus.crit || 0) + eff.value;
+                msg = `永久暴击率+${(eff.value * 100).toFixed(0)}%`;
+                break;
+            case 'perm_spd':
+                player.permBonus.spd = (player.permBonus.spd || 0) + eff.value;
+                msg = `永久速度+${eff.value}`;
+                break;
+            case 'stone':
+                player.stone = (player.stone || 0) + eff.value;
+                msg = `获得${eff.value}灵石`;
+                break;
         }
         if (typeof UI !== 'undefined') {
             UI.toast(`使用${pill.name}：${msg}`, 'good');

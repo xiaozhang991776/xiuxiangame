@@ -407,8 +407,8 @@ const Cultivate = {
         let def = player.baseDef + realmDef + (player.permBonus.def || 0);
         let hp = player.baseHp + realmHp + (player.permBonus.hp || 0);
         let ling = player.baseLing + realmLing + (player.permBonus.ling || 0);
-        let spd = player.baseSpd;
-        let crit = player.baseCrit;
+        let spd = player.baseSpd + (player.permBonus.spd || 0);
+        let crit = player.baseCrit + (player.permBonus.crit || 0);
 
         // 装备加成（锻造装备优先用实例属性，其余按模板×强化）
         for (const slot in player.equipped) {
