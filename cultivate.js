@@ -95,7 +95,9 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         const seq = player.realmIdx * realm.layers + (player.realmLayer - 1);
         // 随坊市物价 ×10 同步上调，使突破灵石门槛与坊市（同为灵石支付）重新挂钩；难度系数再 ×breakStoneMult
-        return Math.floor((2000 + seq * 400000) * (typeof DIFF !== 'undefined' ? DIFF.breakStoneMult : 1));
+        // 道祖之后（realmIdx>12）段位难度 ×15，与突破战力门槛/斗法敌人强度一致
+        const overCap = player.realmIdx > 12 ? 15 : 1;
+        return Math.floor((2000 + seq * 400000) * overCap * (typeof DIFF !== 'undefined' ? DIFF.breakStoneMult : 1));
     },
 
     /* ---------- 是否可以突破当前小境界 ---------- */

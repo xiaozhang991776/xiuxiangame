@@ -224,6 +224,20 @@ for (let i = 0; i < GameConfig.realms.length; i++) {
 ok('全 33 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×15）', safe);
 ok('境界难度随境界单调递增', mono);
 
+// —— 段位提升难度三块一致：道祖之后（realmIdx>12）战力/灵石门槛/斗法敌人强度均 ×15 ——
+const mkRealm = (idx) => ({ realmIdx: idx, realmLayer: 1 });
+const stoneDao = Cultivate.getBreakthroughStoneCost(mkRealm(12));
+const stoneJun = Cultivate.getBreakthroughStoneCost(mkRealm(13));
+ok('道祖之后突破灵石门槛 ×15（三块难度一致）', stoneJun >= stoneDao * 14, { dao: stoneDao, jun: stoneJun, ratio: +(stoneJun / stoneDao).toFixed(2) });
+
+if (typeof Explore !== 'undefined') {
+    const eDao = Explore._scaleEnemy({ realmIdx: 12, realmLayer: 1 });
+    const eJun = Explore._scaleEnemy({ realmIdx: 13, realmLayer: 1 });
+    ok('道祖之后斗法敌人强度 ×15（hp 22.5倍=1.5*15）', approx(eJun.hp / eDao.hp, 22.5, 1.0), { dao: eDao.hp, jun: eJun.hp, ratio: +(eJun.hp / eDao.hp).toFixed(2) });
+} else {
+    ok('道祖之后斗法敌人强度 ×15（探索模块未加载，跳过）', true);
+}
+
 // 后期满配速率绝不可逼近安全整数上限（不应“应顶/超模”）
 const pFull = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
 pFull.realmIdx = 12; pFull.realmLayer = 15;
