@@ -585,6 +585,16 @@ const Cultivate = {
         const capped = Math.min(GameConfig.realms.length - 1, formula);
         return Math.max(player ? (player.realmIdx || 0) : 0, capped);
     },
+    /* ---------- 轮回战力上线 ---------- */
+    // 第 n 世可免费轮回所需的战力阈值 = 今生天花板境界(baseRealm + n*realmPerRebirth)满层突破成本
+    // 道祖之后(idx>12)的战力上线自动含 ×15 难度系数（getBreakthroughCost 内已处理）
+    getRebirthZhanliCap(player) {
+        const n = (player && player.rebirth) || 0;
+        const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth : {};
+        const capRealmIdx = Math.min(GameConfig.realms.length - 1, (c.baseRealm || 0) + n * (c.realmPerRebirth || 1));
+        const r = getRealm(capRealmIdx);
+        return this.getBreakthroughCost({ realmIdx: capRealmIdx, realmLayer: r.layers });
+    },
     // 估算某境界下的属性（临时改写 realm 字段后还原，不污染原对象）
     estimateStatsAt(player, realmIdx, realmLayer) {
         const oi = player.realmIdx, ol = player.realmLayer;
@@ -703,10 +713,10 @@ const Cultivate = {
             player.rebirth = (player.rebirth || 0) + 1;
             usedPill = true;
         } else {
-            // 免费轮回：需先达「今生境界天花板」，门槛随轮回次数递增
-            const need = this.getMaxRealm(player);
-            if ((player.realmIdx || 0) < need) {
-                if (typeof UI !== 'undefined') UI.toast(`需先达${getRealm(need).name}期（今生境界天花板）方可免费轮回`, 'bad');
+            // 免费轮回：需先达「战力上线」（= 今生天花板境界满层突破成本），门槛随轮回次数递增
+            const cap = this.getRebirthZhanliCap(player);
+            if ((player.zhanli || 0) < cap) {
+                if (typeof UI !== 'undefined') UI.toast(`需先达战力 ${fmtNum(cap)}（战力上线，随轮回次数递增）方可免费轮回`, 'bad');
                 return { ok: false, reason: 'locked' };
             }
             player.rebirth = (player.rebirth || 0) + 1;

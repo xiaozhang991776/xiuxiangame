@@ -173,11 +173,16 @@ console.log('\n[8b] 轮回草轮回保留境界（战力不降），免费轮回
         ok('轮回草轮回保留层序 realmLayer 不变', p.realmLayer === beforeLayer, `前${beforeLayer}→后${p.realmLayer}`);
         ok('轮回草轮回转世层数 +1', p.rebirth === 3, p.rebirth);
         // 对照：免费轮回应重置境界
-        const p2 = bareAt(12, 15);              // 道祖满层（原终局，新增20境后非天花板）
+        const p2 = bareAt(12, 15);              // 道祖满层
         p2.rebirth = 2;
+        p2.zhanli = Cultivate.getRebirthZhanliCap(p2); // 战力达上线（等价原"达境界天花板"）
         const r2 = Cultivate.reincarnate(p2, 'free');
-        ok('免费轮回成功（已达天花板）', r2.ok === true, r2);
+        ok('免费轮回成功（战力达上线）', r2.ok === true, r2);
         ok('免费轮回重置境界 realmIdx→0', p2.realmIdx === 0, p2.realmIdx);
+        // 战力不足时免费轮回应被锁
+        const p3 = bareAt(0, 1); p3.rebirth = 0; p3.zhanli = 0;
+        const r3 = Cultivate.reincarnate(p3, 'free');
+        ok('战力不足免费轮回被锁(locked)', r3.ok === false && r3.reason === 'locked', r3);
     } finally {
         for (const k in UIbk) sandbox.UI[k] = UIbk[k];
     }
