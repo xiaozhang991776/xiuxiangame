@@ -84,7 +84,9 @@ const Cultivate = {
         // 当前大境界内，层数越高所需越多
         const layerProgress = (player.realmLayer - 1) / realm.layers;
         // 难度系数：突破所需战力 ×breakXiuMult（调难时 >1）
-        return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1) * (typeof DIFF !== 'undefined' ? DIFF.breakXiuMult : 1));
+        // 道祖(idx 12)之后的超脱系段位，突破难度统一 ×15
+        const postDaoguMult = player.realmIdx > 12 ? 15 : 1;
+        return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1) * postDaoguMult * (typeof DIFF !== 'undefined' ? DIFF.breakXiuMult : 1));
     },
 
     /* ---------- 获取当前突破（段位/大境界）所需额外灵石 ---------- */

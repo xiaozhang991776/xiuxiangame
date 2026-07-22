@@ -210,11 +210,13 @@ ok('道祖L15 突破成本 < JS安全整数', costDz < Number.MAX_SAFE_INTEGER, 
 let prev = -1, mono = true, safe = true;
 for (let i = 0; i < GameConfig.realms.length; i++) {
     const c = Cultivate.getBreakthroughCost(bareAt(i, 15));
-    if (c >= Number.MAX_SAFE_INTEGER) safe = false;
+    // 道祖之后段位难度×15，单境满层成本会超过 JS 安全整数(9e15)，
+    // 但须远小于存储上限 ZHANLI_CAP(1e30)，否则 UI/存档混乱
+    if (c >= 1e29) safe = false;
     if (c <= prev) mono = false;
     prev = c;
 }
-ok('全 33 境界满层成本均 < 9e15（无溢出）', safe);
+ok('全 33 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×15）', safe);
 ok('境界难度随境界单调递增', mono);
 
 // 后期满配速率绝不可逼近安全整数上限（不应“应顶/超模”）
