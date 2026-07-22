@@ -287,9 +287,8 @@ const Explore = {
         }, GameConfig.enemies[0]);
         if (!base) base = GameConfig.enemies[0];
         const gap = Math.max(0, player.realmIdx - base.realmIdx);
-        const scale = Math.pow(hard ? 8 : 5, gap) * (1 + (player.realmLayer - 1) * 0.05);
-        const names = ['炼虚', '合体', '大乘', '真仙', '金仙', '太乙', '大罗', '道祖'];
-        const prefix = player.realmIdx < 5 ? base.name : (names[player.realmIdx - 5] || '道祖') + '·化身';
+        const scale = Math.pow(hard ? 2.0 : 1.5, gap) * (1 + (player.realmLayer - 1) * 0.05);
+        const prefix = player.realmIdx < 5 ? base.name : getRealm(player.realmIdx).name + '·化身';
         return {
             id: '__scaled_' + player.realmIdx + '_' + player.realmLayer + (hard ? '_h' : ''),
             name: prefix + '（境界压制）',

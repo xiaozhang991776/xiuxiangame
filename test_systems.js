@@ -173,7 +173,7 @@ console.log('\n[8b] 轮回草轮回保留境界（战力不降），免费轮回
         ok('轮回草轮回保留层序 realmLayer 不变', p.realmLayer === beforeLayer, `前${beforeLayer}→后${p.realmLayer}`);
         ok('轮回草轮回转世层数 +1', p.rebirth === 3, p.rebirth);
         // 对照：免费轮回应重置境界
-        const p2 = bareAt(12, 15);              // 道祖满层（已达天花板）
+        const p2 = bareAt(12, 15);              // 道祖满层（原终局，新增20境后非天花板）
         p2.rebirth = 2;
         const r2 = Cultivate.reincarnate(p2, 'free');
         ok('免费轮回成功（已达天花板）', r2.ok === true, r2);
@@ -214,7 +214,7 @@ for (let i = 0; i < GameConfig.realms.length; i++) {
     if (c <= prev) mono = false;
     prev = c;
 }
-ok('全 13 境界满层成本均 < 9e15（无溢出）', safe);
+ok('全 33 境界满层成本均 < 9e15（无溢出）', safe);
 ok('境界难度随境界单调递增', mono);
 
 // 后期满配速率绝不可逼近安全整数上限（不应“应顶/超模”）

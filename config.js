@@ -23,7 +23,7 @@ const GameConfig = {
         earth: { name: '土', color: '#c4955a', counter: 'water', desc: '厚重如山' }
     },
 
-    /* ---------- 境界配置（13大境界 × 15层小境界 = 195段） ---------- */
+    /* ---------- 境界配置（33大境界 × 15层小境界 = 495段） ---------- */
     realms: [
         { name: '练气', layers: 15, baseXiu: 100,    xiuMult: 1.25, atkBonus: 2,      defBonus: 1,      hpBonus: 20,      lingBonus: 10,       breakthroughRate: 0.95 },
         { name: '筑基', layers: 15, baseXiu: 1200,   xiuMult: 1.30, atkBonus: 8,      defBonus: 5,      hpBonus: 80,      lingBonus: 30,       breakthroughRate: 0.80 },
@@ -39,7 +39,27 @@ const GameConfig = {
         { name: '金仙', layers: 15, baseXiu: 2.3e11,  xiuMult: 1.60, atkBonus: 35000,  defBonus: 23000,  hpBonus: 350000,  lingBonus: 150000,    breakthroughRate: 0.12 },
         { name: '太乙', layers: 15, baseXiu: 2.4e11,  xiuMult: 1.60, atkBonus: 80000,  defBonus: 55000,  hpBonus: 800000,  lingBonus: 400000,    breakthroughRate: 0.10 },
         { name: '大罗', layers: 15, baseXiu: 2.45e11, xiuMult: 1.60, atkBonus: 180000, defBonus: 120000, hpBonus: 1800000, lingBonus: 1000000,   breakthroughRate: 0.08 },
-        { name: '道祖', layers: 15, baseXiu: 2.5e11,  xiuMult: 1.60, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 }
+        { name: '道祖', layers: 15, baseXiu: 2.5e11,  xiuMult: 1.60, atkBonus: 400000, defBonus: 280000, hpBonus: 4000000, lingBonus: 2500000,   breakthroughRate: 0.05 },
+        { name: '道君', layers: 15, baseXiu: 2.88e11, xiuMult: 1.60, atkBonus: 460000, defBonus: 322000, hpBonus: 4600000, lingBonus: 2875000, breakthroughRate: 0.05 },
+        { name: '道尊', layers: 15, baseXiu: 3.31e11, xiuMult: 1.60, atkBonus: 529000, defBonus: 370300, hpBonus: 5290000, lingBonus: 3306250, breakthroughRate: 0.049 },
+        { name: '道圣', layers: 15, baseXiu: 3.80e11, xiuMult: 1.60, atkBonus: 608350, defBonus: 425845, hpBonus: 6083500, lingBonus: 3802187, breakthroughRate: 0.048 },
+        { name: '混元', layers: 15, baseXiu: 4.37e11, xiuMult: 1.60, atkBonus: 699602, defBonus: 489722, hpBonus: 6996025, lingBonus: 4372516, breakthroughRate: 0.047 },
+        { name: '太上', layers: 15, baseXiu: 5.03e11, xiuMult: 1.60, atkBonus: 804543, defBonus: 563180, hpBonus: 8045429, lingBonus: 5028393, breakthroughRate: 0.046 },
+        { name: '无量', layers: 15, baseXiu: 5.78e11, xiuMult: 1.60, atkBonus: 925224, defBonus: 647657, hpBonus: 9252243, lingBonus: 5782652, breakthroughRate: 0.045 },
+        { name: '鸿钧', layers: 15, baseXiu: 6.65e11, xiuMult: 1.60, atkBonus: 1064008, defBonus: 744806, hpBonus: 10640080, lingBonus: 6650050, breakthroughRate: 0.044 },
+        { name: '天道', layers: 15, baseXiu: 7.65e11, xiuMult: 1.60, atkBonus: 1223609, defBonus: 856526, hpBonus: 12236091, lingBonus: 7647557, breakthroughRate: 0.043 },
+        { name: '天尊', layers: 15, baseXiu: 8.79e11, xiuMult: 1.60, atkBonus: 1407151, defBonus: 985005, hpBonus: 14071505, lingBonus: 8794691, breakthroughRate: 0.042 },
+        { name: '圣人', layers: 15, baseXiu: 1.01e12, xiuMult: 1.60, atkBonus: 1618223, defBonus: 1132756, hpBonus: 16182231, lingBonus: 10113894, breakthroughRate: 0.041 },
+        { name: '太初', layers: 15, baseXiu: 1.16e12, xiuMult: 1.60, atkBonus: 1860957, defBonus: 1302670, hpBonus: 18609566, lingBonus: 11630978, breakthroughRate: 0.039 },
+        { name: '太易', layers: 15, baseXiu: 1.34e12, xiuMult: 1.60, atkBonus: 2140100, defBonus: 1498070, hpBonus: 21401000, lingBonus: 13375625, breakthroughRate: 0.038 },
+        { name: '太极', layers: 15, baseXiu: 1.54e12, xiuMult: 1.60, atkBonus: 2461115, defBonus: 1722781, hpBonus: 24611150, lingBonus: 15381969, breakthroughRate: 0.037 },
+        { name: '先天', layers: 15, baseXiu: 1.77e12, xiuMult: 1.60, atkBonus: 2830282, defBonus: 1981198, hpBonus: 28302823, lingBonus: 17689264, breakthroughRate: 0.036 },
+        { name: '混沌', layers: 15, baseXiu: 2.03e12, xiuMult: 1.60, atkBonus: 3254825, defBonus: 2278377, hpBonus: 32548247, lingBonus: 20342654, breakthroughRate: 0.035 },
+        { name: '鸿蒙', layers: 15, baseXiu: 2.34e12, xiuMult: 1.60, atkBonus: 3743048, defBonus: 2620134, hpBonus: 37430483, lingBonus: 23394052, breakthroughRate: 0.034 },
+        { name: '无极', layers: 15, baseXiu: 2.69e12, xiuMult: 1.60, atkBonus: 4304506, defBonus: 3013154, hpBonus: 43045056, lingBonus: 26903160, breakthroughRate: 0.033 },
+        { name: '永恒', layers: 15, baseXiu: 3.09e12, xiuMult: 1.60, atkBonus: 4950181, defBonus: 3465127, hpBonus: 49501814, lingBonus: 30938634, breakthroughRate: 0.032 },
+        { name: '虚无', layers: 15, baseXiu: 3.56e12, xiuMult: 1.60, atkBonus: 5692709, defBonus: 3984896, hpBonus: 56927087, lingBonus: 35579429, breakthroughRate: 0.031 },
+        { name: '大道', layers: 15, baseXiu: 4.09e12, xiuMult: 1.60, atkBonus: 6546615, defBonus: 4582630, hpBonus: 65466150, lingBonus: 40916343, breakthroughRate: 0.03 },
     ],
 
     /* ---------- 品质配置 ---------- */
