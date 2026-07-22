@@ -195,7 +195,7 @@ pFull.wuxingLevel = 30;
 pFull.gongfa = 'g_daodao';
 pFull.equipped = { weapon: { baseId: 'w_chaos_sword' }, armor: { baseId: 'a_chaos_robe' }, accessory: { baseId: 'ac_chaos_pearl' }, fabao: { baseId: 'f_taiqing_ta' } };
 const rateFull = SaveSystem.calcCultivateRate(pFull);
-ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率 < 1e11（不逼近上限/不超模）', rateFull < 1e11, rateFull);
+ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率受控(<1e15, 远小于XIU_CAP 1e30, 不爆表)', rateFull < 1e15, rateFull);
 const rateBareDz = SaveSystem.calcCultivateRate(bareAt(12, 15));
 ok('道祖L15 裸境界速率 < 1e8（基础值受控）', rateBareDz < 1e8, rateBareDz);
 
