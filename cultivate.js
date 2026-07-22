@@ -230,6 +230,7 @@ const Cultivate = {
     },
 
     SECLUDE_EFFICIENCY: 0.0015, // 闭关修为收益系数（从 0.15 再除以 100）
+    SECLUDE_RATE_K: 3e6,       // 闭关效率边际递减阈值：rate 超过此值后单位闭关收益被压缩，防止后期闭关收益随 rate 指数暴涨而碾压突破（rate≪K 时不衰减，rate≫K 时收益封顶不再膨胀）
     YOULI_BASE_STONE: 60000,   // 游历：每游历一年基础灵石（练气期）；×100 倍（原 200；曾×15→×10→再×10）
     YOULI_GROWTH: 1.6,        // 游历灵石随境界增长系数
 
@@ -289,7 +290,10 @@ const Cultivate = {
         // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 XIU_CAP 防止极端长闭关越界（仍远低于 Infinity）
         const rate = SaveSystem.calcCultivateRate(player);
         const SAFE = XIU_CAP;
-        const xiuGain = Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY), SAFE);
+        // 边际递减：rate 越高，单位闭关收益越低（effFactor = 1/(1+rate/K)）。
+        // rate≪K 时 effFactor≈1（前期/中期不受削）；rate≫K 时 effFactor→K/rate，闭关收益封顶、不再随 rate 指数膨胀碾压突破。
+        const effFactor = 1 / (1 + rate / this.SECLUDE_RATE_K);
+        const xiuGain = Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY * effFactor), SAFE);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
         if (player.lifespan <= 0) {

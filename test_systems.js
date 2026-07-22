@@ -242,6 +242,19 @@ console.log('\n[9] 突破觉醒天赋点');
         bp.talents = { pts:0, learned:{} };
         const okMajor = await Cultivate.breakThrough(bp);
         ok('突破大境界成功并 +3 天赋点', okMajor === true && bp.talents.pts === 3, bp.talents.pts);
+
+        // [13] 闭关边际递减：后期闭关不再指数碾压突破（回归#闭关超模）
+        {
+            const sp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+            sp.realmIdx = 12; sp.realmLayer = 15; sp.wuxingLevel = 30; // 道祖满层 + 满悟性（最极端后期）
+            sp.lifespan = 1e9;
+            sp.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
+            const sRes = Cultivate.seclude(sp, 100);
+            const sCost = Cultivate.getBreakthroughCost(sp);
+            const sRatio = sRes.xiu / sCost;
+            ok('后期(道祖满层·满悟性)闭关100年收益为有限正值（非 NaN/Infinity）', isFinite(sRes.xiu) && sRes.xiu > 0, sRes.xiu);
+            ok('后期闭关100年 / 突破成本 < 50 层（边际递减削超模，回归#闭关超模；旧版≈469）', sRatio < 50, sRatio);
+        }
     } catch (e) {
         console.error('突破测试异常:', e && e.stack || e);
         fail++;
