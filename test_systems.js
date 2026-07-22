@@ -156,6 +156,33 @@ ok('化形丹在 materials（供灵宠面板购买）', !!GameConfig.materials.f
 ok('坊市不再设「材料」分类（shopItems.material 为空）', Array.isArray(GameConfig.shopItems.material) && GameConfig.shopItems.material.length === 0);
 ok('轮回草在 materials（供转世面板购买）', !!GameConfig.materials.find(m=>m.id==='m_rebirth_herb'));
 
+console.log('\n[8b] 轮回草轮回保留境界（战力不降），免费轮回重置境界');
+{
+    const UIbk = {};
+    for (const k of ['toast', 'addLog', 'renderAll']) { UIbk[k] = sandbox.UI[k]; sandbox.UI[k] = () => {}; }
+    try {
+        const p = bareAt(7, 5);                 // 大乘 L5
+        p.rebirth = 2;
+        p.inventory = p.inventory || {};
+        p.inventory.material = p.inventory.material || {};
+        p.inventory.material['m_rebirth_herb'] = 100;   // herbCost=100
+        const beforeIdx = p.realmIdx, beforeLayer = p.realmLayer;
+        const r = Cultivate.reincarnate(p, 'pill');
+        ok('轮回草轮回成功(usedPill)', r.ok === true && r.usedPill === true, r);
+        ok('轮回草轮回保留境界 realmIdx 不变（战力不降）', p.realmIdx === beforeIdx, `前${beforeIdx}→后${p.realmIdx}`);
+        ok('轮回草轮回保留层序 realmLayer 不变', p.realmLayer === beforeLayer, `前${beforeLayer}→后${p.realmLayer}`);
+        ok('轮回草轮回转世层数 +1', p.rebirth === 3, p.rebirth);
+        // 对照：免费轮回应重置境界
+        const p2 = bareAt(12, 15);              // 道祖满层（已达天花板）
+        p2.rebirth = 2;
+        const r2 = Cultivate.reincarnate(p2, 'free');
+        ok('免费轮回成功（已达天花板）', r2.ok === true, r2);
+        ok('免费轮回重置境界 realmIdx→0', p2.realmIdx === 0, p2.realmIdx);
+    } finally {
+        for (const k in UIbk) sandbox.UI[k] = UIbk[k];
+    }
+}
+
 console.log('\n[10] 大乘+ 修炼速率修复（防卡死/防溢出）');
 const SELF = 31536000 * 0.0015;
 function bareAt(realmIdx, realmLayer) {

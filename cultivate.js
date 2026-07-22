@@ -700,9 +700,15 @@ const Cultivate = {
             player.rebirth = (player.rebirth || 0) + 1;
         }
         // 重置境界/寿元（保留修为/属性加成/装备/资源/功法/灵宠/好友等，避免轮回清空积累）
-        player.realmIdx = 0;
-        player.realmLayer = 1;
-        player.lifespan = 100;
+        if (usedPill) {
+            // 轮回草轮回：保留当前境界（realmIdx/realmLayer），战力不降；仅重算寿元（重活一世，避免残留低寿命立刻羽化）
+            player.lifespan = 100;
+        } else {
+            // 免费轮回：散功重修，境界与寿元归零（设计本意：重踏仙途）
+            player.realmIdx = 0;
+            player.realmLayer = 1;
+            player.lifespan = 100;
+        }
         this.save(player);
         if (typeof UI !== 'undefined') {
             const rb = this.getRebirthBonus(player);
