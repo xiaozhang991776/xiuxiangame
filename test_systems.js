@@ -76,7 +76,7 @@ function ok(name, cond, extra) {
 }
 function approx(a, b, eps=1e-6){ return Math.abs(a-b) <= eps; }
 const getPet = (id) => sandbox.GameConfig.pets.find(x => x.id === id);
-const { GameConfig, Talent, PetSys, Cultivate, SaveSystem } = sandbox;
+const { GameConfig, Talent, PetSys, Cultivate, SaveSystem, Shop } = sandbox;
 
 console.log('\n[1] 天赋配置');
 ok('GameConfig.talents 共 13 项', GameConfig.talents && GameConfig.talents.length === 13, GameConfig.talents && GameConfig.talents.length);
@@ -221,6 +221,22 @@ ok('高阶灵宠 祖龙·太初 需太乙(10)', !!GameConfig.pets.find(p => p.id
 console.log('\n[9] 突破觉醒天赋点');
 (async () => {
     try {
+        // [12] 坊市购买装备必须扣灵石（回归：getBuyList 用 ...tpl 把 item.type 覆盖成 weapon/armor/accessory，
+        //       旧版 Shop.buy 的 switch 只认 'equipment'/'fabao'，导致武器/防具/饰品落入无匹配分支、price=0 不扣灵石）
+        {
+            const bp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+            bp.realmIdx = 12; bp.realmLayer = 15;
+            bp.stone = 1e9; bp.xiu = 1e9;
+            bp.talents = { pts:0, learned:{} };
+            bp.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
+            const before = bp.stone;
+            Shop.buy(bp, 'weapon', 'w_short_sword');
+            Shop.buy(bp, 'armor', 'a_cloth_robe');
+            Shop.buy(bp, 'accessory', 'ac_jade_pendant');
+            const spent = before - bp.stone;
+            ok('坊市购买 武器/防具/饰品 均扣除灵石（回归#装备不扣灵石）', spent === (500+400+600), spent);
+        }
+
         const bp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
         bp.realmIdx = 0; bp.realmLayer = 15; bp.xiu = 1e9; bp.stone = 1e9;
         bp.talents = { pts:0, learned:{} };

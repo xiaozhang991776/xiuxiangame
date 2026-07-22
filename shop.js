@@ -51,6 +51,9 @@ const Shop = {
         let reason = '';
         switch (type) {
             case 'equipment':
+            case 'weapon':
+            case 'armor':
+            case 'accessory':
             case 'fabao': {
                 const tpl = getEquipTemplate(id);
                 if (!tpl) return;
