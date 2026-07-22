@@ -1514,7 +1514,6 @@ const UI = {
     openSeclusion() {
         const p = Game.player;
         if (!p) return;
-        const rate = SaveSystem.calcCultivateRate(p); // 每秒修为
         const opts = [
             { y: 1,     label: '一年',   sub: '初窥门径' },
             { y: 10,    label: '十年',   sub: '小有所成' },
@@ -1525,7 +1524,7 @@ const UI = {
         ];
         const cards = opts.map(o => {
             const disabled = o.y > (p.lifespan || 0);
-            const gain = Math.floor(o.y * rate * 31536000 * Cultivate.SECLUDE_EFFICIENCY);
+            const gain = Cultivate.previewSeclude(p, o.y);
             return `
                 <button class="seclusion-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.secludeAction(${o.y})"`}>
                     <span class="secl-label">${o.label}</span>
@@ -1535,12 +1534,12 @@ const UI = {
             `;
         }).join('');
         const allIn = p.lifespan || 0;
-        const allInGain = Math.floor(allIn * rate * 31536000 * Cultivate.SECLUDE_EFFICIENCY);
+        const allInGain = Cultivate.previewSeclude(p, allIn);
         const allInDisabled = allIn <= 0;
         this.showModal({
             title: '闭关潜修',
             body: `<p style="line-height:1.7;margin-bottom:12px">闭关乃斩断尘缘、潜心悟道之法。闭关越久，修为增涨越多，但<b>每闭关一年，折损一年寿元</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
-                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（寿元即闭关上限，无法闭关超过自身寿元；每突破大境界可增寿元）</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（寿元即闭关上限，无法闭关超过自身寿元；每突破大境界可增寿元。<b style="color:#c9a24a">注：修炼速率越高，闭关单位收益边际递减，极高境界时收益趋于封顶</b>）</p>
                    <div class="seclusion-scroll-wrap">
                        <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('seclusionOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
                        <div class="seclusion-options" id="seclusionOptions">${cards}</div>

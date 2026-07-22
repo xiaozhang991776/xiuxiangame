@@ -277,6 +277,20 @@ const Cultivate = {
     },
 
     /* ---------- 闭关潜修（消耗寿元换修为） ---------- */
+    // 闭关修为收益（与 seclude 同公式，纯计算无副作用）：供 UI 预览与实际结算共用，杜绝「UI 预览与实际到手不符」的脱节 bug
+    _secludeXiuGain(player, years) {
+        const rate = SaveSystem.calcCultivateRate(player);
+        // 边际递减：rate 越高，单位闭关收益越低（effFactor = 1/(1+rate/K)）。
+        // rate≪K 时 effFactor≈1（前期/中期不受削）；rate≫K 时 effFactor→K/rate，闭关收益封顶、不再随 rate 指数膨胀碾压突破。
+        const effFactor = 1 / (1 + rate / this.SECLUDE_RATE_K);
+        return Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY * effFactor), XIU_CAP);
+    },
+    // 预览：给定年数的闭关修为收益（不扣寿命、不改状态），供 UI 闭关面板显示
+    previewSeclude(player, years) {
+        years = Math.floor(years);
+        if (!years || years <= 0) return 0;
+        return this._secludeXiuGain(player, years);
+    },
     seclude(player, years) {
         years = Math.floor(years);
         if (!years || years <= 0) {
@@ -288,12 +302,8 @@ const Cultivate = {
             return null;
         }
         // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 XIU_CAP 防止极端长闭关越界（仍远低于 Infinity）
-        const rate = SaveSystem.calcCultivateRate(player);
         const SAFE = XIU_CAP;
-        // 边际递减：rate 越高，单位闭关收益越低（effFactor = 1/(1+rate/K)）。
-        // rate≪K 时 effFactor≈1（前期/中期不受削）；rate≫K 时 effFactor→K/rate，闭关收益封顶、不再随 rate 指数膨胀碾压突破。
-        const effFactor = 1 / (1 + rate / this.SECLUDE_RATE_K);
-        const xiuGain = Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY * effFactor), SAFE);
+        const xiuGain = this._secludeXiuGain(player, years);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
         if (player.lifespan <= 0) {

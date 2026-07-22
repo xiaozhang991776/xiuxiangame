@@ -284,6 +284,23 @@ console.log('\n[9] 突破觉醒天赋点');
             ok('后期(道祖满层·满悟性)闭关100年收益为有限正值（非 NaN/Infinity）', isFinite(sRes.xiu) && sRes.xiu > 0, sRes.xiu);
             ok('后期闭关100年 / 突破成本 < 50 层（边际递减削超模，回归#闭关超模；旧版≈469）', sRatio < 50, sRatio);
         }
+
+        // [14] 闭关 UI 预览与实际结算一致性（回归#闭关UI没改：旧版预览用旧公式，漏算 effFactor 边际递减与 XIU_CAP 钳制，导致显示虚高、与实际到手不符）
+        {
+            const mk = (idx, lay, wx) => {
+                const q = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+                q.realmIdx = idx; q.realmLayer = lay; q.wuxingLevel = wx;
+                q.lifespan = 1e9;
+                q.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
+                return q;
+            };
+            const cases = [['前期 练气', mk(0,1,0), 100], ['后期 道祖满层·满悟性', mk(12,15,30), 100]];
+            for (const [name, base, yrs] of cases) {
+                const prev = Cultivate.previewSeclude(JSON.parse(JSON.stringify(base)), yrs);
+                const real = Cultivate.seclude(JSON.parse(JSON.stringify(base)), yrs);
+                ok(`闭关UI预览收益 === 实际闭关收益（${name}）`, real.xiu === prev, `预览=${prev} 实际=${real.xiu}`);
+            }
+        }
     } catch (e) {
         console.error('突破测试异常:', e && e.stack || e);
         fail++;
