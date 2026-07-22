@@ -120,6 +120,11 @@ const Cultivate = {
                 if (typeof UI !== 'undefined') UI.toast('已达最高境界，无法突破！', 'bad');
                 return false;
             }
+            // 今生境界天花板：超过则需先轮回（轮回成为真实进度门槛，而非摆设）
+            if ((player.realmIdx + 1) > this.getMaxRealm(player)) {
+                if (typeof UI !== 'undefined') UI.toast('今生境界已至天花板，需先轮回方可更进一步！', 'bad');
+                return false;
+            }
             const realm = getRealm(player.realmIdx);
             const cost = this.getBreakthroughCost(player);
             if (player.xiu < cost) {
@@ -153,8 +158,8 @@ const Cultivate = {
                 // 突破成功
                 player.realmIdx++;
                 player.realmLayer = 1;
-                // 大境界突破增寿元（按新境界，调大：每突破一大境多给 500×境界序 年寿元）
-                player.lifespan = (player.lifespan || 0) + player.realmIdx * 500;
+                // 大境界突破增寿元（按新境界；改1：由 500×境界序 收到 250×境界序，使单世寿元更紧、轮回节奏更密）
+                player.lifespan = (player.lifespan || 0) + player.realmIdx * 250;
                 player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
                 // 突破大境界：觉醒天赋点（核心长线成长）
                 if (typeof Talent !== 'undefined') {

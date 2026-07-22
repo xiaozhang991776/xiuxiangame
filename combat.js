@@ -23,8 +23,10 @@ const Combat = {
         }
 
         const stats = Cultivate.calcFinalStats(player);
-        // 难度强化（秘境强敌）
-        const mult = isHard ? 1.5 : 1.0;
+        // 难度强化（秘境强敌）+ 随玩家实力浮动（改2：敌人不再被轻易碾压）
+        const over = Math.max(0, (player.realmIdx || 0) - (enemyTpl.realmIdx || 0)); // 越级挑战
+        const rb = (player.rebirth || 0);
+        const mult = (isHard ? 1.5 : 1.0) * (1 + over * 0.35) * (1 + rb * 0.25);
 
         // 临时气血增益/减益（矿洞受伤等），用于本场战斗初始气血
         const tempHpBuff = player.tempHpBuff || 0;
@@ -61,10 +63,11 @@ const Combat = {
                 name: enemyTpl.name,
                 avatar: enemyTpl.icon,
                 elem: enemyTpl.elem,
-                hp: Math.floor(enemyTpl.hp * mult),
-                maxHp: Math.floor(enemyTpl.hp * mult),
-                atk: Math.floor(enemyTpl.atk * mult),
-                def: Math.floor(enemyTpl.def * mult),
+                // 敌人随玩家当前最终属性浮动：确保任意境界都是势均力敌之战（攻击≈90%、防御≈85%、气血≈110% 玩家），再叠加强敌/越级/轮回系数
+                hp: Math.max(Math.floor(enemyTpl.hp * mult), Math.floor(stats.hp * 1.1 * mult)),
+                maxHp: Math.max(Math.floor(enemyTpl.hp * mult), Math.floor(stats.hp * 1.1 * mult)),
+                atk: Math.max(Math.floor(enemyTpl.atk * mult), Math.floor(stats.atk * 0.9 * mult)),
+                def: Math.max(Math.floor(enemyTpl.def * mult), Math.floor(stats.def * 0.85 * mult)),
                 spd: enemyTpl.spd,
                 ling: enemyTpl.ling,
                 buffs: [],
