@@ -135,8 +135,8 @@
                 </div>
             </div>
             <div class="top-bar-center">
-                <div class="resource-item" title="修为">
-                    <span class="res-icon res-xiu">气</span>
+                <div class="resource-item" title="战力">
+                    <span class="res-icon res-xiu">战</span>
                     <span class="res-value" id="topXiu">0</span>
                     <span class="res-rate" id="topRate">+0/s</span>
                 </div>
@@ -160,7 +160,7 @@
             </div>
         </header>
 
-        <!-- 修为进度条 -->
+        <!-- 战力进度条 -->
         <div class="cultivation-bar-wrap">
             <div class="cultivation-bar">
                 <div class="cultivation-bar-fill" id="xiuBarFill"></div>
@@ -223,7 +223,7 @@
                         </div>
                         <div class="cultivate-info">
                             <h3 class="cultivate-title">静心修炼</h3>
-                            <p class="cultivate-status" id="cultivateStatus">气机流转，修为缓缓增长</p>
+                            <p class="cultivate-status" id="cultivateStatus">气机流转，战力缓缓增长</p>
                             <div class="duan-display" id="cultDuan">
                                 <div class="duan-head">
                                     <span class="duan-label">段位</span>
@@ -257,7 +257,7 @@
                                     <span class="cs-value" id="tribulusBonus">+0%</span>
                                 </div>
                             </div>
-                            <p class="cultivate-guide">修炼聚气攒<b>修为</b> → 修为满则点<b>突破</b>精进境界 → 境界越高，去<b>斗法历练</b>、<b>秘境探宝</b>收获越丰，循环往复，问道长生。</p>
+                            <p class="cultivate-guide">修炼聚气攒<b>战力</b> → 战力满则点<b>突破</b>精进境界 → 境界越高，去<b>斗法历练</b>、<b>秘境探宝</b>收获越丰，循环往复，问道长生。</p>
                             <div class="cultivate-actions">
                                 <button class="cultivate-toggle" id="cultivateToggle">暂停修炼</button>
                                 <button class="cultivate-tap" id="cultivateTap">修炼 <span class="tap-hint">(点击聚气)</span></button>
@@ -274,7 +274,7 @@
                                 <button class="seclusion-btn" id="seclusionBtn">闭关潜修</button>
                                 <button class="seclusion-btn youli-btn" id="youliBtn">游历天下</button>
                                 <button class="seclusion-btn exchange-btn" id="exchangeBtn">兑换灵石</button>
-                                <span class="seclusion-hint" id="seclusionHint">寿元：100年 · 闭关增修为 · 游历获灵石材料</span>
+                                <span class="seclusion-hint" id="seclusionHint">寿元：100年 · 闭关增战力 · 游历获灵石材料</span>
                             </div>
                         </div>
                     </div>
@@ -313,7 +313,7 @@
                 <div class="panel" id="panel-combat">
                     <div class="combat-select">
                         <h3 class="panel-title">选择对手</h3>
-                        <p class="panel-desc">斗法一场，以证道心。战胜可得修为、灵石与掉落。</p>
+                        <p class="panel-desc">斗法一场，以证道心。战胜可得战力、灵石与掉落。</p>
                         <div class="enemy-list" id="enemyList"></div>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
                 <!-- 神通面板 -->
                 <div class="panel" id="panel-skill">
                     <h3 class="panel-title">神通法术</h3>
-                    <p class="panel-desc">修炼神通，斗法时施展。可消耗修为提升等级。</p>
+                    <p class="panel-desc">修炼神通，斗法时施展。可消耗战力提升等级。</p>
                     <div class="skill-list" id="skillList"></div>
                 </div>
 

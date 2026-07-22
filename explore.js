@@ -26,7 +26,7 @@ const Explore = {
             if (typeof UI !== 'undefined') UI.toast(`境界不足，需${getRealm(scene.realmReq).name}境界`, 'bad');
             return;
         }
-        // 探索冷却：防止同一场景反复触发白嫖修为/资源
+        // 探索冷却：防止同一场景反复触发白嫖战力/资源
         if (this.isOnCd()) {
             const remain = Math.ceil((this.cdUntil - Date.now()) / 1000);
             if (typeof UI !== 'undefined') UI.toast(`需静修片刻，方可再探（约${remain}s）`, 'bad');
@@ -80,15 +80,15 @@ const Explore = {
         if (typeof UI !== 'undefined') UI.hideEvent();
 
         switch (choice.type) {
-            case 'xiu':
+            case 'zhanli':
                 const _incV = Math.floor(choice.value * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-                player.xiu += _incV;
-                player.stats.totalXiu = (player.stats.totalXiu || 0) + _incV;
+                player.zhanli += _incV;
+                player.stats.totalZhanli = (player.stats.totalZhanli || 0) + _incV;
                 if (typeof UI !== 'undefined') {
-                    UI.toast(`获得${fmtNum(_incV)}修为`, 'gold');
-                    UI.addLog(`奇遇：获得${fmtNum(choice.value)}修为`, 'evt');
+                    UI.toast(`获得${fmtNum(_incV)}战力`, 'gold');
+                    UI.addLog(`奇遇：获得${fmtNum(choice.value)}战力`, 'evt');
                 }
-                if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
+                if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
                 if (typeof UI !== 'undefined') UI.updateResourceBar();
                 break;
 
@@ -134,21 +134,21 @@ const Explore = {
 
             case 'quest': {
                 if (typeof UI !== 'undefined') UI.toast('接到新的宗门任务', 'good');
-                // 简单：给一些修为作为任务奖励预付（资源收紧：乘 incomeMult）
+                // 简单：给一些战力作为任务奖励预付（资源收紧：乘 incomeMult）
                 const _qPre = Math.floor(100 * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-                player.xiu += _qPre;
-                if (typeof UI !== 'undefined') UI.addLog(`接到宗门任务，预付${_qPre}修为`, 'evt');
+                player.zhanli += _qPre;
+                if (typeof UI !== 'undefined') UI.addLog(`接到宗门任务，预付${_qPre}战力`, 'evt');
                 break;
             }
 
             case 'karma_good':
-                // 行善积德，小概率获得奇遇（资源收紧：善报修为乘 incomeMult）
+                // 行善积德，小概率获得奇遇（资源收紧：善报战力乘 incomeMult）
                 if (Math.random() < 0.3) {
                     const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
-                    const reward = Math.floor((player.xiu * 0.01 + 50) * _m);
-                    player.xiu = Math.min(player.xiu + reward, XIU_CAP);
+                    const reward = Math.floor((player.zhanli * 0.01 + 50) * _m);
+                    player.zhanli = Math.min(player.zhanli + reward, ZHANLI_CAP);
                     if (typeof UI !== 'undefined') {
-                        UI.toast(`善有善报，获得${fmtNum(reward)}修为`, 'gold');
+                        UI.toast(`善有善报，获得${fmtNum(reward)}战力`, 'gold');
                         UI.addLog('行善积德，福报降临', 'evt');
                     }
                 } else {
@@ -302,7 +302,7 @@ const Explore = {
             def: Math.floor(base.def * scale),
             spd: Math.floor(base.spd * (1 + gap * 0.2)),
             ling: Math.floor(base.ling * scale),
-            xiuReward: Math.floor(base.xiuReward * scale),
+            zhanliReward: Math.floor(base.zhanliReward * scale),
             stoneReward: Math.floor(base.stoneReward * scale),
             drops: base.drops
         };
@@ -446,10 +446,10 @@ const Explore = {
             !player.inventory.gongfa.includes(g.id) && player.realmIdx >= g.realmReq
         );
         if (candidates.length === 0) {
-            // 没有可学的，给修为补偿（资源收紧：乘 incomeMult）
+            // 没有可学的，给战力补偿（资源收紧：乘 incomeMult）
             const xiu = Math.floor((500 + Math.floor(Math.random() * 2000)) * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-            player.xiu += xiu;
-            if (typeof UI !== 'undefined') UI.toast(`获得${fmtNum(xiu)}修为`, 'gold');
+            player.zhanli += xiu;
+            if (typeof UI !== 'undefined') UI.toast(`获得${fmtNum(xiu)}战力`, 'gold');
             return;
         }
         const gf = candidates[Math.floor(Math.random() * candidates.length)];
@@ -465,7 +465,7 @@ const Quests = {
             const state = player.quests[q.id] || { progress: 0, claimed: false };
             let progress = state.progress;
             // 实时更新部分任务进度
-            if (q.type === 'xiu_total') progress = player.stats.totalXiu || 0;
+            if (q.type === 'zhanli_total') progress = player.stats.totalZhanli || 0;
             if (q.type === 'combat_win') progress = player.stats.combatWins || 0;
             if (q.type === 'explore_count') progress = player.stats.exploreCount || 0;
             if (q.type === 'realm_idx') progress = player.realmIdx + 1;
@@ -483,7 +483,7 @@ const Quests = {
             const state = player.quests[q.id] || { progress: 0, claimed: false };
             if (state.claimed) return;
             // 对于累加型任务，直接设置当前值
-            if (['xiu_total', 'combat_win', 'explore_count', 'realm_idx', 'realm_layer'].includes(type)) {
+            if (['zhanli_total', 'combat_win', 'explore_count', 'realm_idx', 'realm_layer'].includes(type)) {
                 state.progress = value;
             } else {
                 state.progress = Math.max(state.progress, value);
@@ -500,7 +500,7 @@ const Quests = {
         if (state.claimed) return;
         // 实时进度
         let progress = state.progress;
-        if (q.type === 'xiu_total') progress = player.stats.totalXiu || 0;
+        if (q.type === 'zhanli_total') progress = player.stats.totalZhanli || 0;
         if (q.type === 'combat_win') progress = player.stats.combatWins || 0;
         if (q.type === 'explore_count') progress = player.stats.exploreCount || 0;
         if (q.type === 'realm_idx') progress = player.realmIdx + 1;
@@ -511,21 +511,21 @@ const Quests = {
         }
         state.claimed = true;
         player.quests[questId] = state;
-        // 发放奖励（资源收紧：灵石/修为奖励乘 incomeMult）
+        // 发放奖励（资源收紧：灵石/战力奖励乘 incomeMult）
         const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
         let _gotStone = 0, _gotXiu = 0;
         if (q.reward.stone) { const _s = Math.floor(q.reward.stone * _m); player.stone += _s; _gotStone = _s; }
-        if (q.reward.xiu) {
-            const _x = Math.floor(q.reward.xiu * _m);
-            player.xiu += _x;
-            player.stats.totalXiu = (player.stats.totalXiu || 0) + _x;
+        if (q.reward.zhanli) {
+            const _x = Math.floor(q.reward.zhanli * _m);
+            player.zhanli += _x;
+            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + _x;
             _gotXiu = _x;
         }
         if (q.reward.items) {
             q.reward.items.forEach(it => Inventory.addItem(player, it.id, it.count));
         }
         if (typeof UI !== 'undefined') {
-            UI.toast(`领取奖励：${_gotStone ? fmtNum(_gotStone) + '灵石 ' : ''}${_gotXiu ? fmtNum(_gotXiu) + '修为' : ''}`, 'gold');
+            UI.toast(`领取奖励：${_gotStone ? fmtNum(_gotStone) + '灵石 ' : ''}${_gotXiu ? fmtNum(_gotXiu) + '战力' : ''}`, 'gold');
             UI.addLog(`完成任务 ${q.name}，领取奖励`, 'evt');
             UI.renderAll();
         }

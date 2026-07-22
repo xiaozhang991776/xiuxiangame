@@ -73,7 +73,7 @@
             // 有存档，直接进入游戏
             enterGame();
             // 显示离线收益
-            if (Game.offlineReward && Game.offlineReward.xiu > 0) {
+            if (Game.offlineReward && Game.offlineReward.zhanli > 0) {
                 setTimeout(() => UI.showOfflineReward(Game.offlineReward), 500);
             }
         } else {
@@ -135,7 +135,7 @@
                 UI.toast('已切换至「' + p.name + '」的道途', 'good');
             } else {
                 enterGame();
-                if (Game.offlineReward && Game.offlineReward.xiu > 0) {
+                if (Game.offlineReward && Game.offlineReward.zhanli > 0) {
                     setTimeout(() => UI.showOfflineReward(Game.offlineReward), 500);
                 }
             }
@@ -337,7 +337,7 @@
         // 游历天下
         document.getElementById('youliBtn').onclick = () => UI.openYouli();
 
-        // 兑换灵石（拿修为换灵石）
+        // 兑换灵石（拿战力换灵石）
         document.getElementById('exchangeBtn').onclick = () => UI.openExchange();
 
         // 悟性·顿悟

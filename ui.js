@@ -84,7 +84,7 @@ const UI = {
                     <div>硬抗成功率：<b style="color:#6dbe6d">${pct}%</b></div>
                     <div>请护道人需：<b style="color:#d4af37">${fmtNum(cost)}</b> 灵石</div>
                 </div>
-                <p class="trib-tip">渡劫成功获「劫后余韵」永久加成；失败则境界回落、修为受损。</p>
+                <p class="trib-tip">渡劫成功获「劫后余韵」永久加成；失败则境界回落、战力受损。</p>
             </div>`;
         this.showModal({
             title: '⚡ 天劫降临',
@@ -155,7 +155,7 @@ const UI = {
         const rect = btn.getBoundingClientRect();
         const float = document.createElement('div');
         float.className = 'tap-gain' + (combo >= 5 ? ' combo-hot' : '');
-        let txt = '修为 +' + fmtNum(gain);
+        let txt = '战力 +' + fmtNum(gain);
         if (combo >= 2) txt += ` <span class="tap-combo">连击×${combo}</span>`;
         float.innerHTML = txt;
         float.style.left = (rect.left + rect.width / 2) + 'px';
@@ -180,7 +180,7 @@ const UI = {
         const duanFill = document.getElementById('duanBarFill');
         if (duanFill) duanFill.style.width = Math.min(100, (layerNow / layerMax) * 100) + '%';
         document.getElementById('topAvatar').textContent = ['道','仙','魔','佛'][p.avatar];
-        document.getElementById('topXiu').textContent = fmtNum(p.xiu);
+        document.getElementById('topXiu').textContent = fmtNum(p.zhanli);
         const rate = SaveSystem.calcCultivateRate(p);
         document.getElementById('topRate').textContent = '+' + fmtNum(rate) + '/s';
         document.getElementById('topStone').textContent = fmtNum(p.stone);
@@ -190,22 +190,22 @@ const UI = {
         if (lifeEl) lifeEl.textContent = fmtNum(p.lifespan);
     },
 
-    /* ---------- 更新修为进度条 ---------- */
+    /* ---------- 更新战力进度条 ---------- */
     updateCultivationBar() {
         const p = Game.player;
         if (!p) return;
         const cost = Cultivate.getBreakthroughCost(p);
-        const pct = Math.min(100, (p.xiu / cost) * 100);
+        const pct = Math.min(100, (p.zhanli / cost) * 100);
         document.getElementById('xiuBarFill').style.width = pct + '%';
-        document.getElementById('xiuBarText').textContent = `${fmtNum(p.xiu)} / ${fmtNum(cost)}`;
+        document.getElementById('xiuBarText').textContent = `${fmtNum(p.zhanli)} / ${fmtNum(cost)}`;
         const btn = document.getElementById('breakBtn');
         const stoneCost = Cultivate.getBreakthroughStoneCost(p);
-        if (p.xiu >= cost && p.stone >= stoneCost) {
+        if (p.zhanli >= cost && p.stone >= stoneCost) {
             btn.classList.add('ready');
         } else {
             btn.classList.remove('ready');
         }
-        btn.title = `突破需 ${fmtNum(cost)} 修为 · ${fmtNum(stoneCost)} 灵石`;
+        btn.title = `突破需 ${fmtNum(cost)} 战力 · ${fmtNum(stoneCost)} 灵石`;
     },
 
     /* ---------- 渲染修炼面板 ---------- */
@@ -232,7 +232,7 @@ const UI = {
                 </div>`;
         }
         document.getElementById('cultivateToggle').textContent = Game.cultivating ? '暂停修炼' : '开始修炼';
-        document.getElementById('cultivateStatus').textContent = Game.cultivating ? '气机流转，修为缓缓增长' : '修炼已暂停';
+        document.getElementById('cultivateStatus').textContent = Game.cultivating ? '气机流转，战力缓缓增长' : '修炼已暂停';
         // 悟性显示
         const wxLv = p.wuxingLevel || 0;
         const wxLvEl = document.getElementById('wuxingLevel');
@@ -241,7 +241,7 @@ const UI = {
         if (wxTxt) wxTxt.textContent = `点击+${Math.round((Cultivate.wuxingTapMult(p) - 1) * 100)}% · 速率+${Math.round((Cultivate.wuxingRateMult(p) - 1) * 100)}%`;
         // 闭关提示（寿元）
         const seEl = document.getElementById('seclusionHint');
-        if (seEl) seEl.textContent = `寿元：${fmtNum(p.lifespan)}年 · 闭关可大幅增涨修为（每闭关一年折损一年寿元）`;
+        if (seEl) seEl.textContent = `寿元：${fmtNum(p.lifespan)}年 · 闭关可大幅增涨战力（每闭关一年折损一年寿元）`;
     },
 
     /* ---------- 渲染敌人列表 ---------- */
@@ -262,7 +262,7 @@ const UI = {
                     速度：${e.spd}
                 </div>
                 <div class="enemy-reward">
-                    修为+${fmtNum(e.xiuReward)} · 灵石+${fmtNum(e.stoneReward)}
+                    战力+${fmtNum(e.zhanliReward)} · 灵石+${fmtNum(e.stoneReward)}
                 </div>
             `;
             if (!locked) {
@@ -447,12 +447,12 @@ const UI = {
             const learned = !!p.skills[s.id];
             const lvl = p.skills[s.id] || 0;
             const realmOk = p.realmIdx >= s.realmReq;
-            const xiuOk = p.xiu >= s.learnCost;
+            const xiuOk = p.zhanli >= s.learnCost;
             const canLearn = realmOk && xiuOk;
-            // 未解锁时给出明确门槛提示，避免误以为只是修为不够
+            // 未解锁时给出明确门槛提示，避免误以为只是战力不够
             let lockTip = '';
             if (!learned && !realmOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">需${getRealm(s.realmReq).name}境界方可修习</div>`;
-            else if (!learned && !xiuOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">修为不足，尚缺${fmtNum(s.learnCost - p.xiu)}</div>`;
+            else if (!learned && !xiuOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">战力不足，尚缺${fmtNum(s.learnCost - p.zhanli)}</div>`;
             const card = document.createElement('div');
             card.className = 'skill-card' + (learned ? '' : ' locked');
             const elemHtml = s.elem ? `<span class="skill-elem" data-elem="${s.elem}">${GameConfig.elements[s.elem].name}</span>` : '';
@@ -465,8 +465,8 @@ const UI = {
                 <div class="skill-desc">${elemHtml}${s.desc}</div>
                 <div class="skill-cost">灵力消耗：${s.cost} ${s.cd ? '· 冷却：' + s.cd + '回合' : ''}</div>
                 ${learned
-                    ? `<button class="skill-upgrade" ${lvl >= 100 ? 'disabled' : ''} onclick="UI.upgradeSkill('${s.id}')">升级 (消耗${fmtNum(upCost)}修为)</button>`
-                    : `<button class="skill-upgrade" ${canLearn ? '' : 'disabled'} onclick="UI.learnSkill('${s.id}')">${realmOk ? '学习 (消耗' + fmtNum(s.learnCost) + '修为)' : '需' + getRealm(s.realmReq).name + '境界'}</button>`
+                    ? `<button class="skill-upgrade" ${lvl >= 100 ? 'disabled' : ''} onclick="UI.upgradeSkill('${s.id}')">升级 (消耗${fmtNum(upCost)}战力)</button>`
+                    : `<button class="skill-upgrade" ${canLearn ? '' : 'disabled'} onclick="UI.learnSkill('${s.id}')">${realmOk ? '学习 (消耗' + fmtNum(s.learnCost) + '战力)' : '需' + getRealm(s.realmReq).name + '境界'}</button>`
                 }
                 ${lockTip}
             `;
@@ -644,7 +644,7 @@ const UI = {
             const pct = Math.min(100, (q.progress / q.target) * 100);
             let rewardStr = '';
             if (q.reward.stone) rewardStr += `${fmtNum(q.reward.stone)}灵石 `;
-            if (q.reward.xiu) rewardStr += `${fmtNum(q.reward.xiu)}修为 `;
+            if (q.reward.zhanli) rewardStr += `${fmtNum(q.reward.zhanli)}战力 `;
             if (q.reward.items) q.reward.items.forEach(it => {
                 const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
                 rewardStr += `${t.name}×${it.count} `;
@@ -697,7 +697,7 @@ const UI = {
             }
             let rewardStr = '';
             if (ch.reward && ch.reward.stone) rewardStr += `${fmtNum(ch.reward.stone)}灵石 `;
-            if (ch.reward && ch.reward.xiu) rewardStr += `${fmtNum(ch.reward.xiu)}修为 `;
+            if (ch.reward && ch.reward.zhanli) rewardStr += `${fmtNum(ch.reward.zhanli)}战力 `;
             if (ch.reward && ch.reward.items) ch.reward.items.forEach(it => {
                 const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
                 rewardStr += `${t ? t.name : it.id}×${it.count} `;
@@ -728,7 +728,7 @@ const UI = {
         if (!ch) return;
         let rewardStr = '';
         if (ch.reward && ch.reward.stone) rewardStr += `${fmtNum(ch.reward.stone)}灵石 `;
-        if (ch.reward && ch.reward.xiu) rewardStr += `${fmtNum(ch.reward.xiu)}修为 `;
+        if (ch.reward && ch.reward.zhanli) rewardStr += `${fmtNum(ch.reward.zhanli)}战力 `;
         if (ch.reward && ch.reward.items) ch.reward.items.forEach(it => {
             const t = getEquipTemplate(it.id) || getPill(it.id) || getMaterial(it.id);
             rewardStr += `${t ? t.name : it.id}×${it.count} `;
@@ -775,7 +775,8 @@ const UI = {
                 name: p.name + '（你）', realmName: getRealm(p.realmIdx).name, realmIdx: p.realmIdx,
                 atk: st.atk, def: st.def, hp: st.hp, ling: st.ling, crit: st.crit,
                 tXi: (p.tribulus && p.tribulus.xiuMult) || 0, tSt: (p.tribulus && p.tribulus.stoneMult) || 0,
-                power: Friends.power(st), isMe: true
+                zhanli: p.zhanli || 0,
+                power: Friends.power({ zhanli: p.zhanli }), isMe: true
             };
             const others = Friends.list().map(f => ({ ...f, isMe: false }));
             const all = [me].concat(others).sort((a, b) => b.power - a.power);
@@ -1067,7 +1068,7 @@ const UI = {
             <div class="pd-actions">
                 ${active ? '' : `<button class="pd-btn" onclick="UI.setPetActive('${inst.id}')">设为主战</button>`}
                 <button class="pd-btn" onclick="UI.petFeed('${inst.id}')">喂养（灵兽粮×1）</button>
-                <button class="pd-btn" onclick="UI.petTrain('${inst.id}')">修炼（耗 ${fmtNum(trainCost)} 修为）</button>
+                <button class="pd-btn" onclick="UI.petTrain('${inst.id}')">修炼（耗 ${fmtNum(trainCost)} 战力）</button>
                 <button class="pd-btn${canEvo ? '' : ' disabled'}" ${canEvo ? '' : 'disabled'} onclick="UI.petEvolve('${inst.id}')">化形进阶${canEvo ? '' : `（需 Lv.${evoNeed}）`}</button>
             </div>
             <div class="pd-buy">
@@ -1199,7 +1200,7 @@ const UI = {
         if (!p) return;
         const doIt = () => { Cultivate.reincarnate(p, mode); };
         if (mode === 'free') {
-            this.showConfirm('确认免费轮回？', '散功重修：境界、装备、寿元将重置归零，但你的<b>修为</b>予以保留、劫后余韵、悟性、永久属性等加成全部保留，可凭存留修为更快重登仙途。', doIt);
+            this.showConfirm('确认免费轮回？', '散功重修：境界、装备、寿元将重置归零，但你的<b>战力</b>予以保留、劫后余韵、悟性、永久属性等加成全部保留，可凭存留战力更快重登仙途。', doIt);
         } else {
             const cfg = GameConfig.rebirth;
             const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
@@ -1276,19 +1277,19 @@ const UI = {
     /* ---------- 新手教程 ---------- */
     TUTORIAL_STEPS: [
         { title: '踏入仙途', body: '道友初临，且听我徐徐道来这方世界的门道。点击「下一步」即可层层展开，随时可点右上 📖 重看。', panel: 'cultivate' },
-        { title: '静心修炼', body: '<b>修为</b>乃修行根本。点「修炼（点击聚气）」可手动攒修为，平日亦会缓缓自增——顶部「气」即为修为。', panel: 'cultivate', target: '#cultivateTap' },
-        { title: '闭关 · 游历 · 兑换', body: '<b>闭关潜修</b>换大量修为；<b>游历天下</b>寻灵石、材料与丹药；<b>兑换灵石</b>以修为换灵石。三者皆耗<b>寿元</b>。', panel: 'cultivate', target: '#seclusionHint' },
-        { title: '突破境界', body: '修为攒满，便点「<b>突破</b>」精进境界、增寿元、强根基。每<b>突破大境界</b>会触发<b>天劫</b>（可请护道人化解或硬抗，成功则永久增益修炼与灵石），并<b>觉醒天赋点</b>。', panel: 'cultivate', target: '#breakBtn' },
-        { title: '顿悟 · 悟性', body: '「<b>顿悟</b>」耗灵石或修为提升<b>悟性</b>。悟性越高，<b>每次点击修为</b>与<b>修炼速率</b>越暴涨——这是后期（大乘以上）冲刺高境界的关键引擎，越早顿悟、受益越久，闭关一年可抵往昔千载。', panel: 'cultivate', target: '#enlightenBtn' },
+        { title: '静心修炼', body: '<b>战力</b>乃修行根本。点「修炼（点击聚气）」可手动攒战力，平日亦会缓缓自增——顶部「气」即为战力。', panel: 'cultivate', target: '#cultivateTap' },
+        { title: '闭关 · 游历 · 兑换', body: '<b>闭关潜修</b>换大量战力；<b>游历天下</b>寻灵石、材料与丹药；<b>兑换灵石</b>以战力换灵石。三者皆耗<b>寿元</b>。', panel: 'cultivate', target: '#seclusionHint' },
+        { title: '突破境界', body: '战力攒满，便点「<b>突破</b>」精进境界、增寿元、强根基。每<b>突破大境界</b>会触发<b>天劫</b>（可请护道人化解或硬抗，成功则永久增益修炼与灵石），并<b>觉醒天赋点</b>。', panel: 'cultivate', target: '#breakBtn' },
+        { title: '顿悟 · 悟性', body: '「<b>顿悟</b>」耗灵石或战力提升<b>悟性</b>。悟性越高，<b>每次点击战力</b>与<b>修炼速率</b>越暴涨——这是后期（大乘以上）冲刺高境界的关键引擎，越早顿悟、受益越久，闭关一年可抵往昔千载。', panel: 'cultivate', target: '#enlightenBtn' },
         { title: '寿元将尽', body: '留意右上「<b>寿元</b>」：每过真实<b>一分钟减一</b>，闭关游历亦折寿元。寿元耗尽便<b>羽化归虚</b>，故当抓紧修行。', panel: 'cultivate', target: '#topLife' },
-        { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得修为、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
+        { title: '斗法证道', body: '切到「<b>斗法</b>」与妖兽论道，胜则得战力、灵石与掉落，亦是试炼道心。', panel: 'combat', target: '#panel-combat' },
         { title: '三界历练', body: '「<b>历练</b>」可访名山、探秘境、遇奇遇，收获随机机缘，妙不可言。', panel: 'explore', target: '#panel-explore' },
         { title: '坊市淘宝', body: '切到「<b>坊市</b>」可买卖物资、搜罗法宝。装备、丹药、功法、法宝、灵宠皆可交易；修行所需的<b>轮回草</b>则于「转世轮回」面板内直达购买。', panel: 'shop', target: '#panel-shop' },
         { title: '乾坤袋', body: '「<b>乾坤袋</b>」随身藏纳装备丹药。穿戴<b>武器·护甲·饰品·法宝</b>可增益气血、攻击、防御与灵力；丹药则提供临时裨益。战力强弱，半系于此。', panel: 'inventory', target: '#panel-inventory' },
         { title: '神通', body: '「<b>神通</b>」可修习法术，临阵施展。攻伐、护身、辅助各具妙用，功法愈深，威能愈盛——是越阶斗法、闯荡秘境的底气。', panel: 'skill', target: '#panel-skill' },
         { title: '道友', body: '「<b>道友</b>」凭<b>档案码</b>结交同道，<b>道友榜</b>按战力排序、彼此砥砺；亦可与道友切磋论道，互证修行。', panel: 'friends', target: '#panel-friends' },
         { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>今生境界天花板</b>」（筑基 + 已轮回世数）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
-        { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；在<b>修炼区·灵宠</b>子标签中选中灵宠，可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗修为）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'cultivate', sub: 'pet', target: '#cultSubPet' },
+        { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；在<b>修炼区·灵宠</b>子标签中选中灵宠，可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗战力）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'cultivate', sub: 'pet', target: '#cultSubPet' },
         { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。在<b>修炼区·天赋</b>子标签修习六系天赋（攻伐/守御/长生/悟道/御兽/天命），永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'cultivate', sub: 'talent', target: '#cultSubTalent' },
         { title: '大成飞升', body: '道途无尽：达<b>大乘（大成）期</b>以上，诸般「<b>绝学重宝</b>」方现世间——坊市解锁<b>太清宝塔·诸天鼎·无衡镜</b>等仙界法宝、神通现<b>太清剑诀→道·无上</b>诸绝学、灵宠得<b>麒麟王·祖龙太初</b>，更可飞升<b>九重天·诸天战场</b>绝境夺造化。每一步飞升，战力皆翻天覆地，此乃问道终极之境。', panel: 'cultivate' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
@@ -1373,7 +1374,7 @@ const UI = {
         if (r && r.dead) return; // 寿元耗尽，已进入羽化流程
         this.hideModal();
         if (r) {
-            this.toast(`闭关${r.years}年，悟得${fmtNum(r.xiu)}修为`, 'gold');
+            this.toast(`闭关${r.years}年，悟得${fmtNum(r.zhanli)}战力`, 'gold');
             this.renderAll();
         }
     },
@@ -1409,7 +1410,7 @@ const UI = {
         this.showModal({
             title: '游历天下',
             body: `<p style="line-height:1.7;margin-bottom:12px">游历四方，寻宝访仙。<b>每游历一年，折损一年寿元</b>，但可获<b>灵石</b>、<b>材料</b>、乃至<b>丹药</b>与<b>奇遇</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
-                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（与闭关潜修相对：闭关换修为，游历换资源）</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（与闭关潜修相对：闭关换战力，游历换资源）</p>
                    <div class="seclusion-scroll-wrap">
                        <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('youliOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
                        <div class="seclusion-options" id="youliOptions">${cards}</div>
@@ -1452,36 +1453,36 @@ const UI = {
         });
     },
 
-    /* ---------- 拿修为换灵石 ---------- */
+    /* ---------- 拿战力换灵石 ---------- */
     openExchange() {
         const p = Game.player;
         if (!p) return;
-        const rate = Cultivate.XIU_TO_STONE_RATE;
+        const rate = Cultivate.ZHANLI_TO_STONE_RATE;
         const tiers = [
-            { v: 1e5,  label: '10万修为' },
-            { v: 1e6,  label: '100万修为' },
-            { v: 1e7,  label: '1000万修为' },
-            { v: 1e8,  label: '1亿修为' },
-            { v: 1e9,  label: '10亿修为' }
+            { v: 1e5,  label: '10万战力' },
+            { v: 1e6,  label: '100万战力' },
+            { v: 1e7,  label: '1000万战力' },
+            { v: 1e8,  label: '1亿战力' },
+            { v: 1e9,  label: '10亿战力' }
         ];
         const cards = tiers.map(o => {
-            const disabled = o.v > (p.xiu || 0);
+            const disabled = o.v > (p.zhanli || 0);
             const stone = Math.floor(o.v * rate);
             return `
                 <button class="seclusion-card exchange-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.exchangeAction(${o.v})"`}>
                     <span class="secl-label">${o.label}</span>
                     <span class="secl-sub">兑换</span>
-                    ${disabled ? '<span class="secl-gain">修为不足</span>' : `<span class="secl-gain">→ ${fmtNum(stone)}灵石</span>`}
+                    ${disabled ? '<span class="secl-gain">战力不足</span>' : `<span class="secl-gain">→ ${fmtNum(stone)}灵石</span>`}
                 </button>
             `;
         }).join('');
-        const allIn = Math.floor(p.xiu || 0);
+        const allIn = Math.floor(p.zhanli || 0);
         const allInStone = Math.floor(allIn * rate);
         const allInDisabled = allIn <= 0;
         this.showModal({
             title: '兑换灵石',
-            body: `<p style="line-height:1.7;margin-bottom:12px">将<b>修为</b>兑换为<b>灵石</b>，用于突破与坊市采买。当前修为：<b style="color:#7dd3c0">${fmtNum(p.xiu || 0)}</b>。</p>
-                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:8px">汇率：约 ${fmtNum(2000)} 修为 ≈ 1 灵石。兑换所得灵石不计入任务进度；兑换会消耗修为，可能拖慢突破，请权衡。</p>
+            body: `<p style="line-height:1.7;margin-bottom:12px">将<b>战力</b>兑换为<b>灵石</b>，用于突破与坊市采买。当前战力：<b style="color:#7dd3c0">${fmtNum(p.zhanli || 0)}</b>。</p>
+                   <p style="color:#9a8e7a;font-size:12px;margin-bottom:8px">汇率：约 ${fmtNum(2000)} 战力 ≈ 1 灵石。兑换所得灵石不计入任务进度；兑换会消耗战力，可能拖慢突破，请权衡。</p>
                    <div class="seclusion-scroll-wrap">
                        <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('exchangeOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
                        <div class="seclusion-options" id="exchangeOptions">${cards}</div>
@@ -1489,10 +1490,10 @@ const UI = {
                    </div>
                    <div class="seclusion-allin exchange-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.exchangeAction(${allIn})"`}>
                        <span class="secl-allin-label">全部可兑</span>
-                       <span class="secl-allin-gain">${allInDisabled ? '无修为可用' : `${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}修为`}</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无战力可用' : `${fmtNum(allInStone)}灵石 · ${fmtNum(allIn)}战力`}</span>
                    </div>
                    <div class="ex-custom">
-                       <input id="exCustomInput" class="ex-input" type="number" min="1" inputmode="numeric" placeholder="输入想兑换的修为数量" />
+                       <input id="exCustomInput" class="ex-input" type="number" min="1" inputmode="numeric" placeholder="输入想兑换的战力数量" />
                        <button class="ex-custom-btn" onclick="UI.exchangeAction(parseFloat(document.getElementById('exCustomInput').value)||0)">兑 换</button>
                    </div>`,
             footer: [
@@ -1504,10 +1505,10 @@ const UI = {
     exchangeAction(v) {
         const p = Game.player;
         if (!p) return;
-        const r = Cultivate.exchangeXiuForStone(p, v);
+        const r = Cultivate.exchangeZhanliForStone(p, v);
         if (!r) return;
         this.hideModal();
-        this.toast(`兑换成功：消耗${fmtNum(r.xiuSpent)}修为，得${fmtNum(r.stoneGot)}灵石`, 'gold');
+        this.toast(`兑换成功：消耗${fmtNum(r.zhanliSpent)}战力，得${fmtNum(r.stoneGot)}灵石`, 'gold');
         this.renderAll();
     },
 
@@ -1529,7 +1530,7 @@ const UI = {
                 <button class="seclusion-card${disabled ? ' disabled' : ''}" ${disabled ? 'disabled' : `onclick="UI.secludeAction(${o.y})"`}>
                     <span class="secl-label">${o.label}</span>
                     <span class="secl-sub">${o.sub}</span>
-                    ${disabled ? '<span class="secl-gain">寿元不足</span>' : `<span class="secl-gain">+${fmtNum(gain)}修为</span>`}
+                    ${disabled ? '<span class="secl-gain">寿元不足</span>' : `<span class="secl-gain">+${fmtNum(gain)}战力</span>`}
                 </button>
             `;
         }).join('');
@@ -1538,7 +1539,7 @@ const UI = {
         const allInDisabled = allIn <= 0;
         this.showModal({
             title: '闭关潜修',
-            body: `<p style="line-height:1.7;margin-bottom:12px">闭关乃斩断尘缘、潜心悟道之法。闭关越久，修为增涨越多，但<b>每闭关一年，折损一年寿元</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
+            body: `<p style="line-height:1.7;margin-bottom:12px">闭关乃斩断尘缘、潜心悟道之法。闭关越久，战力增涨越多，但<b>每闭关一年，折损一年寿元</b>。当前寿元：<b style="color:#d4af37">${fmtNum(p.lifespan || 0)}年</b>。</p>
                    <p style="color:#9a8e7a;font-size:12px;margin-bottom:18px">（寿元即闭关上限，无法闭关超过自身寿元；每突破大境界可增寿元。<b style="color:#c9a24a">注：修炼速率越高，闭关单位收益边际递减，极高境界时收益趋于封顶</b>）</p>
                    <div class="seclusion-scroll-wrap">
                        <button class="seclusion-arrow seclusion-arrow-left" aria-label="向左滑动" onclick="document.getElementById('seclusionOptions').scrollBy({left:-170,behavior:'smooth'})">‹</button>
@@ -1547,7 +1548,7 @@ const UI = {
                    </div>
                    <div class="seclusion-allin${allInDisabled ? ' disabled' : ''}" ${allInDisabled ? '' : `onclick="UI.secludeAction(${allIn})"`}>
                        <span class="secl-allin-label">耗尽全部寿元</span>
-                       <span class="secl-allin-gain">${allInDisabled ? '无寿元可用' : `+${fmtNum(allInGain)}修为 · ${fmtNum(allIn)}年`}</span>
+                       <span class="secl-allin-gain">${allInDisabled ? '无寿元可用' : `+${fmtNum(allInGain)}战力 · ${fmtNum(allIn)}年`}</span>
                    </div>`,
             footer: [
                 { text: '关闭', action: () => this.hideModal() }
@@ -1575,7 +1576,7 @@ const UI = {
         const tapNext = Math.round((Cultivate.wuxingTapMult({ wuxingLevel: lv + 1 }) - 1) * 100);
         const rateNext = Math.round((Cultivate.wuxingRateMult({ wuxingLevel: lv + 1 }) - 1) * 100);
         const canStone = p.stone >= c.stone;
-        const canXiu = p.xiu >= c.xiu;
+        const canXiu = p.zhanli >= c.zhanli;
         const row = (label, costTxt, have, enough, type) => `
             <button class="enl-row${enough ? '' : ' disabled'}" ${enough ? `onclick="UI.doEnlighten('${type}')"` : 'disabled'}>
                 <span class="enl-type">${label}</span>
@@ -1584,10 +1585,10 @@ const UI = {
             </button>`;
         this.showModal({
             title: '顿悟 · 悟性',
-            body: `<p style="line-height:1.7;margin-bottom:10px">顿悟可永久提升<b>每次点击修炼的修为</b>，并小幅提升<b>修炼速率</b>。当前悟性 <b style="color:#d4af37">${lv} 重</b>（点击+${tapNow}% · 速率+${rateNow}%），顿悟后 → 点击+${tapNext}% · 速率+${rateNext}%。</p>
+            body: `<p style="line-height:1.7;margin-bottom:10px">顿悟可永久提升<b>每次点击修炼的战力</b>，并小幅提升<b>修炼速率</b>。当前悟性 <b style="color:#d4af37">${lv} 重</b>（点击+${tapNow}% · 速率+${rateNow}%），顿悟后 → 点击+${tapNext}% · 速率+${rateNext}%。</p>
                    <div class="enl-list">
                        ${row('灵石', fmtNum(c.stone) + ' 灵石', p.stone, canStone, 'stone')}
-                       ${row('修为', fmtNum(c.xiu) + ' 修为', p.xiu, canXiu, 'xiu')}
+                       ${row('战力', fmtNum(c.zhanli) + ' 战力', p.zhanli, canXiu, 'zhanli')}
                    </div>
                    <p style="color:#9a8e7a;font-size:12px;margin-top:10px">二选其一消耗即可顿悟一级。</p>`,
             footer: [{ text: '关闭', action: () => this.hideModal() }]
@@ -1604,13 +1605,13 @@ const UI = {
 
     /* ---------- 显示离线收益 ---------- */
     showOfflineReward(reward) {
-        if (!reward || reward.xiu <= 0) return;
+        if (!reward || reward.zhanli <= 0) return;
         const hours = reward.time / 3600;
         const timeStr = hours >= 1 ? `${hours.toFixed(1)}小时` : `${Math.floor(reward.time / 60)}分钟`;
         this.showModal({
             title: '离线修炼',
             body: `<p>道友离线潜修${timeStr}，悟得：</p>
-                   <p style="font-size:20px;color:#d4af37;margin:14px 0;text-align:center">${fmtNum(reward.xiu)} 修为</p>
+                   <p style="font-size:20px;color:#d4af37;margin:14px 0;text-align:center">${fmtNum(reward.zhanli)} 战力</p>
                    <p style="color:#9a8e7a;font-size:12px;text-align:center">（离线修炼效率为在线50%）</p>`,
             footer: [{ text: '收下', type: 'primary', action: () => this.hideModal() }]
         });

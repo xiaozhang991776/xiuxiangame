@@ -9,8 +9,8 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         let base = 1.0;
 
-        // 境界加成：让修炼速率随「下一层突破所需修为」同步指数增长。
-        // 原线性加成(1+realmIdx*0.5+...)导致高境界(大乘+)修为需求爆炸、速率却线性增长，
+        // 境界加成：让修炼速率随「下一层突破所需战力」同步指数增长。
+        // 原线性加成(1+realmIdx*0.5+...)导致高境界(大乘+)战力需求爆炸、速率却线性增长，
         // 曾需数十万年闭关，且满层成本溢出 JS 安全整数(9e15)而永远卡死。
         // 现令 base ∝ baseXiu * xiuMult^(layer-1)（即下一层突破成本），使每层所需闭关时长与境界无关。
         const layerExp = Math.pow(realm.xiuMult, player.realmLayer - 1);
@@ -55,7 +55,7 @@ const Cultivate = {
         const talentXiu = (typeof Talent !== 'undefined') ? Talent.xiuRateMult(player) : 1;
         base *= talentXiu;
 
-        // 难度系数：修炼速率 ×rateMult（默认 1；调难时 <1 让修为获取整体变慢）
+        // 难度系数：修炼速率 ×rateMult（默认 1；调难时 <1 让战力获取整体变慢）
         base *= (typeof DIFF !== 'undefined') ? DIFF.rateMult : 1;
         // 硬顶：最终修炼速率不得超过 JS 安全整数，防止界面上出现无法阅读的超大数字，也避免后续点击/闭关收益中间值溢出
         base = Math.min(base, Number.MAX_SAFE_INTEGER);
@@ -78,17 +78,17 @@ const Cultivate = {
         };
     },
 
-    /* ---------- 获取当前境界突破所需修为 ---------- */
+    /* ---------- 获取当前境界突破所需战力 ---------- */
     getBreakthroughCost(player) {
         const realm = getRealm(player.realmIdx);
         // 当前大境界内，层数越高所需越多
         const layerProgress = (player.realmLayer - 1) / realm.layers;
-        // 难度系数：突破所需修为 ×breakXiuMult（调难时 >1）
+        // 难度系数：突破所需战力 ×breakXiuMult（调难时 >1）
         return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1) * (typeof DIFF !== 'undefined' ? DIFF.breakXiuMult : 1));
     },
 
     /* ---------- 获取当前突破（段位/大境界）所需额外灵石 ---------- */
-    // 随总段位线性增长：前期便宜，终局约数百万灵石，不随修为指数爆炸而卡死
+    // 随总段位线性增长：前期便宜，终局约数百万灵石，不随战力指数爆炸而卡死
     getBreakthroughStoneCost(player) {
         const realm = getRealm(player.realmIdx);
         const seq = player.realmIdx * realm.layers + (player.realmLayer - 1);
@@ -102,14 +102,14 @@ const Cultivate = {
             // 满层，需要突破大境界
             return this.canBreakthroughRealm(player);
         }
-        return player.xiu >= this.getBreakthroughCost(player);
+        return player.zhanli >= this.getBreakthroughCost(player);
     },
 
     /* ---------- 是否可以突破大境界 ---------- */
     canBreakthroughRealm(player) {
         if (player.realmIdx >= GameConfig.realms.length - 1) return false; // 已达最高境界
         if (player.realmLayer < getRealm(player.realmIdx).layers) return false;
-        return player.xiu >= this.getBreakthroughCost(player);
+        return player.zhanli >= this.getBreakthroughCost(player);
     },
 
     /* ---------- 执行突破 ---------- */
@@ -127,8 +127,8 @@ const Cultivate = {
             }
             const realm = getRealm(player.realmIdx);
             const cost = this.getBreakthroughCost(player);
-            if (player.xiu < cost) {
-                if (typeof UI !== 'undefined') UI.toast('修为不足，无法突破！', 'bad');
+            if (player.zhanli < cost) {
+                if (typeof UI !== 'undefined') UI.toast('战力不足，无法突破！', 'bad');
                 return false;
             }
             // 额外灵石门槛
@@ -153,7 +153,7 @@ const Cultivate = {
                 rate = Math.min(1, rate + btBonus);
                 player.breakBonus = 0;
             }
-            player.xiu -= cost;
+            player.zhanli -= cost;
             if (Math.random() < rate) {
                 // 突破成功
                 player.realmIdx++;
@@ -184,12 +184,12 @@ const Cultivate = {
                 this.save(player);
                 return true;
             } else {
-                // 突破失败，损失部分修为
+                // 突破失败，损失部分战力
                 const loss = Math.floor(cost * 0.3);
-                player.xiu = Math.max(0, player.xiu - loss);
+                player.zhanli = Math.max(0, player.zhanli - loss);
                 if (typeof UI !== 'undefined') {
                     UI.toast('突破失败，走火入魔！', 'bad');
-                    UI.addLog(`突破失败，损失${fmtNum(loss)}修为`, 'bad');
+                    UI.addLog(`突破失败，损失${fmtNum(loss)}战力`, 'bad');
                 }
                 this.save(player);
                 return false;
@@ -197,8 +197,8 @@ const Cultivate = {
         }
         // 小境界突破（必成功）
         const cost = this.getBreakthroughCost(player);
-        if (player.xiu < cost) {
-            if (typeof UI !== 'undefined') UI.toast('修为不足，无法突破！', 'bad');
+        if (player.zhanli < cost) {
+            if (typeof UI !== 'undefined') UI.toast('战力不足，无法突破！', 'bad');
             return false;
         }
         // 额外灵石门槛
@@ -208,7 +208,7 @@ const Cultivate = {
             return false;
         }
         player.stone -= stoneCost;
-        player.xiu -= cost;
+        player.zhanli -= cost;
         player.realmLayer++;
         player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
         // 每满 5 小境界：额外天赋点
@@ -220,7 +220,7 @@ const Cultivate = {
         if (typeof UI !== 'undefined') {
             UI.showBreakthroughFX(`${realm.name}${cnNum(player.realmLayer)}层`);
             UI.toast(`突破至${realm.name}${cnNum(player.realmLayer)}层`, 'gold');
-            UI.addLog(`修为精进，突破至${realm.name}${cnNum(player.realmLayer)}层`, 'evt');
+            UI.addLog(`战力精进，突破至${realm.name}${cnNum(player.realmLayer)}层`, 'evt');
         }
         if (typeof Quests !== 'undefined') {
             Quests.tickProgress('realm_layer', player.realmIdx * 100 + player.realmLayer);
@@ -229,17 +229,17 @@ const Cultivate = {
         return true;
     },
 
-    SECLUDE_EFFICIENCY: 0.0015, // 闭关修为收益系数（从 0.15 再除以 100）
+    SECLUDE_EFFICIENCY: 0.0015, // 闭关战力收益系数（从 0.15 再除以 100）
     SECLUDE_RATE_K: 1e5,       // 闭关效率边际递减阈值：rate 超过此值后单位闭关收益被压缩，防止后期闭关收益随 rate 指数暴涨而碾压突破（rate≪K 时不衰减，rate≫K 时收益封顶不再膨胀）。再削弱档：从 3e6 降至 1e5，使中期(元婴~道祖)闭关100年收益从≈1层削到≈0.68层、后期(道祖满层)彻底封死；前期(练气~金丹)因 rate≪K 完全不动。
     YOULI_BASE_STONE: 60000,   // 游历：每游历一年基础灵石（练气期）；×100 倍（原 200；曾×15→×10→再×10）
     YOULI_GROWTH: 1.6,        // 游历灵石随境界增长系数
 
-    // 悟性系统：顿悟消耗资源，永久提升每次点击修为与修炼速率
+    // 悟性系统：顿悟消耗资源，永久提升每次点击战力与修炼速率
     WUXING_MAX: 50,            // 悟性上限（重）
-    WUXING_TAP_PER: 15,     // 每重：每次点击修炼修为 +1500%（50重共×751）；用户要求「悟性加成×100」（原 0.15）
+    WUXING_TAP_PER: 15,     // 每重：每次点击修炼战力 +1500%（50重共×751）；用户要求「悟性加成×100」（原 0.15）
     WUXING_RATE_PER: 15,     // 每重：修炼速率 +1500%（50重共×751）；用户要求「悟性加成×100」（原 0.15）
-    // 顿悟成本增长：基底小、指数温和，确保 50 重全程在「修为上限 XIU_CAP」与「灵石安全整数」内可达，不再卡死
-    WUXING_XIU_BASE: 50000, WUXING_XIU_GROWTH: 3,       // 修为路径：50 重单级峰值≈1.2e28，远低于 XIU_CAP(1e30)
+    // 顿悟成本增长：基底小、指数温和，确保 50 重全程在「战力上限 ZHANLI_CAP」与「灵石安全整数」内可达，不再卡死
+    WUXING_ZHANLI_BASE: 50000, WUXING_ZHANLI_GROWTH: 3,       // 战力路径：50 重单级峰值≈1.2e28，远低于 ZHANLI_CAP(1e30)
     WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.7,  // 灵石路径：50 重单级峰值≈9.8e14，低于 Number.MAX_SAFE_INTEGER
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
@@ -248,7 +248,7 @@ const Cultivate = {
         const lv = player.wuxingLevel || 0;
         return {
             stone: Math.floor(Math.min(this.WUXING_STONE_BASE * Math.pow(this.WUXING_STONE_GROWTH, lv), Number.MAX_SAFE_INTEGER)),
-            xiu:   Math.floor(Math.min(this.WUXING_XIU_BASE * Math.pow(this.WUXING_XIU_GROWTH, lv), XIU_CAP))
+            zhanli:   Math.floor(Math.min(this.WUXING_ZHANLI_BASE * Math.pow(this.WUXING_ZHANLI_GROWTH, lv), ZHANLI_CAP))
         };
     },
     // 顿悟：消耗指定类型资源，提升一级悟性
@@ -261,7 +261,7 @@ const Cultivate = {
         const c = this.enlightenCosts(player);
         let ok = false;
         if (type === 'stone') { if (player.stone >= c.stone) { player.stone -= c.stone; ok = true; } }
-        else if (type === 'xiu') { if (player.xiu >= c.xiu) { player.xiu -= c.xiu; ok = true; } }
+        else if (type === 'zhanli') { if (player.zhanli >= c.zhanli) { player.zhanli -= c.zhanli; ok = true; } }
         else { return false; }
         if (!ok) {
             if (typeof UI !== 'undefined') UI.toast('资源不足，无法顿悟', 'bad');
@@ -270,26 +270,26 @@ const Cultivate = {
         player.wuxingLevel = lv + 1;
         this.save(player);
         if (typeof UI !== 'undefined') {
-            UI.toast(`顿悟成功！悟性升至 ${player.wuxingLevel} 重，每次修炼修为+${Math.round((this.wuxingTapMult(player) - 1) * 100)}%、修炼速率+${Math.round((this.wuxingRateMult(player) - 1) * 100)}%`, 'gold');
+            UI.toast(`顿悟成功！悟性升至 ${player.wuxingLevel} 重，每次修炼战力+${Math.round((this.wuxingTapMult(player) - 1) * 100)}%、修炼速率+${Math.round((this.wuxingRateMult(player) - 1) * 100)}%`, 'gold');
             UI.addLog(`灵台清明，悟性突破至第 ${player.wuxingLevel} 重`, 'evt');
         }
         return true;
     },
 
-    /* ---------- 闭关潜修（消耗寿元换修为） ---------- */
-    // 闭关修为收益（与 seclude 同公式，纯计算无副作用）：供 UI 预览与实际结算共用，杜绝「UI 预览与实际到手不符」的脱节 bug
-    _secludeXiuGain(player, years) {
+    /* ---------- 闭关潜修（消耗寿元换战力） ---------- */
+    // 闭关战力收益（与 seclude 同公式，纯计算无副作用）：供 UI 预览与实际结算共用，杜绝「UI 预览与实际到手不符」的脱节 bug
+    _secludeZhanliGain(player, years) {
         const rate = SaveSystem.calcCultivateRate(player);
         // 边际递减：rate 越高，单位闭关收益越低（effFactor = 1/(1+rate/K)）。
         // rate≪K 时 effFactor≈1（前期/中期不受削）；rate≫K 时 effFactor→K/rate，闭关收益封顶、不再随 rate 指数膨胀碾压突破。
         const effFactor = 1 / (1 + rate / this.SECLUDE_RATE_K);
-        return Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY * effFactor), XIU_CAP);
+        return Math.min(Math.floor(years * rate * 31536000 * this.SECLUDE_EFFICIENCY * effFactor), ZHANLI_CAP);
     },
-    // 预览：给定年数的闭关修为收益（不扣寿命、不改状态），供 UI 闭关面板显示
+    // 预览：给定年数的闭关战力收益（不扣寿命、不改状态），供 UI 闭关面板显示
     previewSeclude(player, years) {
         years = Math.floor(years);
         if (!years || years <= 0) return 0;
-        return this._secludeXiuGain(player, years);
+        return this._secludeZhanliGain(player, years);
     },
     seclude(player, years) {
         years = Math.floor(years);
@@ -301,9 +301,9 @@ const Cultivate = {
             if (typeof UI !== 'undefined') UI.toast(`寿元不足，仅余${player.lifespan}年`, 'bad');
             return null;
         }
-        // 修为收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 XIU_CAP 防止极端长闭关越界（仍远低于 Infinity）
-        const SAFE = XIU_CAP;
-        const xiuGain = this._secludeXiuGain(player, years);
+        // 战力收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 ZHANLI_CAP 防止极端长闭关越界（仍远低于 Infinity）
+        const SAFE = ZHANLI_CAP;
+        const xiuGain = this._secludeZhanliGain(player, years);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
         if (player.lifespan <= 0) {
@@ -313,15 +313,15 @@ const Cultivate = {
             if (typeof Game !== 'undefined' && typeof Game.onLifespanZero === 'function') {
                 Game.onLifespanZero(player);
             }
-            return { xiu: xiuGain, years, dead: true };
+            return { zhanli: xiuGain, years, dead: true };
         }
-        // 修为（及累计修为）钳到 XIU_CAP：允许多次闭关/点击持续叠加增长，不再卡死在 9e15
-        player.xiu = Math.min((player.xiu || 0) + xiuGain, SAFE);
-        player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + xiuGain, SAFE);
+        // 战力（及累计战力）钳到 ZHANLI_CAP：允许多次闭关/点击持续叠加增长，不再卡死在 9e15
+        player.zhanli = Math.min((player.zhanli || 0) + xiuGain, SAFE);
+        player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + xiuGain, SAFE);
         this.save(player);
-        if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
-        if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}修为（耗寿元${years}年）`, 'evt');
-        return { xiu: xiuGain, years };
+        if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
+        if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}战力（耗寿元${years}年）`, 'evt');
+        return { zhanli: xiuGain, years };
     },
 
     /* ---------- 游历（消耗寿元，获得灵石/材料/丹药） ---------- */
@@ -416,32 +416,32 @@ const Cultivate = {
         return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
     },
 
-    /* ---------- 拿修为换灵石 ---------- */
-    // 将富余修为兑换成灵石，缓解灵石卡突破/采买；兑换会消耗修为，可能拖慢突破，由玩家权衡
-    XIU_TO_STONE_RATE: 0.0005, // 汇率：约 2000 修为 ≈ 1 灵石（档位见 UI.openExchange）
-    exchangeXiuForStone(player, xiuAmount) {
+    /* ---------- 拿战力换灵石 ---------- */
+    // 将富余战力兑换成灵石，缓解灵石卡突破/采买；兑换会消耗战力，可能拖慢突破，由玩家权衡
+    ZHANLI_TO_STONE_RATE: 0.0005, // 汇率：约 2000 战力 ≈ 1 灵石（档位见 UI.openExchange）
+    exchangeZhanliForStone(player, xiuAmount) {
         xiuAmount = Math.floor(xiuAmount);
         if (!xiuAmount || xiuAmount <= 0) {
-            if (typeof UI !== 'undefined') UI.toast('请输入兑换的修为数量', 'bad');
+            if (typeof UI !== 'undefined') UI.toast('请输入兑换的战力数量', 'bad');
             return null;
         }
-        if (xiuAmount > (player.xiu || 0)) {
-            if (typeof UI !== 'undefined') UI.toast('修为不足', 'bad');
+        if (xiuAmount > (player.zhanli || 0)) {
+            if (typeof UI !== 'undefined') UI.toast('战力不足', 'bad');
             return null;
         }
-        const stone = Math.floor(xiuAmount * this.XIU_TO_STONE_RATE);
+        const stone = Math.floor(xiuAmount * this.ZHANLI_TO_STONE_RATE);
         if (stone <= 0) {
             if (typeof UI !== 'undefined') UI.toast('兑换所得灵石过少', 'bad');
             return null;
         }
-        player.xiu -= xiuAmount;
+        player.zhanli -= xiuAmount;
         const _rbX = this.getRebirthBonus(player);
         player.stone += Math.floor(stone * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbX.stoneMult) * this.stoneGainMult(player));
         this.save(player);
         if (typeof UI !== 'undefined') {
-            UI.addLog(`以${fmtNum(xiuAmount)}修为，兑换得${fmtNum(stone)}灵石`, 'evt');
+            UI.addLog(`以${fmtNum(xiuAmount)}战力，兑换得${fmtNum(stone)}灵石`, 'evt');
         }
-        return { xiuSpent: xiuAmount, stoneGot: stone };
+        return { zhanliSpent: xiuAmount, stoneGot: stone };
     },
 
     /* ---------- 获取当前境界名 ---------- */
@@ -514,11 +514,11 @@ const Cultivate = {
         const btn = document.getElementById('cultivateToggle');
         const status = document.getElementById('cultivateStatus');
         if (btn) btn.textContent = Game.cultivating ? '暂停修炼' : '开始修炼';
-        if (status) status.textContent = Game.cultivating ? '气机流转，修为缓缓增长' : '修炼已暂停';
+        if (status) status.textContent = Game.cultivating ? '气机流转，战力缓缓增长' : '修炼已暂停';
         if (typeof UI !== 'undefined') UI.toast(Game.cultivating ? '开始修炼' : '修炼已暂停', 'good');
     },
 
-    /* ---------- 手动修炼（点击一次立即获得修为） ---------- */
+    /* ---------- 手动修炼（点击一次立即获得战力） ---------- */
     tapCombo: 0,
     tapComboTimer: 0,
     manualCultivate(player) {
@@ -533,13 +533,13 @@ const Cultivate = {
         }
         this.tapComboTimer = now;
         const comboMult = 1 + (this.tapCombo - 1) * 0.08; // 最高约 1.88x
-        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，钳到 XIU_CAP 允许终局持续增长
-        const SAFE = XIU_CAP;
+        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，钳到 ZHANLI_CAP 允许终局持续增长
+        const SAFE = ZHANLI_CAP;
         const gain = Math.min(Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player))), SAFE);
-        player.xiu = Math.min((player.xiu || 0) + gain, SAFE);
-        player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + gain, SAFE);
+        player.zhanli = Math.min((player.zhanli || 0) + gain, SAFE);
+        player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + gain, SAFE);
         // 任务进度
-        if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', player.stats.totalXiu);
+        if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
         // 视觉反馈
         if (typeof UI !== 'undefined') {
             UI.showTapGain(gain, this.tapCombo > 1 ? this.tapCombo : 0);
@@ -652,7 +652,7 @@ const Cultivate = {
             return { mode, success: true, bonus: sb,
                 msg: `硬抗${trib.name}成功！劫后余韵加身：修炼速率+${Math.round(sb.xiuMult*100)}%、灵石获取+${Math.round(sb.stoneMult*100)}%` };
         }
-        // 硬抗失败：境界回落 + 损修为 + 损寿元（难度系数 tribPenaltyMult 加重惩罚）
+        // 硬抗失败：境界回落 + 损战力 + 损寿元（难度系数 tribPenaltyMult 加重惩罚）
         const _m = (typeof DIFF !== 'undefined') ? DIFF.tribPenaltyMult : 1;
         const fpRaw = trib.failPenalty || { layerDown: 2, xiuLossPct: 0.3, lifeLoss: 5 };
         const fp = {
@@ -669,12 +669,12 @@ const Cultivate = {
         } else {
             player.realmLayer = 1;
         }
-        const loss = Math.floor((player.xiu || 0) * fp.xiuLossPct);
-        player.xiu = Math.max(0, player.xiu - loss);
+        const loss = Math.floor((player.zhanli || 0) * fp.zhanliLossPct);
+        player.zhanli = Math.max(0, player.zhanli - loss);
         player.lifespan = Math.max(0, (player.lifespan || 0) - fp.lifeLoss);
         this.save(player);
         return { mode, success: false, penalty: fp, xiuLost: loss,
-            msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}修为、寿元-${fp.lifeLoss}` };
+            msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}战力、寿元-${fp.lifeLoss}` };
     },
 
     /* 灵石获取倍率（含 悟道系·点石 天赋） */
@@ -709,7 +709,7 @@ const Cultivate = {
             }
             player.rebirth = (player.rebirth || 0) + 1;
         }
-        // 重置境界/寿元（保留修为/属性加成/装备/资源/功法/灵宠/好友等，避免轮回清空积累）
+        // 重置境界/寿元（保留战力/属性加成/装备/资源/功法/灵宠/好友等，避免轮回清空积累）
         if (usedPill) {
             // 轮回草轮回：保留当前境界（realmIdx/realmLayer），战力不降；仅重算寿元（重活一世，避免残留低寿命立刻羽化）
             player.lifespan = 100;

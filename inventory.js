@@ -173,18 +173,18 @@ const Inventory = {
             if (typeof UI !== 'undefined') UI.toast('已达强化上限+100！', 'bad');
             return false;
         }
-        // 强化消耗修为（随等级递增）
+        // 强化消耗战力（随等级递增）
         const q = getQuality(tpl.quality);
         const cost = Math.floor(tpl.price * 0.3 * (curEnhance + 1));
-        if (player.xiu < cost) {
-            if (typeof UI !== 'undefined') UI.toast(`修为不足！需要${cost}修为`, 'bad');
+        if (player.zhanli < cost) {
+            if (typeof UI !== 'undefined') UI.toast(`战力不足！需要${cost}战力`, 'bad');
             return false;
         }
-        player.xiu -= cost;
+        player.zhanli -= cost;
         eqInstance.enhance = curEnhance + 1;
         if (typeof UI !== 'undefined') {
-            UI.toast(`强化成功！+${curEnhance + 1}（耗${cost}修为）`, 'gold');
-            UI.addLog(`${tpl.name}强化至+${curEnhance + 1}，耗${cost}修为`, 'evt');
+            UI.toast(`强化成功！+${curEnhance + 1}（耗${cost}战力）`, 'gold');
+            UI.addLog(`${tpl.name}强化至+${curEnhance + 1}，耗${cost}战力`, 'evt');
         }
         this.save(player);
         return true;
@@ -238,10 +238,10 @@ const Inventory = {
                 player.tempLingBuff = (player.tempLingBuff || 0) + eff.value;
                 msg = `恢复${eff.value}灵力（战斗中生效）`;
                 break;
-            case 'xiu':
-                player.xiu += eff.value;
-                player.stats.totalXiu = (player.stats.totalXiu || 0) + eff.value;
-                msg = `获得${eff.value}修为`;
+            case 'zhanli':
+                player.zhanli += eff.value;
+                player.stats.totalZhanli = (player.stats.totalZhanli || 0) + eff.value;
+                msg = `获得${eff.value}战力`;
                 break;
             case 'perm_hp':
                 player.permBonus.hp = (player.permBonus.hp || 0) + eff.value;
@@ -492,11 +492,11 @@ const Inventory = {
             if (typeof UI !== 'undefined') UI.toast(`境界不足，需${getRealm(skill.realmReq).name}境界`, 'bad');
             return false;
         }
-        if (player.xiu < skill.learnCost) {
-            if (typeof UI !== 'undefined') UI.toast(`修为不足！需要${fmtNum(skill.learnCost)}修为`, 'bad');
+        if (player.zhanli < skill.learnCost) {
+            if (typeof UI !== 'undefined') UI.toast(`战力不足！需要${fmtNum(skill.learnCost)}战力`, 'bad');
             return false;
         }
-        player.xiu -= skill.learnCost;
+        player.zhanli -= skill.learnCost;
         player.skills[skillId] = 1;
         if (typeof UI !== 'undefined') {
             UI.toast(`习得神通：${skill.name}！`, 'gold');
@@ -517,11 +517,11 @@ const Inventory = {
             return false;
         }
         const cost = Math.floor(skill.learnCost * Math.pow(skill.upCostMult || 1.2, curLv));
-        if (player.xiu < cost) {
-            if (typeof UI !== 'undefined') UI.toast(`修为不足！需要${fmtNum(cost)}修为`, 'bad');
+        if (player.zhanli < cost) {
+            if (typeof UI !== 'undefined') UI.toast(`战力不足！需要${fmtNum(cost)}战力`, 'bad');
             return false;
         }
-        player.xiu -= cost;
+        player.zhanli -= cost;
         player.skills[skillId] = curLv + 1;
         if (typeof UI !== 'undefined') {
             UI.toast(`${skill.name}升至${curLv + 1}级`, 'gold');

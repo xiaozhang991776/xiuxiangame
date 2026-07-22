@@ -354,7 +354,7 @@ input { font-family: inherit; }
 }
 .icon-btn:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
 
-/* 修为进度条 */
+/* 战力进度条 */
 .cultivation-bar-wrap {
     height: 36px; flex-shrink: 0;
     display: flex; align-items: center; gap: 12px;

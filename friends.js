@@ -9,9 +9,9 @@
 const Friends = {
     KEY: 'xiuxian_friends_v1',
 
-    /* 战力评分（用于道友榜排序与比较） */
+    /* 战力评分（用于道友榜排序与比较）：按用户选择，直接用累积战力值 */
     power(prof) {
-        return Math.floor((prof.atk || 0) + (prof.def || 0) + (prof.hp || 0) * 0.3 + (prof.ling || 0));
+        return Math.floor(prof.zhanli || 0);
     },
 
     /* ---------- 本地好友列表 ---------- */
@@ -41,7 +41,7 @@ const Friends = {
             realmIdx: p.realmIdx, realmLayer: p.realmLayer,
             realmName: realm ? realm.name : '',
             atk: st.atk, def: st.def, hp: st.hp, ling: st.ling, crit: st.crit,
-            totalXiu: p.stats.totalXiu || 0,
+            zhanli: p.zhanli || 0,
             tXi: (p.tribulus && p.tribulus.xiuMult) || 0,
             tSt: (p.tribulus && p.tribulus.stoneMult) || 0,
             lifespan: p.lifespan || 0

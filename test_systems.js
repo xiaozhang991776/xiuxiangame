@@ -111,7 +111,7 @@ const psT = PetSys.instStats({ talents:{pts:0,learned:{t_pet:10}} }, instT);
 ok('驭兽10级 灵宠 +60%', psT.atk === Math.floor(8*1.6), psT.atk);
 
 console.log('\n[4] 灵宠培养：喂养/修炼/化形');
-const pPet = { xiu: 1e9, inventory:{ material:{ m_pet_food:5, m_pet_evo:0 } }, pets:[], pet:null, talents:{pts:0,learned:{}} };
+const pPet = { zhanli: 1e9, inventory:{ material:{ m_pet_food:5, m_pet_evo:0 } }, pets:[], pet:null, talents:{pts:0,learned:{}} };
 ok('收服灵宠成功', PetSys.addPet(pPet, 'pet_wolf') === true && pPet.pets.length === 1);
 ok('首只自动出战', pPet.pet === 'pet_wolf');
 const fr = PetSys.feed(pPet, 'pet_wolf', 5);
@@ -224,18 +224,18 @@ pFull.wuxingLevel = 30;
 pFull.gongfa = 'g_daodao';
 pFull.equipped = { weapon: { baseId: 'w_chaos_sword' }, armor: { baseId: 'a_chaos_robe' }, accessory: { baseId: 'ac_chaos_pearl' }, fabao: { baseId: 'f_taiqing_ta' } };
 const rateFull = SaveSystem.calcCultivateRate(pFull);
-ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率受控(<1e15, 远小于XIU_CAP 1e30, 不爆表)', rateFull < 1e15, rateFull);
+ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率受控(<1e15, 远小于ZHANLI_CAP 1e30, 不爆表)', rateFull < 1e15, rateFull);
 const rateBareDz = SaveSystem.calcCultivateRate(bareAt(12, 15));
 ok('道祖L15 裸境界速率 < 1e8（基础值受控）', rateBareDz < 1e8, rateBareDz);
 
-console.log('\n[10b] 修为存储上限解除（不再被钳死在 9e15 / 9007.20兆）');
-ok('修为存储上限 XIU_CAP 已抬高到安全整数之上', sandbox.XIU_CAP > Number.MAX_SAFE_INTEGER, sandbox.XIU_CAP);
-// 复现 manualCultivate 的「修为 += gain」逻辑（避开 UI 桩），断言终局修为能越过旧上限
+console.log('\n[10b] 战力存储上限解除（不再被钳死在 9e15 / 9007.20兆）');
+ok('战力存储上限 ZHANLI_CAP 已抬高到安全整数之上', sandbox.ZHANLI_CAP > Number.MAX_SAFE_INTEGER, sandbox.ZHANLI_CAP);
+// 复现 manualCultivate 的「战力 += gain」逻辑（避开 UI 桩），断言终局战力能越过旧上限
 const wm = sandbox.Cultivate.wuxingTapMult(pFull);
-const tapGain = Math.min(Math.max(1, Math.floor(rateFull * 3 * 1 * wm)), sandbox.XIU_CAP);
+const tapGain = Math.min(Math.max(1, Math.floor(rateFull * 3 * 1 * wm)), sandbox.ZHANLI_CAP);
 const beforeXiu = Number.MAX_SAFE_INTEGER; // 旧档被钳死在 9e15
-const afterXiu = Math.min(beforeXiu + tapGain, sandbox.XIU_CAP);
-ok('终局(道祖满层)点击修炼修为能越过旧上限 9e15（不再卡死 9007.20兆）', afterXiu > beforeXiu, afterXiu);
+const afterXiu = Math.min(beforeXiu + tapGain, sandbox.ZHANLI_CAP);
+ok('终局(道祖满层)点击修炼战力能越过旧上限 9e15（不再卡死 9007.20兆）', afterXiu > beforeXiu, afterXiu);
 ok('fmtNum(1e30) 用大单位(穰/沟)显示而非裸数字', /[稳秸沟穰京兆亿]/.test(sandbox.fmtNum(1e30)), sandbox.fmtNum(1e30));
 
 console.log('\n[11] 大成期(大乘)以上解锁内容（realmReq 门禁）');
@@ -255,7 +255,7 @@ console.log('\n[9] 突破觉醒天赋点');
         {
             const bp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
             bp.realmIdx = 12; bp.realmLayer = 15;
-            bp.stone = 1e9; bp.xiu = 1e9;
+            bp.stone = 1e9; bp.zhanli = 1e9;
             bp.talents = { pts:0, learned:{} };
             bp.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
             const before = bp.stone;
@@ -267,7 +267,7 @@ console.log('\n[9] 突破觉醒天赋点');
         }
 
         const bp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
-        bp.realmIdx = 0; bp.realmLayer = 15; bp.xiu = 1e9; bp.stone = 1e9;
+        bp.realmIdx = 0; bp.realmLayer = 15; bp.zhanli = 1e9; bp.stone = 1e9;
         bp.talents = { pts:0, learned:{} };
         const okMajor = await Cultivate.breakThrough(bp);
         ok('突破大境界成功并 +3 天赋点', okMajor === true && bp.talents.pts === 3, bp.talents.pts);
@@ -280,12 +280,12 @@ console.log('\n[9] 突破觉醒天赋点');
             sp.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
             const sRes = Cultivate.seclude(sp, 100);
             const sCost = Cultivate.getBreakthroughCost(sp);
-            const sRatio = sRes.xiu / sCost;
-            ok('后期(道祖满层·满悟性)闭关100年收益为有限正值（非 NaN/Infinity）', isFinite(sRes.xiu) && sRes.xiu > 0, sRes.xiu);
+            const sRatio = sRes.zhanli / sCost;
+            ok('后期(道祖满层·满悟性)闭关100年收益为有限正值（非 NaN/Infinity）', isFinite(sRes.zhanli) && sRes.zhanli > 0, sRes.zhanli);
             ok('后期闭关100年 / 突破成本 < 50 层（边际递减削超模，回归#闭关超模；旧版≈469）', sRatio < 50, sRatio);
         }
 
-        // [14] 闭关 UI 预览与实际结算一致性（回归#闭关UI没改：旧版预览用旧公式，漏算 effFactor 边际递减与 XIU_CAP 钳制，导致显示虚高、与实际到手不符）
+        // [14] 闭关 UI 预览与实际结算一致性（回归#闭关UI没改：旧版预览用旧公式，漏算 effFactor 边际递减与 ZHANLI_CAP 钳制，导致显示虚高、与实际到手不符）
         {
             const mk = (idx, lay, wx) => {
                 const q = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
@@ -298,7 +298,7 @@ console.log('\n[9] 突破觉醒天赋点');
             for (const [name, base, yrs] of cases) {
                 const prev = Cultivate.previewSeclude(JSON.parse(JSON.stringify(base)), yrs);
                 const real = Cultivate.seclude(JSON.parse(JSON.stringify(base)), yrs);
-                ok(`闭关UI预览收益 === 实际闭关收益（${name}）`, real.xiu === prev, `预览=${prev} 实际=${real.xiu}`);
+                ok(`闭关UI预览收益 === 实际闭关收益（${name}）`, real.zhanli === prev, `预览=${prev} 实际=${real.zhanli}`);
             }
         }
     } catch (e) {

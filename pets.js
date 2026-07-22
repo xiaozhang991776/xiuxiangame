@@ -74,13 +74,13 @@ const PetSys = {
         return { ok: true, used: use, gained, lv: inst.lv };
     },
 
-    /* 修炼：消耗修为，增经验与亲密度 */
+    /* 修炼：消耗战力，增经验与亲密度 */
     train(player, id) {
         const inst = this.getInst(player, id);
         if (!inst) return { ok: false };
         const cost = 200 * (inst.lv || 1);
-        if ((player.xiu || 0) < cost) return { ok: false, msg: '修为不足（需 ' + fmtNum(cost) + '）' };
-        player.xiu -= cost;
+        if ((player.zhanli || 0) < cost) return { ok: false, msg: '战力不足（需 ' + fmtNum(cost) + '）' };
+        player.zhanli -= cost;
         inst.exp += 60; inst.aff += 2;
         while (inst.exp >= this.expNeed(inst.lv)) {
             inst.exp -= this.expNeed(inst.lv); inst.lv++;
@@ -119,7 +119,7 @@ const PetSys = {
 (function injectPetMaterials() {
     if (typeof GameConfig === 'undefined') return;
     const mats = [
-        { id: 'm_pet_food', name: '灵兽粮', icon: '粮', quality: 0, price: 60,    desc: '喂养灵宠的灵粮，可助其增长修为' },
+        { id: 'm_pet_food', name: '灵兽粮', icon: '粮', quality: 0, price: 60,    desc: '喂养灵宠的灵粮，可助其增长战力' },
         { id: 'm_pet_evo',  name: '化形丹', icon: '丹', quality: 3, price: 20000,  desc: '灵宠化形进阶之丹，等级足时可令其蜕变' }
     ];
     mats.forEach(m => { if (!GameConfig.materials.find(x => x.id === m.id)) GameConfig.materials.push(m); });

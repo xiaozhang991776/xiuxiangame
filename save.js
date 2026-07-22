@@ -116,13 +116,13 @@ const SaveSystem = {
         }
         try {
             player.lastSave = Date.now();
-            // 防溢出：落盘前把修为/累计修为钳制到 XIU_CAP（远低于 Infinity），
-            // 既杜绝历史膨胀值写回，又允许 9e15 之上的终局修为持续保留、不被压回。
-            if (player.xiu != null && (player.xiu > XIU_CAP || !isFinite(player.xiu))) {
-                player.xiu = XIU_CAP;
+            // 防溢出：落盘前把战力/累计战力钳制到 ZHANLI_CAP（远低于 Infinity），
+            // 既杜绝历史膨胀值写回，又允许 9e15 之上的终局战力持续保留、不被压回。
+            if (player.zhanli != null && (player.zhanli > ZHANLI_CAP || !isFinite(player.zhanli))) {
+                player.zhanli = ZHANLI_CAP;
             }
-            if (player.stats && player.stats.totalXiu != null && (player.stats.totalXiu > XIU_CAP || !isFinite(player.stats.totalXiu))) {
-                player.stats.totalXiu = XIU_CAP;
+            if (player.stats && player.stats.totalZhanli != null && (player.stats.totalZhanli > ZHANLI_CAP || !isFinite(player.stats.totalZhanli))) {
+                player.stats.totalZhanli = ZHANLI_CAP;
             }
             const data = this._safeStringify(player);
             // 序列化失败：绝不写 "null" 覆盖旧档（否则下次读档会清零全部进度）
@@ -168,6 +168,15 @@ const SaveSystem = {
     /* ---------- 数据迁移与字段补全 ---------- */
     migrate(player) {
         const def = GameConfig.defaultPlayer;
+        // 兼容性迁移：旧档用「修为(xiu)」作为成长资源，现统一为「战力(zhanli)」
+        if (player.zhanli === undefined && player.xiu !== undefined) {
+            player.zhanli = player.xiu;
+            delete player.xiu;
+        }
+        if (player.stats && player.stats.totalZhanli === undefined && player.stats.totalXiu !== undefined) {
+            player.stats.totalZhanli = player.stats.totalXiu;
+            delete player.stats.totalXiu;
+        }
         // 浅合并缺失字段
         for (const k in def) {
             if (player[k] === undefined) {
@@ -185,7 +194,7 @@ const SaveSystem = {
         if (!player.inventory.fabao) player.inventory.fabao = [];
         if (!player.skills) player.skills = { s_basic_strike: 1 };
         if (!player.quests) player.quests = {};
-        if (!player.stats) player.stats = { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0 };
+        if (!player.stats) player.stats = { combatWins: 0, exploreCount: 0, totalZhanli: 0, breakthroughs: 0 };
         if (!player.settings) player.settings = { autoSave: true, anim: true, sound: false };
         // 灵宠培养 + 天赋系统 字段补全 / 旧档迁移
         if (!player.pets) player.pets = [];
@@ -220,7 +229,7 @@ const SaveSystem = {
         const now = Date.now();
         const last = player.lastSave || now;
         const elapsedSec = Math.min((now - last) / 1000, GameConfig.offlineMaxHours * 3600);
-        if (elapsedSec < 60) return { xiu: 0, time: 0 };
+        if (elapsedSec < 60) return { zhanli: 0, time: 0 };
 
         // 调用 Cultivate 模块计算效率（避免循环依赖，直接计算）
         const rate = this.calcCultivateRate(player);
@@ -231,9 +240,9 @@ const SaveSystem = {
     /* ---------- 计算修炼效率（独立实现，避免循环依赖） ---------- */
     calcCultivateRate(player) {
         const realm = getRealm(player.realmIdx);
-        let base = 1.0; // 基础每秒1修为
-        // 境界加成：让修炼速率随「下一层突破所需修为」同步指数增长，
-        // 否则高境界(大乘+)修为需求爆炸、速率却线性增长，会彻底卡死。
+        let base = 1.0; // 基础每秒1战力
+        // 境界加成：让修炼速率随「下一层突破所需战力」同步指数增长，
+        // 否则高境界(大乘+)战力需求爆炸、速率却线性增长，会彻底卡死。
         // base ∝ baseXiu * xiuMult^(layer-1)（即下一层突破成本），使每层所需闭关时长与境界无关。
         const layerExp = Math.pow(realm.xiuMult, player.realmLayer - 1);
         const realmMult = Math.max(1, (realm.baseXiu * layerExp) / 5e6);
@@ -277,10 +286,10 @@ const SaveSystem = {
     /* ---------- 应用离线收益 ---------- */
     applyOfflineReward(player) {
         const reward = this.calcOfflineReward(player);
-        const SAFE = XIU_CAP;
-        if (reward.xiu > 0) {
-            player.xiu = Math.min((player.xiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
-            player.stats.totalXiu = Math.min((player.stats.totalXiu || 0) + Math.min(reward.xiu, SAFE), SAFE);
+        const SAFE = ZHANLI_CAP;
+        if (reward.zhanli > 0) {
+            player.zhanli = Math.min((player.zhanli || 0) + Math.min(reward.zhanli, SAFE), SAFE);
+            player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + Math.min(reward.zhanli, SAFE), SAFE);
         }
         player.lastOffline = Date.now();
         player.lastSave = Date.now(); // 防止下次用旧lastSave重复结算离线收益
@@ -356,7 +365,7 @@ const SaveSystem = {
             element: p.element || 'metal',
             realmIdx: p.realmIdx || 0,
             realmLayer: p.realmLayer || 1,
-            xiu: Math.floor(p.xiu || 0),
+            zhanli: Math.floor(p.zhanli || 0),
             lifespan: (p.lifespan || 100),
             lastSave: p.lastSave || Date.now()
         };
@@ -393,7 +402,7 @@ const SaveSystem = {
                 try { p = JSON.parse(old); } catch (e) { p = null; }
                 idx.slots['1'] = p
                     ? this.metaFromPlayer(p)
-                    : { name: '无名修士', avatar: 0, element: 'metal', realmIdx: 0, realmLayer: 1, xiu: 0, lifespan: 100, lastSave: Date.now() };
+                    : { name: '无名修士', avatar: 0, element: 'metal', realmIdx: 0, realmLayer: 1, zhanli: 0, lifespan: 100, lastSave: Date.now() };
                 idx.current = 1;
                 this._writeIndex(idx);
                 this._write(slotKey(1), old);
@@ -434,7 +443,7 @@ const Game = {
         slotId = slotId || 1;
         SaveSystem.save(this.player, slotId);
         this.currentSlotId = slotId;
-        this.offlineReward = { xiu: 0, time: 0 };
+        this.offlineReward = { zhanli: 0, time: 0 };
     },
 
     /* 切换到指定槽位（中途切换道途，不结算离线收益） */
@@ -443,7 +452,7 @@ const Game = {
         if (p) {
             this.player = p;
             this.currentSlotId = id;
-            this.offlineReward = { xiu: 0, time: 0 };
+            this.offlineReward = { zhanli: 0, time: 0 };
         }
         return p;
     },
@@ -485,15 +494,15 @@ const Game = {
             this.lastTickTime = now;
             const rate = SaveSystem.calcCultivateRate(this.player);
             const gain = rate * dt;
-            this.player.xiu += gain;
-            this.player.stats.totalXiu = (this.player.stats.totalXiu || 0) + gain;
+            this.player.zhanli += gain;
+            this.player.stats.totalZhanli = (this.player.stats.totalZhanli || 0) + gain;
             // UI刷新（节流：每秒更新一次）
             if (typeof UI !== 'undefined' && UI.updateCultivationBar) {
                 UI.updateCultivationBar();
                 UI.updateResourceBar();
             }
             // 任务进度
-            if (typeof Quests !== 'undefined') Quests.tickProgress('xiu_total', this.player.stats.totalXiu);
+            if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', this.player.stats.totalZhanli);
         }, 1000);
     },
 

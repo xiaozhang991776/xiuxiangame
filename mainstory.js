@@ -66,9 +66,9 @@ const MainStory = {
     _grant(player, ch) {
         const r = ch.reward || {};
         if (r.stone) player.stone = (player.stone || 0) + r.stone;
-        if (r.xiu) {
-            player.xiu = (player.xiu || 0) + r.xiu;
-            player.stats.totalXiu = (player.stats.totalXiu || 0) + r.xiu;
+        if (r.zhanli) {
+            player.zhanli = (player.zhanli || 0) + r.zhanli;
+            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + r.zhanli;
         }
         if (r.items && typeof Inventory !== 'undefined') {
             r.items.forEach(it => Inventory.addItem(player, it.id, it.count));

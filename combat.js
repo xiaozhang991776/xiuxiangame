@@ -432,13 +432,13 @@ const Combat = {
             // 奖励
             // 难度系数：战斗收入 ×incomeMult（调难时 <1，资源更紧）
             const _inc = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
-            const xiuReward = Math.floor(enemyTpl.xiuReward * _inc);
+            const zhanliReward = Math.floor(enemyTpl.zhanliReward * _inc);
             const _ts = (typeof Cultivate !== 'undefined' && Cultivate.getTribulusBonus) ? Cultivate.getTribulusBonus(player).stoneMult : 0;
             const _rb = (typeof Cultivate !== 'undefined' && Cultivate.getRebirthBonus) ? Cultivate.getRebirthBonus(player).stoneMult : 0;
             const stoneReward = Math.floor(enemyTpl.stoneReward * (1 + _ts) * (1 + _rb) * _inc);
-            player.xiu += xiuReward;
+            player.zhanli += zhanliReward;
             player.stone += stoneReward;
-            player.stats.totalXiu = (player.stats.totalXiu || 0) + xiuReward;
+            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + zhanliReward;
             player.stats.combatWins = (player.stats.combatWins || 0) + 1;
             // 掉落
             const drops = Inventory.addDrops(player, enemyTpl.drops);
@@ -450,8 +450,8 @@ const Combat = {
 
             if (typeof UI !== 'undefined') {
                 UI.hideBattle();
-                UI.toast(`胜利！获得${fmtNum(xiuReward)}修为，${fmtNum(stoneReward)}灵石`, 'gold');
-                UI.addLog(`战胜${enemyTpl.name}，获得${fmtNum(xiuReward)}修为`, 'evt');
+                UI.toast(`胜利！获得${fmtNum(zhanliReward)}战力，${fmtNum(stoneReward)}灵石`, 'gold');
+                UI.addLog(`战胜${enemyTpl.name}，获得${fmtNum(zhanliReward)}战力`, 'evt');
                 drops.forEach(d => {
                     const tpl = getEquipTemplate(d.id) || getPill(d.id) || getMaterial(d.id);
                     UI.addLog(`获得掉落：${tpl.name}×${d.count}`, 'evt');
@@ -463,17 +463,17 @@ const Combat = {
             if (typeof Quests !== 'undefined') Quests.tickProgress('combat_win', player.stats.combatWins);
             SaveSystem.save(player);
         } else {
-            // 失败惩罚：损失部分修为
-            const loss = Math.floor(player.xiu * 0.05);
-            player.xiu -= loss;
+            // 失败惩罚：损失部分战力
+            const loss = Math.floor(player.zhanli * 0.05);
+            player.zhanli -= loss;
             delete player.tempHpBuff;
             delete player.tempLingBuff;
             delete player.tempBuffAtk;
             delete player.tempBuffDef;
             if (typeof UI !== 'undefined') {
                 UI.hideBattle();
-                UI.toast(`战败，损失${fmtNum(loss)}修为`, 'bad');
-                UI.addLog(`败于${enemyTpl.name}，损失${fmtNum(loss)}修为`, 'bad');
+                UI.toast(`战败，损失${fmtNum(loss)}战力`, 'bad');
+                UI.addLog(`败于${enemyTpl.name}，损失${fmtNum(loss)}战力`, 'bad');
                 UI.renderAll();
             }
             SaveSystem.save(player);

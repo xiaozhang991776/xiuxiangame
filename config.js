@@ -5,12 +5,12 @@
 
 // 全局难度系数（想整体调难/调易，只改这里；默认 1=原版；<1 更难，>1 更易）
 const DIFF = {
-    rateMult: 1.0,        // 修炼/点击/闭关/离线 修为获取速率（1.0 = 调难前基线，用户嫌太难已放平）
-    breakXiuMult: 1.0,    // 突破所需修为（1.0 = 调难前基线）
+    rateMult: 1.0,        // 修炼/点击/闭关/离线 战力获取速率（1.0 = 调难前基线，用户嫌太难已放平）
+    breakXiuMult: 1.0,    // 突破所需战力（1.0 = 调难前基线）
     breakStoneMult: 0.01,  // 突破灵石门槛 ×0.01（降到约原 1/100，用户指定「100/1」；想调回更难就调大此值）
     tribChanceMult: 1.0,   // 天劫硬抗成功率（1.0 = 调难前基线）
     tribPenaltyMult: 1.0,  // 天劫失败惩罚（1.0 = 调难前基线）
-    incomeMult: 1.0         // 战斗/游历/探索/任务/招财丹 灵石·修为收入（1.0 = 调难前基线，叠×3 后≈原×1.5）
+    incomeMult: 1.0         // 战斗/游历/探索/任务/招财丹 灵石·战力收入（1.0 = 调难前基线，叠×3 后≈原×1.5）
 };
 
 const GameConfig = {
@@ -112,7 +112,7 @@ const GameConfig = {
     pills: [
         { id: 'p_qi_pill',     name: '聚气丹',   icon: '丹', quality: 0, desc: '恢复50灵力',          effect: { type: 'ling', value: 50 },        price: 300,  craft: { materials: {m_herb:2}, cost: 200 } },
         { id: 'p_hp_pill',     name: '回春丹',   icon: '丹', quality: 0, desc: '恢复100气血',         effect: { type: 'hp', value: 100 },        price: 300,  craft: { materials: {m_herb:2}, cost: 200 } },
-        { id: 'p_xiu_pill',    name: '筑基丹',   icon: '丹', quality: 1, desc: '立即获得200修为',     effect: { type: 'xiu', value: 200 },       price: 1500, craft: { materials: {m_herb:5, m_ore:2}, cost: 1000 } },
+        { id: 'p_xiu_pill',    name: '筑基丹',   icon: '丹', quality: 1, desc: '立即获得200战力',     effect: { type: 'zhanli', value: 200 },       price: 1500, craft: { materials: {m_herb:5, m_ore:2}, cost: 1000 } },
         { id: 'p_atk_pill',    name: '虎力丹',   icon: '丹', quality: 1, desc: '战斗中攻击+15（3回合）', effect: { type: 'buff_atk', value: 15, turns: 3 }, price: 2000, craft: { materials: {m_beast:3}, cost: 1200 } },
         { id: 'p_def_pill',    name: '金刚丹',   icon: '丹', quality: 1, desc: '战斗中防御+10（3回合）', effect: { type: 'buff_def', value: 10, turns: 3 }, price: 2000, craft: { materials: {m_ore:3}, cost: 1200 } },
         { id: 'p_breakthrough',name: '破障丹',   icon: '丹', quality: 2, desc: '突破成功率+20%',      effect: { type: 'breakBonus', value: 0.2 }, price: 8000, craft: { materials: {m_herb:10, m_ore:5, m_beast:3}, cost: 5000 } },
@@ -195,26 +195,26 @@ const GameConfig = {
 
     /* ---------- 敌人配置 ---------- */
     enemies: [
-        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   xiuReward: 60,    stoneReward: 90,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15, count: 1 }] },
-        { id: 'e_bat',      name: '吸血妖蝠',   icon: '蝠', elem: 'water', realmIdx: 0, realmLayer: 3, hp: 80,   atk: 10,   def: 4,   spd: 16,  ling: 8,   xiuReward: 120,    stoneReward: 150,   drops: [{ id: 'm_beast', rate: 0.45, count: 1 }, { id: 'p_qi_pill', rate: 0.2, count: 1 }] },
-        { id: 'e_snake',    name: '青鳞蛇妖',   icon: '蛇', elem: 'wood',  realmIdx: 0, realmLayer: 5, hp: 128,  atk: 14,   def: 6,   spd: 14,  ling: 12,  xiuReward: 220,   stoneReward: 270,   drops: [{ id: 'm_herb', rate: 0.55, count: 2 }, { id: 'm_beast', rate: 0.35, count: 1 }] },
-        { id: 'e_bear',     name: '玄铁熊',     icon: '熊', elem: 'earth', realmIdx: 0, realmLayer: 7, hp: 224,  atk: 20,   def: 14,  spd: 8,   ling: 18,  xiuReward: 400,   stoneReward: 480,   drops: [{ id: 'm_ore', rate: 0.55, count: 2 }, { id: 'a_silk_robe', rate: 0.1, count: 1 }] },
-        { id: 'e_evil_dao', name: '邪修散人',   icon: '邪', elem: 'fire',  realmIdx: 1, realmLayer: 1, hp: 360,  atk: 32,   def: 18,  spd: 18,  ling: 30,  xiuReward: 1000,   stoneReward: 1080,  drops: [{ id: 'w_flame_blade', rate: 0.13, count: 1 }, { id: 'p_xiu_pill', rate: 0.25, count: 1 }] },
-        { id: 'e_tiger',    name: '赤焰虎王',   icon: '虎', elem: 'fire',  realmIdx: 1, realmLayer: 4, hp: 640,  atk: 52,   def: 30,  spd: 22,  ling: 50,  xiuReward: 2400,  stoneReward: 2280,  drops: [{ id: 'm_beast', rate: 0.65, count: 3 }, { id: 'w_thunder_sword', rate: 0.1, count: 1 }] },
-        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, xiuReward: 10000,  stoneReward: 7200, drops: [{ id: 'w_zither', rate: 0.15, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
-        { id: 'e_dragon_jc',name: '蛟龙',       icon: '蛟', elem: 'water', realmIdx: 2, realmLayer: 5, hp: 4000, atk: 192,  def: 128, spd: 30,  ling: 200, xiuReward: 28000, stoneReward: 19200, drops: [{ id: 'f_mountain', rate: 0.13, count: 1 }, { id: 'm_pearl', rate: 0.45, count: 2 }] },
-        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, xiuReward: 120000, stoneReward: 90000,drops: [{ id: 'f_mirror', rate: 0.15, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_devil',    name: '天魔',       icon: '魔', elem: 'fire',  realmIdx: 3, realmLayer: 5, hp: 40000,atk: 1200, def: 720, spd: 45,  ling: 1000,xiuReward: 400000,stoneReward: 270000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'm_chaos', rate: 0.35, count: 1 }] },
-        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, xiuReward: 1600000,stoneReward: 1080000, drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
+        { id: 'e_wolf',     name: '山野妖狼',   icon: '狼', elem: 'metal', realmIdx: 0, realmLayer: 1, hp: 48,   atk: 6,    def: 2,   spd: 12,  ling: 5,   zhanliReward: 60,    stoneReward: 90,   drops: [{ id: 'm_beast', rate: 0.35, count: 1 }, { id: 'p_hp_pill', rate: 0.15, count: 1 }] },
+        { id: 'e_bat',      name: '吸血妖蝠',   icon: '蝠', elem: 'water', realmIdx: 0, realmLayer: 3, hp: 80,   atk: 10,   def: 4,   spd: 16,  ling: 8,   zhanliReward: 120,    stoneReward: 150,   drops: [{ id: 'm_beast', rate: 0.45, count: 1 }, { id: 'p_qi_pill', rate: 0.2, count: 1 }] },
+        { id: 'e_snake',    name: '青鳞蛇妖',   icon: '蛇', elem: 'wood',  realmIdx: 0, realmLayer: 5, hp: 128,  atk: 14,   def: 6,   spd: 14,  ling: 12,  zhanliReward: 220,   stoneReward: 270,   drops: [{ id: 'm_herb', rate: 0.55, count: 2 }, { id: 'm_beast', rate: 0.35, count: 1 }] },
+        { id: 'e_bear',     name: '玄铁熊',     icon: '熊', elem: 'earth', realmIdx: 0, realmLayer: 7, hp: 224,  atk: 20,   def: 14,  spd: 8,   ling: 18,  zhanliReward: 400,   stoneReward: 480,   drops: [{ id: 'm_ore', rate: 0.55, count: 2 }, { id: 'a_silk_robe', rate: 0.1, count: 1 }] },
+        { id: 'e_evil_dao', name: '邪修散人',   icon: '邪', elem: 'fire',  realmIdx: 1, realmLayer: 1, hp: 360,  atk: 32,   def: 18,  spd: 18,  ling: 30,  zhanliReward: 1000,   stoneReward: 1080,  drops: [{ id: 'w_flame_blade', rate: 0.13, count: 1 }, { id: 'p_xiu_pill', rate: 0.25, count: 1 }] },
+        { id: 'e_tiger',    name: '赤焰虎王',   icon: '虎', elem: 'fire',  realmIdx: 1, realmLayer: 4, hp: 640,  atk: 52,   def: 30,  spd: 22,  ling: 50,  zhanliReward: 2400,  stoneReward: 2280,  drops: [{ id: 'm_beast', rate: 0.65, count: 3 }, { id: 'w_thunder_sword', rate: 0.1, count: 1 }] },
+        { id: 'e_demon',    name: '魔修宗师',   icon: '魔', elem: 'water', realmIdx: 2, realmLayer: 1, hp: 1760, atk: 112,  def: 72,  spd: 28,  ling: 120, zhanliReward: 10000,  stoneReward: 7200, drops: [{ id: 'w_zither', rate: 0.15, count: 1 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
+        { id: 'e_dragon_jc',name: '蛟龙',       icon: '蛟', elem: 'water', realmIdx: 2, realmLayer: 5, hp: 4000, atk: 192,  def: 128, spd: 30,  ling: 200, zhanliReward: 28000, stoneReward: 19200, drops: [{ id: 'f_mountain', rate: 0.13, count: 1 }, { id: 'm_pearl', rate: 0.45, count: 2 }] },
+        { id: 'e_nether',   name: '幽冥鬼王',   icon: '鬼', elem: 'earth', realmIdx: 3, realmLayer: 1, hp: 14400,atk: 480,  def: 304, spd: 35,  ling: 500, zhanliReward: 120000, stoneReward: 90000,drops: [{ id: 'f_mirror', rate: 0.15, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_devil',    name: '天魔',       icon: '魔', elem: 'fire',  realmIdx: 3, realmLayer: 5, hp: 40000,atk: 1200, def: 720, spd: 45,  ling: 1000,zhanliReward: 400000,stoneReward: 270000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'm_chaos', rate: 0.35, count: 1 }] },
+        { id: 'e_immortal', name: '渡劫真仙',   icon: '仙', elem: 'metal', realmIdx: 4, realmLayer: 1, hp: 160000,atk:4400, def:2800,spd: 60,  ling: 3000, zhanliReward: 1600000,stoneReward: 1080000, drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
         // 扩展：炼虚至道祖
-        { id: 'e_lianxu',   name: '炼虚魔君',   icon: '虚', elem: 'fire',  realmIdx: 5, realmLayer: 1, hp: 15000, atk: 1200, def: 600, spd: 28,  ling: 4000, xiuReward: 4000000,  stoneReward: 3000000,  drops: [{ id: 'm_chaos', rate: 0.35, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_heti',     name: '合体妖尊',   icon: '合', elem: 'wood',  realmIdx: 6, realmLayer: 1, hp: 35000, atk: 2800, def: 1400, spd: 30,  ling: 8000, xiuReward: 10000000,  stoneReward: 7200000, drops: [{ id: 'm_spirit_wood', rate: 0.45, count: 2 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
-        { id: 'e_dacheng',  name: '大乘罗汉',   icon: '乘', elem: 'earth', realmIdx: 7, realmLayer: 1, hp: 80000, atk: 6500, def: 3200, spd: 32,  ling: 16000,xiuReward: 24000000, stoneReward: 18000000, drops: [{ id: 'm_geng_gold', rate: 0.45, count: 2 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
-        { id: 'e_zhenxian', name: '真仙使者',   icon: '真', elem: 'water', realmIdx: 8, realmLayer: 1, hp: 180000,atk:15000, def:7500, spd: 34,  ling: 32000,xiuReward: 60000000, stoneReward: 48000000, drops: [{ id: 'm_qi_essence', rate: 0.45, count: 2 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
-        { id: 'e_jinxian',  name: '金仙老祖',   icon: '金', elem: 'metal', realmIdx: 9, realmLayer: 1, hp: 400000,atk:35000, def:17500,spd: 36,  ling: 64000,xiuReward: 160000000, stoneReward: 120000000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'p_grand_hp', rate: 0.25, count: 1 }] },
-        { id: 'e_taiyi',    name: '太乙天尊',   icon: '乙', elem: 'fire',  realmIdx: 10,realmLayer: 1, hp: 900000,atk:80000, def:40000,spd: 38,  ling: 128000,xiuReward: 400000000,stoneReward: 300000000,drops: [{ id: 'f_void_banner', rate: 0.13, count: 1 }, { id: 'p_grand_ling', rate: 0.25, count: 1 }] },
-        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,xiuReward: 1000000000,stoneReward: 720000000,drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
-        { id: 'e_daozu',    name: '道祖化身',   icon: '祖', elem: 'earth', realmIdx: 12,realmLayer: 1, hp: 5000000,atk:400000, def:200000,spd: 42,  ling: 512000,xiuReward: 2400000000,stoneReward: 1800000000,drops: [{ id: 'w_pangu_axe', rate: 0.13, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] }
+        { id: 'e_lianxu',   name: '炼虚魔君',   icon: '虚', elem: 'fire',  realmIdx: 5, realmLayer: 1, hp: 15000, atk: 1200, def: 600, spd: 28,  ling: 4000, zhanliReward: 4000000,  stoneReward: 3000000,  drops: [{ id: 'm_chaos', rate: 0.35, count: 1 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_heti',     name: '合体妖尊',   icon: '合', elem: 'wood',  realmIdx: 6, realmLayer: 1, hp: 35000, atk: 2800, def: 1400, spd: 30,  ling: 8000, zhanliReward: 10000000,  stoneReward: 7200000, drops: [{ id: 'm_spirit_wood', rate: 0.45, count: 2 }, { id: 'p_permanent_hp', rate: 0.2, count: 1 }] },
+        { id: 'e_dacheng',  name: '大乘罗汉',   icon: '乘', elem: 'earth', realmIdx: 7, realmLayer: 1, hp: 80000, atk: 6500, def: 3200, spd: 32,  ling: 16000,zhanliReward: 24000000, stoneReward: 18000000, drops: [{ id: 'm_geng_gold', rate: 0.45, count: 2 }, { id: 'p_permanent_atk', rate: 0.2, count: 1 }] },
+        { id: 'e_zhenxian', name: '真仙使者',   icon: '真', elem: 'water', realmIdx: 8, realmLayer: 1, hp: 180000,atk:15000, def:7500, spd: 34,  ling: 32000,zhanliReward: 60000000, stoneReward: 48000000, drops: [{ id: 'm_qi_essence', rate: 0.45, count: 2 }, { id: 'p_immortal', rate: 0.2, count: 1 }] },
+        { id: 'e_jinxian',  name: '金仙老祖',   icon: '金', elem: 'metal', realmIdx: 9, realmLayer: 1, hp: 400000,atk:35000, def:17500,spd: 36,  ling: 64000,zhanliReward: 160000000, stoneReward: 120000000,drops: [{ id: 'f_pagoda', rate: 0.13, count: 1 }, { id: 'p_grand_hp', rate: 0.25, count: 1 }] },
+        { id: 'e_taiyi',    name: '太乙天尊',   icon: '乙', elem: 'fire',  realmIdx: 10,realmLayer: 1, hp: 900000,atk:80000, def:40000,spd: 38,  ling: 128000,zhanliReward: 400000000,stoneReward: 300000000,drops: [{ id: 'f_void_banner', rate: 0.13, count: 1 }, { id: 'p_grand_ling', rate: 0.25, count: 1 }] },
+        { id: 'e_daluo',    name: '大罗金仙',   icon: '罗', elem: 'water', realmIdx: 11,realmLayer: 1, hp: 2000000,atk:180000, def:90000,spd: 40,  ling: 256000,zhanliReward: 1000000000,stoneReward: 720000000,drops: [{ id: 'w_chaos_sword', rate: 0.15, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] },
+        { id: 'e_daozu',    name: '道祖化身',   icon: '祖', elem: 'earth', realmIdx: 12,realmLayer: 1, hp: 5000000,atk:400000, def:200000,spd: 42,  ling: 512000,zhanliReward: 2400000000,stoneReward: 1800000000,drops: [{ id: 'w_pangu_axe', rate: 0.13, count: 1 }, { id: 'p_ningshen', rate: 0.25, count: 1 }] }
     ],
 
     /* ---------- 地图场景 ---------- */
@@ -233,11 +233,11 @@ const GameConfig = {
 
     /* ---------- 随机事件 ---------- */
     events: {
-        meditate:        { title: '静修悟道', icon: '禅', desc: '在此静坐片刻，似有所悟', choices: [{ text: '静心感悟', type: 'xiu', value: 50 }] },
-        master_guidance: { title: '师尊指点', icon: '师', desc: '宗门长老路过，见你根基不错，传你一道', choices: [{ text: '拜谢请教', type: 'xiu', value: 200 }, { text: '求取功法', type: 'gongfa', value: 'g_five_elem' }] },
+        meditate:        { title: '静修悟道', icon: '禅', desc: '在此静坐片刻，似有所悟', choices: [{ text: '静心感悟', type: 'zhanli', value: 50 }] },
+        master_guidance: { title: '师尊指点', icon: '师', desc: '宗门长老路过，见你根基不错，传你一道', choices: [{ text: '拜谢请教', type: 'zhanli', value: 200 }, { text: '求取功法', type: 'gongfa', value: 'g_five_elem' }] },
         sect_task:       { title: '宗门任务', icon: '卷', desc: '掌门召你前去，有一桩差事', choices: [{ text: '领命前往', type: 'quest' }] },
         find_stall:      { title: '偶遇摊位', icon: '摊', desc: '路边一老叟摆摊，似有奇货', choices: [{ text: '上前查看', type: 'shop_random' }, { text: '离开', type: 'nothing' }] },
-        auction:         { title: '拍卖盛会', icon: '锤', desc: '坊市举办拍卖会，有稀有宝物', choices: [{ text: '参与竞拍', type: 'auction' }, { text: '围观', type: 'xiu', value: 20 }] },
+        auction:         { title: '拍卖盛会', icon: '锤', desc: '坊市举办拍卖会，有稀有宝物', choices: [{ text: '参与竞拍', type: 'auction' }, { text: '围观', type: 'zhanli', value: 20 }] },
         beggar:          { title: '乞丐乞讨', icon: '乞', desc: '一蓬头乞丐拦住去路，声称是有缘人', choices: [{ text: '施舍100灵石', type: 'beggar_pay', cost: 100 }, { text: '不予理会', type: 'nothing' }] },
         beast_attack:    { title: '妖兽袭击', icon: '兽', desc: '一头妖兽挡住去路！', choices: [{ text: '迎战', type: 'combat_random' }, { text: '绕道', type: 'nothing' }] },
         find_herb:       { title: '发现灵草', icon: '草', desc: '路边发现一丛灵草', choices: [{ text: '采摘', type: 'item', value: 'm_herb', count: 3 }] },
@@ -247,13 +247,13 @@ const GameConfig = {
         cave_in:         { title: '矿洞坍塌', icon: '危', desc: '矿洞突然坍塌！', choices: [{ text: '紧急逃出', type: 'hp_loss', value: 30 }] },
         find_treasure:   { title: '宝箱奇遇', icon: '箱', desc: '秘境深处发现一个古朴宝箱', choices: [{ text: '开启', type: 'treasure' }, { text: '谨慎检查', type: 'treasure_safe' }] },
         ancient_beast:   { title: '上古凶兽', icon: '兽', desc: '一头上古凶兽苏醒！', choices: [{ text: '大战', type: 'combat_hard' }, { text: '逃遁', type: 'nothing' }] },
-        inheritance:     { title: '道统传承', icon: '承', desc: '前方石台上有上古修士留下的传承', choices: [{ text: '参悟', type: 'xiu', value: 5000 }, { text: '尝试领悟功法', type: 'gongfa_random' }] },
-        dragon_test:     { title: '龙族考验', icon: '龙', desc: '龙王现身，要考校你的修为', choices: [{ text: '应战', type: 'combat_hard' }, { text: '献上宝物', type: 'dragon_tribute' }] },
+        inheritance:     { title: '道统传承', icon: '承', desc: '前方石台上有上古修士留下的传承', choices: [{ text: '参悟', type: 'zhanli', value: 5000 }, { text: '尝试领悟功法', type: 'gongfa_random' }] },
+        dragon_test:     { title: '龙族考验', icon: '龙', desc: '龙王现身，要考校你的战力', choices: [{ text: '应战', type: 'combat_hard' }, { text: '献上宝物', type: 'dragon_tribute' }] },
         sea_treasure:    { title: '海底宝库', icon: '宝', desc: '海底深处隐约有光芒', choices: [{ text: '潜入探寻', type: 'treasure_deep' }] },
         dragon_pet:      { title: '幼龙求收', icon: '龙', desc: '一条幼龙似乎认主于你', choices: [{ text: '收为灵宠', type: 'pet', value: 'pet_dragon' }, { text: '放归大海', type: 'karma_good' }] },
-        chaos_inherit:   { title: '混沌传承', icon: '虚', desc: '混沌之力向你涌来', choices: [{ text: '强行吸纳', type: 'xiu', value: 100000 }, { text: '领悟混沌功法', type: 'gongfa_random' }] },
+        chaos_inherit:   { title: '混沌传承', icon: '虚', desc: '混沌之力向你涌来', choices: [{ text: '强行吸纳', type: 'zhanli', value: 100000 }, { text: '领悟混沌功法', type: 'gongfa_random' }] },
         chaos_beast:     { title: '混沌凶兽', icon: '虚', desc: '混沌中窜出一头凶兽！', choices: [{ text: '大战', type: 'combat_hard' }, { text: '遁走', type: 'nothing' }] },
-        immortal_test:   { title: '仙人指路', icon: '仙', desc: '一位仙人现身，问你可愿接受考验', choices: [{ text: '接受考验', type: 'combat_hard' }, { text: '请教大道', type: 'xiu', value: 500000 }] }
+        immortal_test:   { title: '仙人指路', icon: '仙', desc: '一位仙人现身，问你可愿接受考验', choices: [{ text: '接受考验', type: 'combat_hard' }, { text: '请教大道', type: 'zhanli', value: 500000 }] }
     },
 
     /* ---------- 商店商品 ---------- */
@@ -268,11 +268,11 @@ const GameConfig = {
 
     /* ---------- 任务配置 ---------- */
     quests: [
-        { id: 'q_first_cultivate', name: '初识修炼',   desc: '修炼累积100修为',     target: 100,    type: 'xiu_total',     reward: { stone: 150, xiu: 50 } },
+        { id: 'q_first_cultivate', name: '初识修炼',   desc: '修炼累积100战力',     target: 100,    type: 'zhanli_total',     reward: { stone: 150, zhanli: 50 } },
         { id: 'q_first_combat',    name: '初战告捷',   desc: '战胜1个敌人',         target: 1,      type: 'combat_win',    reward: { stone: 240, items: [{ id: 'p_hp_pill', count: 3 }] } },
         { id: 'q_lianqi_break',    name: '突破练气',   desc: '突破至练气三层',       target: 3,      type: 'realm_layer',   reward: { stone: 600, items: [{ id: 'p_xiu_pill', count: 2 }] } },
         { id: 'q_zhuji',           name: '筑基大道',   desc: '突破至筑基境界',       target: 2,      type: 'realm_idx',     reward: { stone: 3000, items: [{ id: 'p_breakthrough', count: 1 }] } },
-        { id: 'q_explore_10',      name: '历练初探',   desc: '完成10次探索',        target: 10,     type: 'explore_count', reward: { stone: 900, xiu: 500 } },
+        { id: 'q_explore_10',      name: '历练初探',   desc: '完成10次探索',        target: 10,     type: 'explore_count', reward: { stone: 900, zhanli: 500 } },
         { id: 'q_kill_20',         name: '斩妖除魔',   desc: '战胜20个敌人',        target: 20,     type: 'combat_win',    reward: { stone: 1500, items: [{ id: 'ac_fire_ring', count: 1 }] } },
         { id: 'q_jindan',          name: '结丹大道',   desc: '突破至金丹境界',       target: 3,      type: 'realm_idx',     reward: { stone: 24000, items: [{ id: 'p_permanent_hp', count: 1 }] } },
         { id: 'q_kill_50',         name: '威震四方',   desc: '战胜50个敌人',        target: 50,     type: 'combat_win',    reward: { stone: 9000, items: [{ id: 'w_thunder_sword', count: 1 }] } },
@@ -288,7 +288,7 @@ const GameConfig = {
     mainStory: [
         { id: 'm_ch1', realmReq: 0, title: '壹·凡尘微光',
           body: '你本是一介凡人，困于生老病死。偶得残破道书半卷，扉页八字灼灼：「仙途有尽，问道无心」。你揣着这丝念想，踏上了修仙之路——哪怕最初，只是为多看一眼山外的云。',
-          reward: { xiu: 200, stone: 300 } },
+          reward: { zhanli: 200, stone: 300 } },
         { id: 'm_ch2', realmReq: 1, title: '贰·筑基立道',
           body: '灵气第一次在丹田凝成实质。你明白，自此肉身不再如纸糊，寿元也悄然延长。师门长辈抚须而笑：「筑基者，立道之基也。往后风浪再大，你已有了不随风倒的根。」',
           reward: { stone: 2000, items: [{ id: 'p_xiu_pill', count: 3 }] } },
@@ -348,7 +348,7 @@ const GameConfig = {
         element: 'metal',
         realmIdx: 0,
         realmLayer: 1,
-        xiu: 0,
+        zhanli: 0,
         stone: 500,
         // 基础属性（不含装备境界加成）
         baseAtk: 10,
@@ -359,7 +359,7 @@ const GameConfig = {
         baseCrit: 0.05,
         // 永久加成（丹药等）
         permBonus: { atk: 0, def: 0, hp: 0, ling: 0 },
-        // 悟性等级（顿悟提升，影响每次点击修为与修炼速率）
+        // 悟性等级（顿悟提升，影响每次点击战力与修炼速率）
         wuxingLevel: 0,
         // 装备栏
         equipped: { weapon: null, armor: null, accessory: null, fabao: null },
@@ -379,7 +379,7 @@ const GameConfig = {
         // 仙途主线进度 { seen: {章节id:true}, claimed: {章节id:true} }
         mainStory: { currentIdx: 0, seen: {}, claimed: {} },
         // 统计
-        stats: { combatWins: 0, exploreCount: 0, totalXiu: 0, breakthroughs: 0, tutorialDone: false },
+        stats: { combatWins: 0, exploreCount: 0, totalZhanli: 0, breakthroughs: 0, tutorialDone: false },
         // 渡劫天劫永久加成（劫后余韵）
         tribulus: { xiuMult: 0, stoneMult: 0 },
         // 转世轮回层数（每突破一次大境界后可轮回，层数越高根基越厚）
@@ -440,9 +440,9 @@ function randomName() {
     return s[Math.floor(r() * s.length)] + s[Math.floor(r() * s.length)] + (r() < 0.4 ? x[Math.floor(r() * x.length)] : '');
 }
 
-// 修为存储硬上限：远低于 JS 的 Infinity(1.8e308)。修为在公式中只做「累加 / 与突破成本比较」，从不被乘到溢出，
+// 战力存储硬上限：远低于 JS 的 Infinity(1.8e308)。战力在公式中只做「累加 / 与突破成本比较」，从不被乘到溢出，
 // 因此可放得很宽，使终局(道祖满层)点击修炼也能持续、可见地增长，不再被钳死在 9e15（9007.20兆）。
-const XIU_CAP = 1e30;
+const ZHANLI_CAP = 1e30;
 
 // 数字格式化（逐级递进：千→万→亿→兆→京→垓→秭→穰→沟）
 function fmtNum(n) {
