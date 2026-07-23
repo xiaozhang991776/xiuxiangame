@@ -157,7 +157,7 @@ ok('化形丹在 materials（供灵宠面板购买）', !!GameConfig.materials.f
 ok('坊市不再设「材料」分类（shopItems.material 为空）', Array.isArray(GameConfig.shopItems.material) && GameConfig.shopItems.material.length === 0);
 ok('轮回草在 materials（供转世面板购买）', !!GameConfig.materials.find(m=>m.id==='m_rebirth_herb'));
 
-console.log('\n[8b] 轮回后战力归零（两种轮回皆重置战力，构成成长闭环）');
+console.log('\n[8b] 轮回战力处理：免费轮回重置战力·轮回草轮回保留战力');
 {
     const UIbk = {};
     for (const k of ['toast', 'addLog', 'renderAll']) { UIbk[k] = sandbox.UI[k]; sandbox.UI[k] = () => {}; }
@@ -173,7 +173,7 @@ console.log('\n[8b] 轮回后战力归零（两种轮回皆重置战力，构成
         ok('轮回草轮回成功(usedPill)', r.ok === true && r.usedPill === true, r);
         ok('轮回草轮回保留境界 realmIdx 不变', p.realmIdx === beforeIdx, `前${beforeIdx}→后${p.realmIdx}`);
         ok('轮回草轮回保留层序 realmLayer 不变', p.realmLayer === beforeLayer, `前${beforeLayer}→后${p.realmLayer}`);
-        ok('轮回草轮回战力归零', p.zhanli === 0, p.zhanli);
+        ok('轮回草轮回保留战力（不归零）', p.zhanli === 1e12, p.zhanli);
         ok('轮回草轮回转世层数 +1', p.rebirth === 3, p.rebirth);
         // 对照：免费轮回同样重置战力，并重置境界
         const p2 = bareAt(12, 15);              // 道祖满层
