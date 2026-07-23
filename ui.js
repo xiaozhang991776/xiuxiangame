@@ -1318,8 +1318,8 @@ const UI = {
     },
     /* ---------- 境界图鉴面板 ---------- */
     renderRealmPanel() {
+        try {
         const p = Game.player;
-        if (!p) return;
         const realms = GameConfig.realms;
         const last = realms.length - 1;
         const c = GameConfig.rebirth || {};
@@ -1331,12 +1331,14 @@ const UI = {
         const cntEl = document.getElementById('realmCount');
         if (cntEl) cntEl.textContent = realms.length;
         const curEl = document.getElementById('realmCurrent');
-        if (curEl) {
+        if (curEl && p) {
             const cur = getRealm(p.realmIdx);
             curEl.innerHTML = `你当前：<b>${cur.name}</b> 第 ${p.realmLayer}/${cur.layers} 层　（共 ${realms.length} 大境界 · ${realms.length * 15} 段）`;
+        } else if (curEl) {
+            curEl.innerHTML = `<span class="muted">尚未创建角色</span>`;
         }
         const tbl = document.getElementById('realmTable');
-        if (tbl) {
+        if (tbl && p) {
             let html = '<div class="realm-row realm-headrow"><span class="c-idx">#</span><span class="c-name">境界</span><span class="c-layer">层</span><span class="c-base">基础战力</span><span class="c-cost">满层突破成本</span></div>';
             realms.forEach((r, i) => {
                 const cost = Cultivate.getBreakthroughCost({ realmIdx: i, realmLayer: r.layers });
@@ -1348,8 +1350,8 @@ const UI = {
 
         // ---- 二、每世轮回战力上线 ----
         const capCur = document.getElementById('capCurrent');
-        const myCap = Cultivate.getLifeZhanliCap(p); // 当前世实际上线（含旧档不低于当前战力）
-        if (capCur) {
+        if (capCur && p) {
+            const myCap = Cultivate.getLifeZhanliCap(p); // 当前世实际上线（含旧档不低于当前战力）
             let txt = `你当前第 <b>${p.rebirth}</b> 世　本世战力上线：<b class="text-gold">${fmtNum(myCap)}</b>`;
             if (myCap >= ZHANLI_CAP) txt += `　（已放开，无上限）`;
             else {
@@ -1357,9 +1359,11 @@ const UI = {
                 txt += diff > 0 ? `　还差 <b class="text-gold">${fmtNum(diff)}</b> 即可免费轮回` : `　已达上线，可<b>免费轮回</b>提升下一世`;
             }
             capCur.innerHTML = txt;
+        } else if (capCur) {
+            capCur.innerHTML = `<span class="muted">尚未创建角色</span>`;
         }
         const capTbl = document.getElementById('capTable');
-        if (capTbl) {
+        if (capTbl && p) {
             let html = '<div class="realm-row realm-headrow"><span class="c-idx">世</span><span class="c-name">需达境界(满层)</span><span class="c-cost">战力上线</span></div>';
             for (let n = 0; n <= maxR; n++) {
                 const idx = Math.min(last, baseR + n * perR);
@@ -1378,6 +1382,7 @@ const UI = {
             }
             capTbl.innerHTML = html;
         }
+        } catch (e) { if (typeof console !== 'undefined') console.error('[renderRealmPanel]', e && (e.stack || e.message)); }
     },
     _xianluLawUpgrade(defId) {
         const def = Laws.DEFS.find(d => d.id === defId); if (!def) return;
@@ -1432,25 +1437,27 @@ const UI = {
     /* ---------- 切换面板 ---------- */
     switchPanel(name) {
         // 灵宠/天赋已并入修炼区子标签，快捷键与教程经此统一路由
-        if (name === 'pet' || name === 'talent') { this.switchCultSub(name); return; }
+        if (name === 'pet' || name === 'talent') { try { this.switchCultSub(name); } catch (e) { if (typeof console !== 'undefined') console.error('[switchPanel '+name+']', e && (e.stack || e.message)); } return; }
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         const panel = document.getElementById('panel-' + name);
         if (panel) panel.classList.add('active');
         Game.currentPanel = name;
-        // 切换到面板时刷新对应内容
-        if (name === 'cultivate') this.switchCultSub('cult');
-        else if (name === 'combat') this.renderEnemyList();
-        else if (name === 'explore') this.renderSceneList();
-        else if (name === 'inventory') this.renderInventory();
-        else if (name === 'skill') this.renderSkillList();
-        else if (name === 'shop') this.renderShop();
-        else if (name === 'quest') this.renderQuests();
-        else if (name === 'mainstory') this.renderMainStory();
-        else if (name === 'friends') this.renderFriends();
-        else if (name === 'reincarnate') this.renderReincarnate();
-        else if (name === 'xianlu') this.renderXianluPanel();
-        else if (name === 'realm') this.renderRealmPanel();
+        // 切换到面板时刷新对应内容；整体 try/catch，单面板异常不再阻断整条切换链路
+        try {
+            if (name === 'cultivate') this.switchCultSub('cult');
+            else if (name === 'combat') this.renderEnemyList();
+            else if (name === 'explore') this.renderSceneList();
+            else if (name === 'inventory') this.renderInventory();
+            else if (name === 'skill') this.renderSkillList();
+            else if (name === 'shop') this.renderShop();
+            else if (name === 'quest') this.renderQuests();
+            else if (name === 'mainstory') this.renderMainStory();
+            else if (name === 'friends') this.renderFriends();
+            else if (name === 'reincarnate') this.renderReincarnate();
+            else if (name === 'xianlu') this.renderXianluPanel();
+            else if (name === 'realm') this.renderRealmPanel();
+        } catch (e) { if (typeof console !== 'undefined') console.error('[switchPanel '+name+']', e && (e.stack || e.message)); }
     },
 
     /* ---------- 新手教程 ---------- */
