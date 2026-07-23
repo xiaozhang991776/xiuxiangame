@@ -214,6 +214,28 @@ console.log('\n[8c] 今生战力上线（原「境界天花板」已改为战力
     ok('totalZhanli 统计不受今生上线限制（仅钳 ZHANLI_CAP）', pG.stats.totalZhanli > capG, pG.stats.totalZhanli);
     // 境界天花板已彻底移除
     ok('getMaxRealm 境界天花板已移除', typeof Cultivate.getMaxRealm === 'undefined');
+
+    // 达线 toast（每世仅提示一次；轮回后下一世再次达线会重新提示）
+    let toastCnt = 0; let lastMsg = '';
+    const _toast = sandbox.UI.toast; sandbox.UI.toast = (msg) => { toastCnt++; lastMsg = msg; };
+    try {
+        const pT = bareAt(3, 5); pT.rebirth = 0; pT.zhanli = 0;
+        const capT = Cultivate.getLifeZhanliCap(pT);
+        // 1) 入账恰好达线 → 弹一次
+        Cultivate.gainZhanli(pT, capT);
+        ok('首次达线弹 toast 1 次', toastCnt === 1 && lastMsg.includes('今生上线'), { cnt: toastCnt, msg: lastMsg });
+        // 2) 继续入账（达线后）→ 不再弹
+        Cultivate.gainZhanli(pT, 99999);
+        Cultivate.gainZhanli(pT, 99999);
+        ok('已达线后继续入账不再重弹 toast', toastCnt === 1, toastCnt);
+        // 3) 轮回（cap 变化）后再次达线 → 再次弹
+        pT.rebirth = 1;
+        delete pT._zhanliCappedAt; // 模拟 reincarnate 的清理
+        Cultivate.gainZhanli(pT, Cultivate.getLifeZhanliCap(pT));
+        ok('轮回后下一世再次达线再次 toast', toastCnt === 2, toastCnt);
+    } finally {
+        sandbox.UI.toast = _toast;
+    }
 }
 
 console.log('\n[10] 大乘+ 修炼速率修复（防卡死/防溢出）');

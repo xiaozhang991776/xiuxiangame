@@ -614,8 +614,15 @@ const Cultivate = {
         if (!player || !(amount > 0)) return 0;
         const cap = this.getLifeZhanliCap(player);
         const before = player.zhanli || 0;
+        const beforeCapped = before >= cap;
         player.zhanli = Math.min(before + amount, cap);
         if (player.stats) player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + amount, ZHANLI_CAP);
+        // 首次达线 toast（按 cap 数值去重：新一世 cap 变化后再次达线会再提示；每世内不重弹）
+        const afterCapped = player.zhanli >= cap;
+        if (!beforeCapped && afterCapped && player._zhanliCappedAt !== cap) {
+            player._zhanliCappedAt = cap;
+            if (typeof UI !== 'undefined') UI.toast(`战力已达今生上线（${fmtNum(cap)}），轮回后方可继续增长`, 'gold');
+        }
         return player.zhanli - before; // 实际入账（达线后为 0）
     },
     /* ---------- 轮回战力上线 ---------- */
@@ -758,6 +765,7 @@ const Cultivate = {
         // 重置境界/寿元/战力（仅保留永久加成：生命/攻击/修炼收益、装备/资源/功法/灵宠/好友等）
         // 战力重置为本世重头修炼：达战力上线→轮回→战力归零→攀向下一世更高上线，构成轮回成长闭环
         player.zhanli = 0;
+        delete player._zhanliCappedAt; // 清掉达线提示标记，下一世再次达线时会重新提示
         if (usedPill) {
             // 轮回草轮回：保留当前境界（realmIdx/realmLayer），仅重算寿元（重活一世，避免残留低寿命立刻羽化）；战力同样归零重练
             player.lifespan = 100;
