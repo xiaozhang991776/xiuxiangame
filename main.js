@@ -476,19 +476,34 @@
                 body: `<p>粘贴存档码：</p>
                        <textarea id="importCode" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px"></textarea>`,
                 footer: [
-                    { text: '导入', type: 'primary', action: () => {
-                        const code = document.getElementById('importCode').value.trim();
+                    { text: '下一步', type: 'primary', action: () => {
+                        const code = (document.getElementById('importCode').value || '').trim();
                         if (!code) { UI.toast('请输入存档码', 'bad'); return; }
                         const player = SaveSystem.importSave(code);
-                        if (player) {
-                            Game.player = player;
-                            Game.save();
-                            UI.hideModal();
-                            UI.renderAll();
-                            UI.toast('导入成功', 'good');
-                        } else {
-                            UI.toast('存档码无效', 'bad');
-                        }
+                        if (!player) { UI.toast('存档码无效，或不是本游戏的存档', 'bad'); return; }
+                        // 二次确认 + 提供当前存档备份，避免误覆盖
+                        const cur = Game.player;
+                        const curCode = cur ? SaveSystem.exportSave(cur) : '';
+                        const backupHtml = curCode
+                            ? `<p style="margin-top:10px">建议先复制下面的<strong>当前存档码</strong>备份：</p>
+                               <textarea readonly onclick="this.select()" style="width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${curCode}</textarea>`
+                            : '';
+                        const nameHtml = (cur && cur.name) ? `「${esc(cur.name)}」` : '当前存档';
+                        UI.showModal({
+                            title: '⚠️ 确认覆盖',
+                            body: `<p>导入将<strong>覆盖${nameHtml}</strong>，原进度会被替换且无法恢复。</p>${backupHtml}
+                                   <p style="margin-top:8px;color:#9a8e7a;font-size:12px">导入后可随时在设置里重新导出新存档码。</p>`,
+                            footer: [
+                                { text: '确认导入', type: 'danger', action: () => {
+                                    Game.player = player;
+                                    Game.save();
+                                    UI.hideModal();
+                                    UI.renderAll();
+                                    UI.toast('导入成功', 'good');
+                                }},
+                                { text: '取消', action: () => UI.hideModal() }
+                            ]
+                        });
                     }},
                     { text: '取消', action: () => UI.hideModal() }
                 ]
