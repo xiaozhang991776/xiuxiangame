@@ -1229,6 +1229,115 @@ const UI = {
         safe(this.renderStatus);
         safe(this.renderPetPanel);
         safe(this.renderTalent);
+        safe(this.renderXianluPanel);
+    },
+
+    /* ---------- 仙路面板（大道+ 新乘区，法则/法宝/洞天/化身） ---------- */
+    renderXianluPanel() {
+        const p = Game.player;
+        const body = document.getElementById('xianluBody');
+        if (!body) return;
+        if (p.realmIdx < 63) {
+            body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>大道</b> 境界方可踏入（当前：${getRealm(p.realmIdx).name}${cnNum(p.realmLayer)}层）</div>`;
+            return;
+        }
+        // 1. 法则
+        const lawRows = Laws.DEFS.map(def => {
+            const lv = Laws.getLevel(p, def);
+            const tn = Laws.tierName(lv);
+            const mult = lv > 0 ? def.mults[Math.min(lv, def.mults.length - 1)] : 1;
+            const r = Laws.canUpgrade(p, def);
+            const btn = r.ok
+                ? `<button class="btn-act" onclick="UI._xianluLawUpgrade('${def.id}')">升阶（${fmtNum(r.need)}灵石）</button>`
+                : `<button class="btn-act" disabled>${r.reason}</button>`;
+            return `<tr><td>${def.icon} ${def.name}</td><td>${tn}</td><td>×${mult.toFixed(2)}</td><td>${btn}</td></tr>`;
+        }).join('');
+        // 2. 法宝
+        const tr = p.treasure || { type: Treasure.DEFAULT_TYPE, level: 1 };
+        const trDef = Treasure.def(p);
+        const trR = Treasure.canRefine(p);
+        const trBtn = trR.ok
+            ? `<button class="btn-act" onclick="UI._xianluTreasureRefine()">祭炼（${fmtNum(trR.cost)}灵石）</button>`
+            : `<button class="btn-act" disabled>${trR.reason}</button>`;
+        // 3. 洞天
+        const caveRows = Cave.SUB.map(sub => {
+            const lv = Cave.getLv(p, sub.id);
+            const cost = Cave.upCost(p, sub);
+            const r = Cave.canUpgrade(p, sub);
+            const btn = r.ok
+                ? `<button class="btn-act" onclick="UI._xianluCaveUpgrade('${sub.id}')">升级（${fmtNum(cost)}灵石）</button>`
+                : `<button class="btn-act" disabled>${r.reason}</button>`;
+            return `<tr><td>${sub.icon} ${sub.name}</td><td>Lv.${lv}</td><td>${sub.desc}</td><td>${btn}</td></tr>`;
+        }).join('');
+        // 4. 化身
+        const avs = p.avatars || [];
+        const avRows = avs.length ? avs.map((a, i) => {
+            const r = Avatars.canUpgrade(p, a);
+            const btn = r.ok
+                ? `<button class="btn-act" onclick="UI._xianluAvatarUpgrade(${i})">升级（${fmtNum(r.cost)}灵石）</button>`
+                : `<button class="btn-act" disabled>${r.reason}</button>`;
+            return `<tr><td>#${i + 1}</td><td>Lv.${a.lv}</td><td>${(Avatars.rateOf(a) * 100).toFixed(1)}% 主修炼</td><td>${btn}</td><td>累计 ${fmtNum(a.total || 0)}</td></tr>`;
+        }).join('') : `<tr><td colspan="5" class="muted">尚未创建化身</td></tr>`;
+        const canCreate = Avatars.canCreate(p);
+        const createBtn = canCreate.ok
+            ? `<button class="btn-act" onclick="UI._xianluAvatarCreate()">创建化身（${fmtNum(canCreate.cost)}灵石）</button>`
+            : `<button class="btn-act" disabled>${canCreate.reason}</button>`;
+        // 总乘区
+        const lm = Laws.totalMult(p);
+        const tm = Treasure.mult(p);
+        const cm = Cave.totalMult(p);
+        const total = lm * tm * cm;
+        body.innerHTML = `
+        <div class="xianlu-summary">总乘区：<b class="text-gold">×${total.toFixed(2)}</b>（法则×${lm.toFixed(2)} × 法宝×${tm.toFixed(2)} × 洞天×${cm.toFixed(2)}）</div>
+        <div class="xianlu-section">
+            <h4>📜 法则领悟</h4>
+            <table class="xianlu-tbl"><thead><tr><th>法则</th><th>阶</th><th>乘数</th><th>操作</th></tr></thead><tbody>${lawRows}</tbody></table>
+        </div>
+        <div class="xianlu-section">
+            <h4>⚔ 本命法宝</h4>
+            <p>类型：<b>${trDef.icon} ${trDef.name}</b>　等级：<b>Lv.${tr.level}</b>　乘数：<b>×${tm.toFixed(2)}</b></p>
+            <p>战斗效果：<b class="text-gold">${trDef.effectDesc}</b></p>
+            <p>${trBtn}</p>
+        </div>
+        <div class="xianlu-section">
+            <h4>🏞 洞天福地</h4>
+            <table class="xianlu-tbl"><thead><tr><th>洞天</th><th>等级</th><th>产出</th><th>操作</th></tr></thead><tbody>${caveRows}</tbody></table>
+            <p class="muted">洞天乘区：灵脉每级+0.08、药田+0.05、悟道崖+0.10；洞天按秒持续产出灵石/悟性经验</p>
+        </div>
+        <div class="xianlu-section">
+            <h4>🪞 分身化身</h4>
+            <p>已创建 <b>${avs.length}</b> / ${Avatars.MAX_AVATARS} 个化身　每化身按主修炼速率的固定比例向 zhanli 池注水（不参与战斗属性）</p>
+            <table class="xianlu-tbl"><thead><tr><th>编号</th><th>等级</th><th>注水率</th><th>操作</th><th>累计</th></tr></thead><tbody>${avRows}</tbody></table>
+            <p>${createBtn}</p>
+        </div>`;
+    },
+    _xianluLawUpgrade(defId) {
+        const def = Laws.DEFS.find(d => d.id === defId); if (!def) return;
+        const r = Laws.upgrade(Game.player, def);
+        if (r.ok) { UI.toast(`${def.name}升至${Laws.tierName(r.newLevel)}`, 'gold'); if (typeof Sound !== 'undefined') Sound.play('levelup'); Game.save(); this.renderXianluPanel(); UI.renderStatus(); }
+        else UI.toast(r.reason, 'bad');
+    },
+    _xianluTreasureRefine() {
+        const r = Treasure.refine(Game.player);
+        if (r.ok) { UI.toast(`本命法宝升至 Lv.${r.level}`, 'gold'); if (typeof Sound !== 'undefined') Sound.play('levelup'); Game.save(); this.renderXianluPanel(); UI.renderStatus(); }
+        else UI.toast(r.reason, 'bad');
+    },
+    _xianluCaveUpgrade(subId) {
+        const sub = Cave.SUB.find(s => s.id === subId); if (!sub) return;
+        const r = Cave.upgrade(Game.player, sub);
+        if (r.ok) { UI.toast(`${sub.name}升至 Lv.${r.level}`, 'gold'); if (typeof Sound !== 'undefined') Sound.play('levelup'); Game.save(); this.renderXianluPanel(); UI.renderStatus(); }
+        else UI.toast(r.reason, 'bad');
+    },
+    _xianluAvatarCreate() {
+        const r = Avatars.create(Game.player);
+        if (r.ok) { UI.toast('成功创建化身', 'gold'); if (typeof Sound !== 'undefined') Sound.play('levelup'); Game.save(); this.renderXianluPanel(); }
+        else UI.toast(r.reason, 'bad');
+    },
+    _xianluAvatarUpgrade(idx) {
+        const av = Game.player.avatars && Game.player.avatars[idx]; if (!av) return;
+        const r = Avatars.upgrade(Game.player, av);
+        if (r.ok) { UI.toast(`化身 #${idx + 1} 升至 Lv.${r.lv}`, 'gold'); if (typeof Sound !== 'undefined') Sound.play('levelup'); Game.save(); this.renderXianluPanel(); }
+        else UI.toast(r.reason, 'bad');
     },
 
     /* ---------- 修炼区子标签切换（灵宠/天赋并入） ---------- */
@@ -1272,6 +1381,7 @@ const UI = {
         else if (name === 'mainstory') this.renderMainStory();
         else if (name === 'friends') this.renderFriends();
         else if (name === 'reincarnate') this.renderReincarnate();
+        else if (name === 'xianlu') this.renderXianluPanel();
     },
 
     /* ---------- 新手教程 ---------- */
@@ -1291,7 +1401,8 @@ const UI = {
         { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>战力上线</b>」（随轮回次数递增的战力门槛，<b>道祖之后该门槛亦 ×30</b>）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
         { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；在<b>修炼区·灵宠</b>子标签中选中灵宠，可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗战力）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'cultivate', sub: 'pet', target: '#cultSubPet' },
         { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。在<b>修炼区·天赋</b>子标签修习六系天赋（攻伐/守御/长生/悟道/御兽/天命），永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'cultivate', sub: 'talent', target: '#cultSubTalent' },
-        { title: '境界全貌', body: '修行之路共 <b>33 大境界 ×15 层</b>：自练气一路攀至 <b>道祖</b>；道祖之后更有 <b>道君→道尊→道圣→…→大道</b> 等 <b>20 个超脱系境界</b>，越往后越近大道本源。※ 道祖之后段位难度（突破战力/灵石门槛、斗法敌人强度）统一 <b>×30</b>，需海量战力方能登顶。达 <b>大乘（大成）期</b> 以上，诸般「<b>绝学重宝</b>」方现世间——坊市解锁 <b>太清宝塔·诸天鼎·无衡镜</b> 等仙界法宝、神通现 <b>太清剑诀→道·无上</b> 诸绝学、灵宠得 <b>麒麟王·祖龙太初</b>，更可飞升 <b>九重天·诸天战场</b> 绝境夺造化。', panel: 'cultivate' },
+        { title: '境界全貌', body: '修行之路共 <b>83 大境界 ×15 层</b>：自练气一路攀至 <b>道祖</b>；道祖之后更有 <b>道君→道尊→道圣→…→太一</b> 等超脱系境界，越往后越近大道本源。※ 道祖之后段位难度（突破战力/灵石门槛、斗法敌人强度）统一 <b>×900</b>，需海量战力方能登顶。达 <b>大乘（大成）期</b> 以上，诸般「<b>绝学重宝</b>」方现世间——坊市解锁 <b>太清宝塔·诸天鼎·无衡镜</b> 等仙界法宝、神通现 <b>太清剑诀→道·无上</b> 诸绝学、灵宠得 <b>麒麟王·祖龙太初</b>，更可飞升 <b>九重天·诸天战场</b> 绝境夺造化。', panel: 'cultivate' },
+        { title: '仙路（大道+）', body: '达 <b>大道</b> 境界后，侧栏「<b>道</b>」图标亮起，进入「<b>仙路</b>」面板可逐步解锁四条<b>独立乘区</b>，叠加在 境界/装备/灵宠/轮回/天赋 之后，<b>互不稀释</b>——<br>• <b>法则领悟</b>：六条法则（剑/丹/阵/时空/因果/轮回）各 5 阶，每阶给一个独立乘数，阶升 = 永久乘区<br>• <b>本命法宝</b>：5 种法宝、30 级，含独特战斗效果（吸血/反弹/护盾/先手/真伤）<br>• <b>洞天福地</b>：灵脉/药田/悟道崖 3 块 20 级，被动产出灵石/悟性经验，乘区独立<br>• <b>分身化身</b>：最多 3 个化身（一气化三清），按主修炼速率比例向 zhanli 池注水（不进战斗属性）<br>※ 这是后期的核心成长路径，按你 <b>灵石</b> 节奏逐项升即可。', panel: 'xianlu' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
     ],
     tutorialIndex: 0,

@@ -201,7 +201,13 @@ const SaveSystem = {
         if (!player.skills) player.skills = { s_basic_strike: 1 };
         if (!player.quests) player.quests = {};
         if (!player.stats) player.stats = { combatWins: 0, exploreCount: 0, totalZhanli: 0, breakthroughs: 0 };
-        if (!player.settings) player.settings = { autoSave: true, anim: true, sound: false };
+        if (!player.settings) player.settings = { autoSave: true, anim: true, sound: true };
+        // 音效开关迁移：旧档（无 sfxMigrated 标记）的 sound:false 是默认值残留
+        // （此前音效为空开关、无任何实际播放），统一开启；用户此后主动关闭并存档（已带标记）则尊重。
+        if (!player.sfxMigrated) {
+            if (player.settings.sound === false) player.settings.sound = true;
+            player.sfxMigrated = true;
+        }
         // 灵宠培养 + 天赋系统 字段补全 / 旧档迁移
         if (!player.pets) player.pets = [];
         if (!player.talents) player.talents = { pts: 0, learned: {} };
@@ -565,6 +571,17 @@ const Game = {
             const gain = rate * dt;
             this.player.zhanli += gain;
             this.player.stats.totalZhanli = (this.player.stats.totalZhanli || 0) + gain;
+            // 洞天产出（灵石/秒、悟性经验/秒）
+            if (typeof Cave !== 'undefined' && this.player.realmIdx >= Cave.UNLOCK_IDX) {
+                const prod = Cave.producePerSec(this.player);
+                if (prod.stone > 0) this.player.stone = (this.player.stone || 0) + prod.stone * dt;
+                if (prod.wuxingExp > 0) this.player.wuxingExp = (this.player.wuxingExp || 0) + prod.wuxingExp * dt;
+            }
+            // 化身注水（向 zhanli 池持续注入，不进战斗属性）
+            if (typeof Avatars !== 'undefined' && this.player.realmIdx >= Avatars.UNLOCK_IDX) {
+                const add = Avatars.tick(this.player);
+                if (add > 0) this.player.zhanli += add;
+            }
             // UI刷新（节流：每秒更新一次）
             if (typeof UI !== 'undefined' && UI.updateCultivationBar) {
                 UI.updateCultivationBar();

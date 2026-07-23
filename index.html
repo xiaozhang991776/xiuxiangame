@@ -203,6 +203,9 @@
                 <button class="nav-btn" data-panel="reincarnate" title="转世轮回">
                     <span class="nav-icon">轮</span><span class="nav-label">转世</span>
                 </button>
+                <button class="nav-btn" data-panel="xianlu" title="仙路（大道以上）">
+                    <span class="nav-icon">道</span><span class="nav-label">仙路</span>
+                </button>
             </nav>
 
             <!-- 内容区 -->
@@ -441,6 +444,13 @@
                     </div>
                     <div class="rebirth-hint" id="rbHint"></div>
                 </div>
+
+                <!-- 仙路（大道以上新乘区） -->
+                <div class="panel" id="panel-xianlu">
+                    <h3 class="panel-title">仙路</h3>
+                    <p class="panel-desc" id="xianluDesc">大道之上，开启四条新乘区——法则领悟、本命法宝、洞天福地、分身化身，互不稀释，逐步叠加。境界未达 <b>大道</b> 时本面板显示为锁定。</p>
+                    <div id="xianluBody"><!-- 渲染时填充 --></div>
+                </div>
             </section>
 
             <!-- 右侧状态面板 -->
@@ -577,8 +587,6 @@
             <div class="settings-actions">
                 <button class="settings-btn" id="manualSaveBtn">手动存档</button>
                 <button class="settings-btn" id="slotSelectBtn">入道飞升 · 选择存档</button>
-                <button class="settings-btn" id="exportBtn">导出存档</button>
-                <button class="settings-btn" id="importBtn">导入存档</button>
                 <button class="settings-btn settings-danger" id="resetBtn">重置游戏</button>
             </div>
             <button class="settings-close" id="settingsClose">关闭</button>
@@ -626,6 +634,7 @@
 
     <!-- 脚本按顺序加载 -->
     <script src="config.js"></script>
+    <script src="sfx.js"></script>
     <script src="shop_ext.js"></script>
     <script src="talents.js"></script>
     <script src="pets.js"></script>
@@ -633,6 +642,10 @@
     <script src="save.js"></script>
     <script src="inventory.js"></script>
     <script src="cultivate.js"></script>
+    <script src="laws.js"></script>
+    <script src="treasure.js"></script>
+    <script src="cave.js"></script>
+    <script src="avatars.js"></script>
     <script src="combat.js"></script>
     <script src="explore.js"></script>
     <script src="mainstory.js"></script>

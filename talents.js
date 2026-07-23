@@ -35,6 +35,7 @@ const Talent = {
     grant(player, n) {
         if (!player.talents) player.talents = { pts: 0, learned: {} };
         player.talents.pts += n;
+        if (typeof Sound !== 'undefined' && n >= 3) Sound.play('levelup');
     },
     pts(player) { return (player.talents && player.talents.pts) || 0; },
     level(player, id) { return (player.talents && player.talents.learned && player.talents.learned[id]) || 0; },

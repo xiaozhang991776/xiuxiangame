@@ -216,6 +216,7 @@ const Combat = {
 
     /* ---------- 造成伤害核心 ---------- */
     dealDamage(from, to, skill, lvlMult = 1, isCombo = false) {
+        if (typeof Sound !== 'undefined') Sound.play(from === 'player' ? 'hit' : 'hurt');
         const attacker = this.state[from];
         const defender = this.state[to];
         let baseAtk = attacker.atk;
@@ -411,12 +412,14 @@ const Combat = {
         if (!this.state) return false;
         if (this.state.player.hp <= 0) {
             this.state.finished = true;
+            if (typeof Sound !== 'undefined') Sound.play('lose');
             this.addLog('你战败了...', 'miss');
             setTimeout(() => this.endBattle(false), 1200);
             return true;
         }
         if (this.state.enemy.hp <= 0) {
             this.state.finished = true;
+            if (typeof Sound !== 'undefined') Sound.play('win');
             this.addLog('你战胜了对手！', 'heal');
             setTimeout(() => this.endBattle(true), 1200);
             return true;

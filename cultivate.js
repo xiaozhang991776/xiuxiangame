@@ -175,6 +175,7 @@ const Cultivate = {
                     UI.showBreakthroughFX(`突破！${newRealm.name}一层`);
                     UI.toast(`恭喜突破至${newRealm.name}境界！`, 'gold');
                     UI.addLog(`道心通明，突破至${newRealm.name}一层！`, 'evt');
+                    if (typeof Sound !== 'undefined') Sound.play('levelup');
                 }
                 // 突破大境界成功，触发天劫
                 this.tribulateAfterBreakthrough(player);
@@ -214,6 +215,9 @@ const Cultivate = {
         player.stone -= stoneCost;
         player.zhanli -= cost;
         player.realmLayer++;
+        // 段位（小境界）突破也增寿元（少量，按当前境界；大境界突破仍是主要来源）
+        const layerLife = 20 + player.realmIdx * 3;
+        player.lifespan = (player.lifespan || 0) + layerLife;
         player.stats.breakthroughs = (player.stats.breakthroughs || 0) + 1;
         // 每满 5 小境界：额外天赋点
         if (player.realmLayer % 5 === 0 && typeof Talent !== 'undefined') {
@@ -223,8 +227,9 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         if (typeof UI !== 'undefined') {
             UI.showBreakthroughFX(`${realm.name}${cnNum(player.realmLayer)}层`);
-            UI.toast(`突破至${realm.name}${cnNum(player.realmLayer)}层`, 'gold');
+            UI.toast(`突破至${realm.name}${cnNum(player.realmLayer)}层（寿元+${fmtNum(layerLife)}）`, 'gold');
             UI.addLog(`战力精进，突破至${realm.name}${cnNum(player.realmLayer)}层`, 'evt');
+            if (typeof Sound !== 'undefined') Sound.play('success');
         }
         if (typeof Quests !== 'undefined') {
             Quests.tickProgress('realm_layer', player.realmIdx * 100 + player.realmLayer);
@@ -246,7 +251,7 @@ const Cultivate = {
     // 注：曾被钳到 Number.MAX_SAFE_INTEGER(9e15) 导致高悟性（≈60重起）单级费用卡死在 9007.20兆不再增长；
     //     现统一钳到 ZHANLI_CAP(1e30)，与「战力上限解除」「战力路径」保持一致，费用能持续、可见地增长
     WUXING_ZHANLI_BASE: 50000, WUXING_ZHANLI_GROWTH: 3,       // 战力路径：100 重单级被钳到 ZHANLI_CAP(1e30)
-    WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.7,  // 灵石路径：100 重单级被钳到 ZHANLI_CAP(1e30)，与战力路径统一
+    WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.2,  // 灵石路径：100 重单级被钳到 ZHANLI_CAP(1e30)，指数调小(1.7→1.2)使费用增长更平滑
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
     // 顿悟到下一级的资源成本（指数增长，门槛较高；双路径分别钳制，确保全程可达）
@@ -327,6 +332,7 @@ const Cultivate = {
         this.save(player);
         if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
         if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}战力（耗寿元${years}年）`, 'evt');
+        if (typeof Sound !== 'undefined') Sound.play('coin');
         return { zhanli: xiuGain, years };
     },
 
@@ -419,6 +425,7 @@ const Cultivate = {
         player.stone += Math.floor(stoneGain * (this.getTribulusBonus(player).stoneMult + 1) * (1 + _rbN.stoneMult) * this.stoneGainMult(player));
         this.save(player);
         if (typeof UI !== 'undefined') UI.addLog(`游历${years}年，收获${fmtNum(stoneGain)}灵石及诸多宝物`, 'evt');
+        if (typeof Sound !== 'undefined') Sound.play('coin');
         return { years, stone: stoneGain, materials: gains.materials, pills: gains.pills, fortune, fortuneText };
     },
 
@@ -509,6 +516,22 @@ const Cultivate = {
         if (typeof Talent !== 'undefined' && player.talents) {
             const ts = Talent.applyStats({ atk, def, hp, ling, spd, crit }, player);
             atk = ts.atk; def = ts.def; hp = ts.hp; ling = ts.ling; spd = ts.spd; crit = ts.crit;
+        }
+
+        // 大道+ 独立乘区：法则 × 法宝 × 洞天（互不稀释）
+        if (player.realmIdx >= 63) {
+            const lawM = (typeof Laws !== 'undefined') ? Laws.totalMult(player) : 1;
+            const trM  = (typeof Treasure !== 'undefined') ? Treasure.mult(player) : 1;
+            const caM  = (typeof Cave !== 'undefined') ? Cave.totalMult(player) : 1;
+            const m = lawM * trM * caM;
+            if (m > 1) {
+                atk = Math.floor(atk * m);
+                def = Math.floor(def * m);
+                hp  = Math.floor(hp  * m);
+                ling = Math.floor(ling * m);
+                spd = Math.floor(spd * m);
+                crit = Math.min(0.95, crit * m);
+            }
         }
 
         return { atk, def, hp, ling, spd, crit, realmAtk, realmDef, realmHp, realmLing };
@@ -689,6 +712,7 @@ const Cultivate = {
         player.zhanli = Math.max(0, player.zhanli - loss);
         player.lifespan = Math.max(0, (player.lifespan || 0) - fp.lifeLoss);
         this.save(player);
+        if (typeof Sound !== 'undefined') Sound.play('tribulation');
         return { mode, success: false, penalty: fp, xiuLost: loss,
             msg: `硬抗${trib.name}失败！境界回落、损失${fmtNum(loss)}战力、寿元-${fp.lifeLoss}` };
     },
@@ -744,6 +768,7 @@ const Cultivate = {
                 : `已免费轮回至第 ${player.rebirth} 世，重立道基（生命/攻击加成与修炼收益 +${xiuPct}% 永久保留）`, 'gold');
             UI.addLog(usedPill ? `历经${player.rebirth}世轮回，道基愈发浑厚` : `${player.name}散功重修，再踏仙途（第 ${player.rebirth} 世）`, 'evt');
             UI.renderAll();
+            if (typeof Sound !== 'undefined') Sound.play('rebirth');
         }
         return { ok: true, usedPill, rebirth: player.rebirth };
     },

@@ -282,8 +282,7 @@
                 body: '<p>当前浏览器<b>禁止了本地存储</b>，最常见原因是：你是用 <code>file://</code> 双击 <code>index.html</code> 打开的。</p>' +
                       '<p style="margin-top:10px">这会导致所有进度<b>无法保存</b>，刷新或关闭后会丢失——也就是「按存档没用」。</p>' +
                       '<p style="margin-top:12px">✅ <b>解决方法（任选其一）</b>：</p>' +
-                      '<p style="margin-top:6px">① 用 <code>http://</code> 方式打开：在游戏目录执行 <code>python -m http.server 8080</code>，再访问 <code>http://localhost:8080</code>；</p>' +
-                      '<p style="margin-top:6px">② 随时用设置里的「<b>导出存档</b>」把进度码复制保存，需要时「导入存档」恢复。</p>',
+                      '<p style="margin-top:6px">① 用 <code>http://</code> 方式打开：在游戏目录执行 <code>python -m http.server 8080</code>，再访问 <code>http://localhost:8080</code>。</p>',
                 footer: [{ text: '已知晓', action: () => UI.hideModal() }]
             });
         }
@@ -352,7 +351,7 @@
             } else if (ok) {
                 UI.toast('已临时保存到会话（关闭标签页前有效），建议用 http:// 打开本游戏以永久保存', 'warn');
             } else {
-                UI.toast('存档失败：浏览器禁止本地存储（多为用 file:// 双击打开所致）。请用 http:// 方式打开，或用「导出存档」备份进度', 'bad');
+                UI.toast('存档失败：浏览器禁止本地存储（多为用 file:// 双击打开所致）。请用 http:// 方式打开', 'bad');
             }
         }
         document.getElementById('saveBtn').onclick = () => doSave();
@@ -460,127 +459,14 @@
             Game.player.settings.sound = e.target.checked;
             Game.save();
         };
+        // 通用 UI 点击音效（战斗面板与突破/修炼按钮已有专属音效，跳过以免重复）
+        document.addEventListener('click', e => {
+            const b = e.target.closest('#battlePanel button, .tab-btn, .settings-btn, .modal-btn, .shop-item, .quest-claim');
+            if (!b) return;
+            if (b.id === 'breakBtn' || b.id === 'cultivateTap' || b.dataset.sfxSkip) return;
+            if (typeof Sound !== 'undefined') Sound.play('click');
+        });
         document.getElementById('manualSaveBtn').onclick = () => doSave('手动存档');
-        document.getElementById('exportBtn').onclick = async () => {
-            const gen = async (pw) => await SaveSystem.exportSave(Game.player, pw || null);
-            let curPw = '';
-            const refresh = async () => {
-                const ta = document.getElementById('exportCode');
-                if (ta) ta.value = await gen(curPw);
-            };
-            const body = `<p>复制下面的存档码保管（换设备/浏览器可导入恢复）：</p>
-                <textarea id="exportCode" readonly onclick="this.select()" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${await gen('')}</textarea>
-                <div style="margin-top:12px">
-                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#e8e0d0;font-size:13px">
-                        <input type="checkbox" id="expEncrypt"> 用密码加密此存档码
-                    </label>
-                    <input type="password" id="expPw" maxlength="64" autocomplete="off" placeholder="设置密码后，导入时需输入"
-                           style="display:none;width:100%;margin-top:8px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,0.45);border:1px solid #c9a96a;color:#e8e0d0;font-size:13px">
-                    <p id="expNote" style="display:none;margin-top:8px;color:#9a8e7a;font-size:12px">🔒 加密后他人拿到这串码也无法读取你的进度（密码不存储、无法找回）。</p>
-                </div>`;
-            UI.showModal({
-                title: '导出存档',
-                body,
-                footer: [
-                    { text: '复制存档码', type: 'primary', action: () => {
-                        const ta = document.getElementById('exportCode');
-                        if (ta) { ta.select(); try { document.execCommand('copy'); } catch (e) {} }
-                        UI.toast('已复制存档码', 'good');
-                    }},
-                    { text: '关闭', action: () => UI.hideModal() }
-                ]
-            });
-            // 勾选/输入密码时实时重新生成（明文 ↔ 加密）
-            setTimeout(() => {
-                const cb = document.getElementById('expEncrypt');
-                const pw = document.getElementById('expPw');
-                const note = document.getElementById('expNote');
-                if (cb) cb.onchange = () => {
-                    const on = cb.checked;
-                    if (pw) pw.style.display = on ? 'block' : 'none';
-                    if (note) note.style.display = on ? 'block' : 'none';
-                    if (!on) { curPw = ''; if (pw) pw.value = ''; refresh(); }
-                };
-                if (pw) pw.oninput = () => { curPw = pw.value; refresh(); };
-            }, 30);
-        };
-        document.getElementById('importBtn').onclick = () => {
-            const curVersion = (typeof GameConfig !== 'undefined' && GameConfig.saveVersion) || 'v1';
-            // 二次确认 + 提供当前存档备份，避免误覆盖
-            const goConfirm = (code, pw) => {
-                const cur = Game.player;
-                const curCodeStr = cur ? SaveSystem.exportSave(cur) : Promise.resolve('');
-                Promise.resolve(curCodeStr).then(curCode => {
-                    const backupHtml = curCode
-                        ? `<p style="margin-top:10px">建议先复制下面的<strong>当前存档码</strong>备份：</p>
-                           <textarea readonly onclick="this.select()" style="width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${curCode.replace(/</g, '&lt;')}</textarea>`
-                        : '';
-                    const nameHtml = (cur && cur.name) ? `「${esc(cur.name)}」` : '当前存档';
-                    UI.showModal({
-                        title: '⚠️ 确认覆盖',
-                        body: `<p>导入将<strong>覆盖${nameHtml}</strong>，原进度会被替换且无法恢复。</p>${backupHtml}
-                               <p style="margin-top:8px;color:#9a8e7a;font-size:12px">导入后可随时在设置里重新导出新存档码。</p>`,
-                        footer: [
-                            { text: '确认导入', type: 'danger', action: async () => {
-                                const res = await SaveSystem.importSave(code, pw);
-                                if (!res.ok) {
-                                    if (res.error === 'BAD_PASSWORD') UI.toast('密码错误，无法解密', 'bad');
-                                    else if (res.error === 'VERSION') UI.toast('存档码版本不兼容，请用新版本重新导出', 'bad');
-                                    else UI.toast('存档码无效', 'bad');
-                                    return;
-                                }
-                                Game.player = res.player;
-                                Game.save();
-                                UI.hideModal();
-                                UI.renderAll();
-                                UI.toast('导入成功', 'good');
-                            }},
-                            { text: '取消', action: () => UI.hideModal() }
-                        ]
-                    });
-                });
-            };
-            UI.showModal({
-                title: '导入存档',
-                body: `<p>粘贴存档码：</p>
-                       <textarea id="importCode" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px"></textarea>
-                       <input type="password" id="importPw" maxlength="64" autocomplete="off" placeholder="此存档码已加密，请输入密码"
-                              style="display:none;width:100%;margin-top:10px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,0.45);border:1px solid #c9a96a;color:#e8e0d0;font-size:13px">
-                       <p id="importPwHint" style="display:none;margin-top:6px;color:#9a8e7a;font-size:12px">🔒 该存档码已加密，需输入导出时设置的密码。</p>`,
-                footer: [
-                    { text: '下一步', type: 'primary', action: async () => {
-                        const code = (document.getElementById('importCode').value || '').trim();
-                        if (!code) { UI.toast('请输入存档码', 'bad'); return; }
-                        const parsed = SaveSystem.parseCode(code);
-                        if (parsed.status === 'invalid') { UI.toast('存档码无效，或不是本游戏的存档', 'bad'); return; }
-                        if (parsed.status === 'version-mismatch') {
-                            UI.toast(`存档码版本不兼容（${parsed.version || '?'} → ${curVersion}），请用新版本重新导出`, 'bad');
-                            return;
-                        }
-                        let pw = '';
-                        if (parsed.status === 'encrypted') {
-                            const pwEl = document.getElementById('importPw');
-                            const hint = document.getElementById('importPwHint');
-                            if (pwEl) pwEl.style.display = 'block';
-                            if (hint) hint.style.display = 'block';
-                            pw = (pwEl && pwEl.value || '').trim();
-                            if (!pw) { UI.toast('请输入密码', 'bad'); return; }
-                            const res = await SaveSystem.importSave(code, pw);
-                            if (!res.ok) {
-                                if (res.error === 'BAD_PASSWORD') { UI.toast('密码错误，无法解密', 'bad'); if (pwEl) pwEl.value = ''; }
-                                else { UI.toast('存档码无效', 'bad'); }
-                                return;
-                            }
-                            goConfirm(code, pw);
-                            return;
-                        }
-                        // 明文 / legacy：直接确认
-                        goConfirm(code, '');
-                    }},
-                    { text: '取消', action: () => UI.hideModal() }
-                ]
-            });
-        };
         document.getElementById('resetBtn').onclick = () => {
             UI.showModal({
                 title: '⚠️ 重置游戏',
@@ -618,7 +504,7 @@
                 || !document.getElementById('settings-screen').classList.contains('hidden')
                 || !document.getElementById('reward-screen').classList.contains('hidden');
             if (blocked) return;
-            const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest', '8': 'friends', '9': 'reincarnate', '0': 'talent', 'p': 'pet' };
+            const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest', '8': 'friends', '9': 'reincarnate', '0': 'talent', 'p': 'pet', 'v': 'xianlu' };
             if (keyMap[e.key]) UI.switchPanel(keyMap[e.key]);
             // 空格键：在修炼面板手动聚气
             if (e.key === ' ' && Game.currentPanel === 'cultivate') {
@@ -633,6 +519,17 @@
             }
         });
     }
+
+    /* ---------- Web Audio 激活（浏览器自动播放策略要求首次手势内 resume） ---------- */
+    function _unlockAudio() {
+        if (typeof Sound !== 'undefined') { try { Sound.unlock(); } catch (e) {} }
+        window.removeEventListener('pointerdown', _unlockAudio);
+        window.removeEventListener('keydown', _unlockAudio);
+        window.removeEventListener('touchstart', _unlockAudio);
+    }
+    window.addEventListener('pointerdown', _unlockAudio);
+    window.addEventListener('keydown', _unlockAudio);
+    window.addEventListener('touchstart', _unlockAudio);
 
     /* ---------- 启动 ---------- */
     if (document.readyState === 'loading') {

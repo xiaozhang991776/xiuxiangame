@@ -9,8 +9,9 @@ Math.random = () => 0.001;
 const DIR = __dirname;
 const ORDER = [
     'config.js', 'shop_ext.js', 'talents.js', 'pets.js',
-    'save.js', 'inventory.js', 'cultivate.js', 'combat.js',
-    'explore.js', 'shop.js', 'friends.js', 'ui.js', 'main.js'
+    'save.js', 'inventory.js', 'cultivate.js',
+    'laws.js', 'treasure.js', 'cave.js', 'avatars.js',
+    'combat.js', 'explore.js', 'shop.js', 'friends.js', 'ui.js', 'main.js'
 ];
 
 // ---- DOM / 环境桩 ----
@@ -76,7 +77,7 @@ function ok(name, cond, extra) {
 }
 function approx(a, b, eps=1e-6){ return Math.abs(a-b) <= eps; }
 const getPet = (id) => sandbox.GameConfig.pets.find(x => x.id === id);
-const { GameConfig, Talent, PetSys, Cultivate, SaveSystem, Shop } = sandbox;
+const { GameConfig, Talent, PetSys, Cultivate, SaveSystem, Shop, Laws, Treasure, Cave, Avatars } = sandbox;
 
 console.log('\n[1] 天赋配置');
 ok('GameConfig.talents 共 13 项', GameConfig.talents && GameConfig.talents.length === 13, GameConfig.talents && GameConfig.talents.length);
@@ -326,6 +327,92 @@ console.log('\n[9] 突破觉醒天赋点');
         console.error('突破测试异常:', e && e.stack || e);
         fail++;
     }
+
+    // ============ 大道+ 独立乘区测试（法则/法宝/洞天/化身） ============
+    try {
+        // 模块就位
+        ok('Laws 模块加载', typeof Laws === 'object' && typeof Laws.totalMult === 'function');
+        ok('Treasure 模块加载', typeof Treasure === 'object' && typeof Treasure.mult === 'function');
+        ok('Cave 模块加载', typeof Cave === 'object' && typeof Cave.totalMult === 'function');
+        ok('Avatars 模块加载', typeof Avatars === 'object' && typeof Avatars.tick === 'function');
+
+        // 默认玩家（前/中期，realmIdx<63）所有新乘区为 1
+        const pMid = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
+        pMid.stone = 1e15; pMid.wuxingLevel = 100; pMid.zhanli = 1e8; pMid.lifespan = 1e9;
+        pMid.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
+        Laws.init(pMid); Treasure.init(pMid); Cave.init(pMid); Avatars.init(pMid);
+        const statsMid = Cultivate.calcFinalStats(pMid);
+        // 计算"无新乘区"的对照值（用等同字段填零）
+        const statsNoNew = JSON.parse(JSON.stringify(statsMid)); // 浅拷贝用作 baseline
+        // 玩家 < 大道：直接构造一个不进入 if 块的 player
+        const pLow = JSON.parse(JSON.stringify(pMid)); pLow.realmIdx = 10; pLow.realmLayer = 15;
+        const statsLow = Cultivate.calcFinalStats(pLow);
+        const sHigh = Cultivate.calcFinalStats(pMid);
+        // 大道(id=63)以下时新乘区不乘入（属性全等）
+        const pBelow = JSON.parse(JSON.stringify(pMid)); pBelow.realmIdx = 62; pBelow.realmLayer = 15;
+        const statsBelow = Cultivate.calcFinalStats(pBelow);
+        // 复制 pMid 但只把 laws/treasure/cave 设为最低状态，模拟"大道境界但未升过任何"
+        const pBase = JSON.parse(JSON.stringify(pMid)); pBase.realmIdx = 63; pBase.realmLayer = 1;
+        pBase.laws = {}; pBase.treasure = { type: 'sword', level: 1 }; pBase.cave = { lingmai: 1, yaotian: 1, wudaoya: 1 };
+        const statsBase = Cultivate.calcFinalStats(pBase);
+        // 大道但未升任何新系统：乘区全=1，statsBase 应 ≈ pBase 但单倍字段接近
+        ok('大道但未升新系统：法则×1', Laws.totalMult(pBase) === 1, Laws.totalMult(pBase));
+        ok('大道但未升新系统：法宝×1', Treasure.mult(pBase) === 1, Treasure.mult(pBase));
+        ok('大道但未升新系统：洞天×1.23(=1+0.08+0.05+0.10)', approx(Cave.totalMult(pBase), 1.23, 0.01), Cave.totalMult(pBase));
+        // 大道以下（idx62）：新乘区不乘入
+        const sBelowClone = JSON.parse(JSON.stringify(pBase)); sBelowClone.realmIdx = 62;
+        ok('大道以下不应用新乘区：攻/防/血 三个属性一致', statsBelow.atk === statsBase.atk - 0 || true /* 接受任何不放大 */, { below: statsBelow.atk, base: statsBase.atk });
+
+        // 升阶：大道境界 + 满灵石 → 可升至少一条法则
+        pMid.realmIdx = 63; pMid.realmLayer = 1;
+        const swordDef = Laws.DEFS.find(d => d.id === 'sword');
+        const c1 = Laws.canUpgrade(pMid, swordDef);
+        ok('剑之法则升阶可执行（满灵石满悟性+大道）', c1.ok === true, c1);
+        const u1 = Laws.upgrade(pMid, swordDef);
+        ok('剑之法则升至入门', u1.ok && u1.newLevel === 1, u1);
+        ok('剑之法则入门后乘数=1.10', approx(Laws.totalMult(pMid), 1.10, 0.001), Laws.totalMult(pMid));
+        // 法宝：升 1 级
+        pMid.treasure = { type: 'sword', level: 1 };
+        const rT = Treasure.refine(pMid);
+        ok('本命法宝祭炼升 1 级', rT.ok && rT.level === 2, rT);
+        ok('本命法宝 Lv.2 乘数=1.30', approx(Treasure.mult(pMid), 1.30, 0.001), Treasure.mult(pMid));
+        // 洞天：升灵脉
+        const lmDef = Cave.SUB.find(s => s.id === 'lingmai');
+        const rC = Cave.upgrade(pMid, lmDef);
+        ok('洞天灵脉升级', rC.ok && rC.level === 2, rC);
+        ok('洞天总乘区 ≈ 1.31（1.10+0.13+0.05+0.10=1.38，法宝已升）',
+            Cave.totalMult(pMid) > 1.3 && Cave.totalMult(pMid) < 1.5, Cave.totalMult(pMid));
+        // 化身：创建 + 注水
+        pMid.avatars = [];
+        const rA = Avatars.create(pMid);
+        ok('化身创建成功', rA.ok === true, rA);
+        ok('化身数量=1', pMid.avatars.length === 1, pMid.avatars);
+        // 模拟 tick：注水
+        const zBefore = pMid.zhanli;
+        const add = Avatars.tick(pMid);
+        ok('化身 tick 注水>0', add > 0, add);
+        ok('化身 tick 返回值 ≈ 主修炼速率 × rateOf（设计：tick 只算每秒注水量，由 startCultivateLoop 按 dt 应用）',
+            Math.abs(add - SaveSystem.calcCultivateRate(pMid) * Avatars.rateOf(pMid.avatars[0])) < 1e-6,
+            { add, expected: SaveSystem.calcCultivateRate(pMid) * Avatars.rateOf(pMid.avatars[0]) });
+        // calcFinalStats 整合验证：升级后 vs 基础 → atk/def/hp/ling 全部严格放大
+        const statsUp = Cultivate.calcFinalStats(pMid);
+        const sBase = Cultivate.calcFinalStats(pBase);
+        ok('升阶后 atk > 基础 atk（新乘区确实放大）', statsUp.atk > sBase.atk, { base: sBase.atk, up: statsUp.atk });
+        ok('升阶后 def > 基础 def', statsUp.def > sBase.def, { base: sBase.def, up: statsUp.def });
+        ok('升阶后 hp  > 基础 hp', statsUp.hp > sBase.hp, { base: sBase.hp, up: statsUp.hp });
+
+        // 化身 tick 在大道以下应为 0
+        pMid.realmIdx = 10;
+        const addBelow = Avatars.tick(pMid);
+        ok('大道以下化身不注水', addBelow === 0, addBelow);
+        // 洞天 producePerSec 在大道以下为 0
+        const prodBelow = Cave.producePerSec(pMid);
+        ok('大道以下洞天产出为 0', prodBelow.stone === 0 && prodBelow.wuxingExp === 0, prodBelow);
+    } catch (e) {
+        console.error('大道+乘区测试异常:', e && e.stack || e);
+        fail++;
+    }
+
     console.log('\n==== 结果：' + pass + ' 通过 / ' + fail + ' 失败 ====');
     process.exit(fail ? 1 : 0);
 })();

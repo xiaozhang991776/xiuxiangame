@@ -461,7 +461,7 @@ const GameConfig = {
         lastSave: 0,
         lastOffline: 0,
         // 设置
-        settings: { autoSave: true, anim: true, sound: false }
+        settings: { autoSave: true, anim: true, sound: true }
     },
 
     /* ---------- 名字池（随机生成） ---------- */
