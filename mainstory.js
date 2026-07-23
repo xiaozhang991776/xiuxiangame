@@ -67,8 +67,7 @@ const MainStory = {
         const r = ch.reward || {};
         if (r.stone) player.stone = (player.stone || 0) + r.stone;
         if (r.zhanli) {
-            player.zhanli = (player.zhanli || 0) + r.zhanli;
-            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + r.zhanli;
+            Cultivate.gainZhanli(player, r.zhanli); // 钳到今生战力上线
         }
         if (r.items && typeof Inventory !== 'undefined') {
             r.items.forEach(it => Inventory.addItem(player, it.id, it.count));

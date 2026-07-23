@@ -82,8 +82,7 @@ const Explore = {
         switch (choice.type) {
             case 'zhanli':
                 const _incV = Math.floor(choice.value * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-                player.zhanli += _incV;
-                player.stats.totalZhanli = (player.stats.totalZhanli || 0) + _incV;
+                Cultivate.gainZhanli(player, _incV); // 钳到今生战力上线
                 if (typeof UI !== 'undefined') {
                     UI.toast(`获得${fmtNum(_incV)}战力`, 'gold');
                     UI.addLog(`奇遇：获得${fmtNum(choice.value)}战力`, 'evt');
@@ -136,7 +135,7 @@ const Explore = {
                 if (typeof UI !== 'undefined') UI.toast('接到新的宗门任务', 'good');
                 // 简单：给一些战力作为任务奖励预付（资源收紧：乘 incomeMult）
                 const _qPre = Math.floor(100 * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-                player.zhanli += _qPre;
+                Cultivate.gainZhanli(player, _qPre); // 钳到今生战力上线
                 if (typeof UI !== 'undefined') UI.addLog(`接到宗门任务，预付${_qPre}战力`, 'evt');
                 break;
             }
@@ -146,7 +145,7 @@ const Explore = {
                 if (Math.random() < 0.3) {
                     const _m = (typeof DIFF !== 'undefined') ? DIFF.incomeMult : 1;
                     const reward = Math.floor((player.zhanli * 0.01 + 50) * _m);
-                    player.zhanli = Math.min(player.zhanli + reward, ZHANLI_CAP);
+                    Cultivate.gainZhanli(player, reward); // 钳到今生战力上线
                     if (typeof UI !== 'undefined') {
                         UI.toast(`善有善报，获得${fmtNum(reward)}战力`, 'gold');
                         UI.addLog('行善积德，福报降临', 'evt');
@@ -449,7 +448,7 @@ const Explore = {
         if (candidates.length === 0) {
             // 没有可学的，给战力补偿（资源收紧：乘 incomeMult）
             const xiu = Math.floor((500 + Math.floor(Math.random() * 2000)) * (typeof DIFF !== 'undefined' ? DIFF.incomeMult : 1));
-            player.zhanli += xiu;
+            Cultivate.gainZhanli(player, xiu); // 钳到今生战力上线
             if (typeof UI !== 'undefined') UI.toast(`获得${fmtNum(xiu)}战力`, 'gold');
             return;
         }
@@ -518,8 +517,7 @@ const Quests = {
         if (q.reward.stone) { const _s = Math.floor(q.reward.stone * _m); player.stone += _s; _gotStone = _s; }
         if (q.reward.zhanli) {
             const _x = Math.floor(q.reward.zhanli * _m);
-            player.zhanli += _x;
-            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + _x;
+            Cultivate.gainZhanli(player, _x); // 钳到今生战力上线
             _gotXiu = _x;
         }
         if (q.reward.items) {

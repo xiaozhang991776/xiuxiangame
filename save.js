@@ -298,10 +298,9 @@ const SaveSystem = {
     /* ---------- 应用离线收益 ---------- */
     applyOfflineReward(player) {
         const reward = this.calcOfflineReward(player);
-        const SAFE = ZHANLI_CAP;
         if (reward.zhanli > 0) {
-            player.zhanli = Math.min((player.zhanli || 0) + Math.min(reward.zhanli, SAFE), SAFE);
-            player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + Math.min(reward.zhanli, SAFE), SAFE);
+            // 离线收益同受「今生战力上线」钳制（收益额本身先钳 ZHANLI_CAP 防溢出）
+            Cultivate.gainZhanli(player, Math.min(reward.zhanli, ZHANLI_CAP));
         }
         player.lastOffline = Date.now();
         player.lastSave = Date.now(); // 防止下次用旧lastSave重复结算离线收益
@@ -569,18 +568,27 @@ const Game = {
             this.lastTickTime = now;
             const rate = SaveSystem.calcCultivateRate(this.player);
             const gain = rate * dt;
-            this.player.zhanli += gain;
-            this.player.stats.totalZhanli = (this.player.stats.totalZhanli || 0) + gain;
+            // 战力增长统一钳到「今生战力上线」（原境界天花板已改为战力上限；终局解锁=ZHANLI_CAP）
+            Cultivate.gainZhanli(this.player, gain);
             // 洞天产出（灵石/秒、悟性经验/秒）
             if (typeof Cave !== 'undefined' && this.player.realmIdx >= Cave.UNLOCK_IDX) {
                 const prod = Cave.producePerSec(this.player);
                 if (prod.stone > 0) this.player.stone = (this.player.stone || 0) + prod.stone * dt;
                 if (prod.wuxingExp > 0) this.player.wuxingExp = (this.player.wuxingExp || 0) + prod.wuxingExp * dt;
             }
-            // 化身注水（向 zhanli 池持续注入，不进战斗属性）
+            // 化身注水（向 zhanli 池持续注入，不进战斗属性；同受今生上线钳制）
             if (typeof Avatars !== 'undefined' && this.player.realmIdx >= Avatars.UNLOCK_IDX) {
                 const add = Avatars.tick(this.player);
-                if (add > 0) this.player.zhanli += add;
+                if (add > 0) Cultivate.gainZhanli(this.player, add);
+            }
+            // 达线提示（每个上线档位只提示一次，轮回抬升上线后可再次提示）
+            const _lifeCap = Cultivate.getLifeZhanliCap(this.player);
+            if (_lifeCap < ZHANLI_CAP && (this.player.zhanli || 0) >= _lifeCap && this._capHintAt !== _lifeCap) {
+                this._capHintAt = _lifeCap;
+                if (typeof UI !== 'undefined') {
+                    UI.toast('战力已达今生上线，修行入账停滞——轮回后方可继续增长！', 'gold');
+                    UI.addLog('今生战力已至上线，前往「转世轮回」重立道基', 'evt');
+                }
             }
             // UI刷新（节流：每秒更新一次）
             if (typeof UI !== 'undefined' && UI.updateCultivationBar) {

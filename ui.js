@@ -1172,7 +1172,7 @@ const UI = {
         if (hintEl) {
             const cap = Cultivate.getRebirthZhanliCap(p);
             if ((p.zhanli || 0) < cap) {
-                hintEl.innerHTML = `<span class="rb-lock">免费轮回需先达战力 <b>${fmtNum(cap)}</b>（战力上线，随轮回次数递增）。当前战力：${fmtNum(p.zhanli || 0)}。</span>`;
+                hintEl.innerHTML = `<span class="rb-lock">免费轮回需先达战力 <b>${fmtNum(cap)}</b>（战力上线，随轮回次数递增；亦是<b>今生战力增长上限</b>，达线后战力停涨）。当前战力：${fmtNum(p.zhanli || 0)}。</span>`;
             } else {
                 const herbName = getMaterial(cfg.herbId).name;
                 const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;
@@ -1398,7 +1398,7 @@ const UI = {
         { title: '乾坤袋', body: '「<b>乾坤袋</b>」随身藏纳装备丹药。穿戴<b>武器·护甲·饰品·法宝</b>可增益气血、攻击、防御与灵力；丹药则提供临时裨益。战力强弱，半系于此。', panel: 'inventory', target: '#panel-inventory' },
         { title: '神通', body: '「<b>神通</b>」可修习法术，临阵施展。攻伐、护身、辅助各具妙用，功法愈深，威能愈盛——是越阶斗法、闯荡秘境的底气。', panel: 'skill', target: '#panel-skill' },
         { title: '道友', body: '「<b>道友</b>」凭<b>档案码</b>结交同道，<b>道友榜</b>按战力排序、彼此砥砺；亦可与道友切磋论道，互证修行。', panel: 'friends', target: '#panel-friends' },
-        { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。达「<b>战力上线</b>」（随轮回次数递增的战力门槛，<b>道祖之后该门槛亦 ×30</b>）即可<b>免费轮回</b>：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
+        { title: '转世轮回', body: '此乃本游戏<b>核心玩法</b>。「<b>战力上线</b>」是随轮回次数递增的战力门槛，也是<b>今生战力增长上限</b>——战力涨到上线即停涨（境界不再单独设天花板），此时即可<b>免费轮回</b>提升上线：重立道基、重置境界与寿元，却<b>永久保留</b>气血与攻击加成。每轮回一世，<b>修炼收益永久 +100%</b>（第 N 世修炼速度 ×(1+N)），气血攻击各 ×(1+0.3N)；轮回上限 <b>100 世</b>。亦可耗 <b>100 株轮回草</b>（坊市有售）直接轮回，不受门槛所限。转世面板已单独显示你的<b>轮回层数</b>。', panel: 'reincarnate', target: '#panel-reincarnate' },
         { title: '灵宠培养', body: '「<b>灵宠</b>」与你同生共死。坊市可购灵宠、历练东海龙宫可收服幼龙；在<b>修炼区·灵宠</b>子标签中选中灵宠，可<b>喂养</b>（耗灵兽粮）、<b>修炼</b>（耗战力）、<b>化形进阶</b>（耗化形丹），等级与化形越高，属性越强，出战越猛。', panel: 'cultivate', sub: 'pet', target: '#cultSubPet' },
         { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。在<b>修炼区·天赋</b>子标签修习六系天赋（攻伐/守御/长生/悟道/御兽/天命），永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'cultivate', sub: 'talent', target: '#cultSubTalent' },
         { title: '境界全貌', body: '修行之路共 <b>103 大境界 ×15 层</b>：自练气一路攀至 <b>道祖</b>；道祖之后更有 <b>道君→道尊→道圣→…→太一→…→太寥</b> 等超脱系境界，越往后越近大道本源。※ 道祖之后段位难度（突破战力/灵石门槛、斗法敌人强度）统一 <b>×900</b>，需海量战力方能登顶。达 <b>大乘（大成）期</b> 以上，诸般「<b>绝学重宝</b>」方现世间——坊市解锁 <b>太清宝塔·诸天鼎·无衡镜</b> 等仙界法宝、神通现 <b>太清剑诀→道·无上</b> 诸绝学、灵宠得 <b>麒麟王·祖龙太初</b>，更可飞升 <b>九重天·诸天战场</b> 绝境夺造化。', panel: 'cultivate' },

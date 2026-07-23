@@ -124,11 +124,8 @@ const Cultivate = {
                 if (typeof UI !== 'undefined') UI.toast('已达最高境界，无法突破！', 'bad');
                 return false;
             }
-            // 今生境界天花板：超过则需先轮回（轮回成为真实进度门槛，而非摆设）
-            if ((player.realmIdx + 1) > this.getMaxRealm(player)) {
-                if (typeof UI !== 'undefined') UI.toast('今生境界已至天花板，需先轮回方可更进一步！', 'bad');
-                return false;
-            }
+            // 今生不再设境界天花板：进度由「今生战力上线」(getLifeZhanliCap) 自然限速——
+            // 战力涨到上线即停，付不起更高突破成本，需轮回提升上线方可更进一步
             const realm = getRealm(player.realmIdx);
             const cost = this.getBreakthroughCost(player);
             if (player.zhanli < cost) {
@@ -312,8 +309,7 @@ const Cultivate = {
             if (typeof UI !== 'undefined') UI.toast(`寿元不足，仅余${player.lifespan}年`, 'bad');
             return null;
         }
-        // 战力收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数，钳到 ZHANLI_CAP 防止极端长闭关越界（仍远低于 Infinity）
-        const SAFE = ZHANLI_CAP;
+        // 战力收益 = 年数 × 每秒修炼速率 × 一年的秒数 × 折损系数（收益额本身钳 ZHANLI_CAP 防溢出）
         const xiuGain = this._secludeZhanliGain(player, years);
         player.lifespan -= years;
         // 寿元耗尽：羽化归虚，游戏重开
@@ -326,9 +322,8 @@ const Cultivate = {
             }
             return { zhanli: xiuGain, years, dead: true };
         }
-        // 战力（及累计战力）钳到 ZHANLI_CAP：允许多次闭关/点击持续叠加增长，不再卡死在 9e15
-        player.zhanli = Math.min((player.zhanli || 0) + xiuGain, SAFE);
-        player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + xiuGain, SAFE);
+        // 战力钳到「今生战力上线」（终局解锁后=ZHANLI_CAP）；累计战力统计仍钳 ZHANLI_CAP
+        this.gainZhanli(player, xiuGain);
         this.save(player);
         if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
         if (typeof UI !== 'undefined') UI.addLog(`闭关${years}年，悟得${fmtNum(xiuGain)}战力（耗寿元${years}年）`, 'evt');
@@ -562,21 +557,19 @@ const Cultivate = {
         }
         this.tapComboTimer = now;
         const comboMult = 1 + (this.tapCombo - 1) * 0.08; // 最高约 1.88x
-        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击，钳到 ZHANLI_CAP 允许终局持续增长
-        const SAFE = ZHANLI_CAP;
-        const gain = Math.min(Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player))), SAFE);
-        player.zhanli = Math.min((player.zhanli || 0) + gain, SAFE);
-        player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + gain, SAFE);
+        // 每次点击 ≈ 3 秒被动修炼收益，再乘连击；入账钳到「今生战力上线」
+        const gain = Math.min(Math.max(1, Math.floor(rate * 3 * comboMult * this.wuxingTapMult(player))), ZHANLI_CAP);
+        const credited = this.gainZhanli(player, gain); // 达今生上线后实际入账为 0
         // 任务进度
         if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
-        // 视觉反馈
+        // 视觉反馈（显示实际入账，达线后 +0 提示玩家该轮回了）
         if (typeof UI !== 'undefined') {
-            UI.showTapGain(gain, this.tapCombo > 1 ? this.tapCombo : 0);
+            UI.showTapGain(credited, this.tapCombo > 1 ? this.tapCombo : 0);
             UI.updateResourceBar();
             UI.updateCultivationBar();
         }
         this.save(player);
-        return gain;
+        return credited;
     },
 
     /* ---------- 渡劫天劫系统 ---------- */
@@ -603,14 +596,27 @@ const Cultivate = {
             stoneMult: 0
         };
     },
-    /* ---------- 轮回相关：境界天花板 ---------- */
-    // 今生可抵达的最高大境界索引（随轮回层数提升；不低于当前进度，避免旧档被锁死）
-    getMaxRealm(player) {
+    /* ---------- 轮回相关：今生战力上线（原「境界天花板」已改为战力上线） ---------- */
+    // 今生战力可增长到的上限 = 免费轮回门槛（getRebirthZhanliCap，随轮回次数递增）。
+    // 战力达线即停涨 → 付不起更高突破成本 → 需轮回提升上线，轮回仍是真实进度门槛。
+    // 终局解锁：达轮回上限(maxRebirth) 或 上线境界已是最后一个境界时返回 ZHANLI_CAP，
+    // 不影响大道+（洞天产出/化身注水/闭关）的长尾战力增长。
+    getLifeZhanliCap(player) {
         const n = (player && player.rebirth) || 0;
         const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth : {};
-        const formula = (c.baseRealm || 0) + n * (c.realmPerRebirth || 1);
-        const capped = Math.min(GameConfig.realms.length - 1, formula);
-        return Math.max(player ? (player.realmIdx || 0) : 0, capped);
+        const capRealmIdx = (c.baseRealm || 0) + n * (c.realmPerRebirth || 1);
+        if (n >= (c.maxRebirth || 100) || capRealmIdx >= GameConfig.realms.length - 1) return ZHANLI_CAP;
+        // 不低于当前战力：旧档超线只停涨、不回落
+        return Math.max(this.getRebirthZhanliCap(player), (player && player.zhanli) || 0);
+    },
+    // 统一战力增长入口：任何来源的战力增加都钳到「今生战力上线」（totalZhanli 统计不受今生上线限制）
+    gainZhanli(player, amount) {
+        if (!player || !(amount > 0)) return 0;
+        const cap = this.getLifeZhanliCap(player);
+        const before = player.zhanli || 0;
+        player.zhanli = Math.min(before + amount, cap);
+        if (player.stats) player.stats.totalZhanli = Math.min((player.stats.totalZhanli || 0) + amount, ZHANLI_CAP);
+        return player.zhanli - before; // 实际入账（达线后为 0）
     },
     /* ---------- 轮回战力上线 ---------- */
     // 第 n 世可免费轮回所需的战力阈值 = 今生天花板境界(baseRealm + n*realmPerRebirth)满层突破成本

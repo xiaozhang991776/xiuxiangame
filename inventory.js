@@ -239,8 +239,7 @@ const Inventory = {
                 msg = `恢复${eff.value}灵力（战斗中生效）`;
                 break;
             case 'zhanli':
-                player.zhanli += eff.value;
-                player.stats.totalZhanli = (player.stats.totalZhanli || 0) + eff.value;
+                Cultivate.gainZhanli(player, eff.value); // 钳到今生战力上线
                 msg = `获得${eff.value}战力`;
                 break;
             case 'perm_hp':

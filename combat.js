@@ -439,9 +439,8 @@ const Combat = {
             const _ts = (typeof Cultivate !== 'undefined' && Cultivate.getTribulusBonus) ? Cultivate.getTribulusBonus(player).stoneMult : 0;
             const _rb = (typeof Cultivate !== 'undefined' && Cultivate.getRebirthBonus) ? Cultivate.getRebirthBonus(player).stoneMult : 0;
             const stoneReward = Math.floor(enemyTpl.stoneReward * (1 + _ts) * (1 + _rb) * _inc);
-            player.zhanli += zhanliReward;
+            Cultivate.gainZhanli(player, zhanliReward); // 钳到今生战力上线
             player.stone += stoneReward;
-            player.stats.totalZhanli = (player.stats.totalZhanli || 0) + zhanliReward;
             player.stats.combatWins = (player.stats.combatWins || 0) + 1;
             // 掉落
             const drops = Inventory.addDrops(player, enemyTpl.drops);

@@ -189,6 +189,30 @@ console.log('\n[8b] 轮回草轮回保留境界（战力不降），免费轮回
     }
 }
 
+console.log('\n[8c] 今生战力上线（原「境界天花板」已改为战力上限）');
+{
+    const p = bareAt(3, 5); p.rebirth = 0; p.zhanli = 0;
+    const life = Cultivate.getLifeZhanliCap(p);
+    ok('第0世 今生战力上线 = 免费轮回门槛（同一数值，达线即可轮回）', life === Cultivate.getRebirthZhanliCap(p), life);
+    const p1 = bareAt(3, 5); p1.rebirth = 5; p1.zhanli = 0;
+    ok('轮回5世后今生上线更高（随轮回递增）', Cultivate.getLifeZhanliCap(p1) > life);
+    // 旧档超线：只停涨、不回落
+    const pOver = bareAt(3, 5); pOver.rebirth = 0; pOver.zhanli = life * 10;
+    ok('超线旧档：上线取 max(线,当前战力)，不回落', Cultivate.getLifeZhanliCap(pOver) === life * 10);
+    // 终局解锁：达轮回上限 → 上线放开为 ZHANLI_CAP（大道+长尾成长不受限）
+    const pEnd = bareAt(63, 1); pEnd.rebirth = GameConfig.rebirth.maxRebirth; pEnd.zhanli = 0;
+    ok('达轮回上限后上线解除（=ZHANLI_CAP）', Cultivate.getLifeZhanliCap(pEnd) === sandbox.ZHANLI_CAP);
+    // gainZhanli 统一入口：入账钳到上线，超出部分归零
+    const pG = bareAt(3, 5); pG.rebirth = 0; pG.zhanli = 0;
+    const capG = Cultivate.getLifeZhanliCap(pG);
+    const credited = Cultivate.gainZhanli(pG, capG * 3);
+    ok('gainZhanli 入账被钳到今生上线', pG.zhanli === capG && credited === capG, pG.zhanli);
+    ok('达线后再入账为 0（战力停涨）', Cultivate.gainZhanli(pG, 12345) === 0 && pG.zhanli === capG);
+    ok('totalZhanli 统计不受今生上线限制（仅钳 ZHANLI_CAP）', pG.stats.totalZhanli > capG, pG.stats.totalZhanli);
+    // 境界天花板已彻底移除
+    ok('getMaxRealm 境界天花板已移除', typeof Cultivate.getMaxRealm === 'undefined');
+}
+
 console.log('\n[10] 大乘+ 修炼速率修复（防卡死/防溢出）');
 const SELF = 31536000 * 0.0015;
 function bareAt(realmIdx, realmLayer) {
