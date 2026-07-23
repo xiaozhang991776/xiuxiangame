@@ -461,49 +461,121 @@
             Game.save();
         };
         document.getElementById('manualSaveBtn').onclick = () => doSave('手动存档');
-        document.getElementById('exportBtn').onclick = () => {
-            const data = SaveSystem.exportSave(Game.player);
+        document.getElementById('exportBtn').onclick = async () => {
+            const gen = async (pw) => await SaveSystem.exportSave(Game.player, pw || null);
+            let curPw = '';
+            const refresh = async () => {
+                const ta = document.getElementById('exportCode');
+                if (ta) ta.value = await gen(curPw);
+            };
+            const body = `<p>复制下面的存档码保管（换设备/浏览器可导入恢复）：</p>
+                <textarea id="exportCode" readonly onclick="this.select()" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${await gen('')}</textarea>
+                <div style="margin-top:12px">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#e8e0d0;font-size:13px">
+                        <input type="checkbox" id="expEncrypt"> 用密码加密此存档码
+                    </label>
+                    <input type="password" id="expPw" maxlength="64" autocomplete="off" placeholder="设置密码后，导入时需输入"
+                           style="display:none;width:100%;margin-top:8px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,0.45);border:1px solid #c9a96a;color:#e8e0d0;font-size:13px">
+                    <p id="expNote" style="display:none;margin-top:8px;color:#9a8e7a;font-size:12px">🔒 加密后他人拿到这串码也无法读取你的进度（密码不存储、无法找回）。</p>
+                </div>`;
             UI.showModal({
                 title: '导出存档',
-                body: `<p>复制以下存档码保存：</p>
-                       <textarea style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px" readonly onclick="this.select()">${data}</textarea>`,
-                footer: [{ text: '关闭', action: () => UI.hideModal() }]
+                body,
+                footer: [
+                    { text: '复制存档码', type: 'primary', action: () => {
+                        const ta = document.getElementById('exportCode');
+                        if (ta) { ta.select(); try { document.execCommand('copy'); } catch (e) {} }
+                        UI.toast('已复制存档码', 'good');
+                    }},
+                    { text: '关闭', action: () => UI.hideModal() }
+                ]
             });
+            // 勾选/输入密码时实时重新生成（明文 ↔ 加密）
+            setTimeout(() => {
+                const cb = document.getElementById('expEncrypt');
+                const pw = document.getElementById('expPw');
+                const note = document.getElementById('expNote');
+                if (cb) cb.onchange = () => {
+                    const on = cb.checked;
+                    if (pw) pw.style.display = on ? 'block' : 'none';
+                    if (note) note.style.display = on ? 'block' : 'none';
+                    if (!on) { curPw = ''; if (pw) pw.value = ''; refresh(); }
+                };
+                if (pw) pw.oninput = () => { curPw = pw.value; refresh(); };
+            }, 30);
         };
         document.getElementById('importBtn').onclick = () => {
+            const curVersion = (typeof GameConfig !== 'undefined' && GameConfig.saveVersion) || 'v1';
+            // 二次确认 + 提供当前存档备份，避免误覆盖
+            const goConfirm = (code, pw) => {
+                const cur = Game.player;
+                const curCodeStr = cur ? SaveSystem.exportSave(cur) : Promise.resolve('');
+                Promise.resolve(curCodeStr).then(curCode => {
+                    const backupHtml = curCode
+                        ? `<p style="margin-top:10px">建议先复制下面的<strong>当前存档码</strong>备份：</p>
+                           <textarea readonly onclick="this.select()" style="width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${curCode.replace(/</g, '&lt;')}</textarea>`
+                        : '';
+                    const nameHtml = (cur && cur.name) ? `「${esc(cur.name)}」` : '当前存档';
+                    UI.showModal({
+                        title: '⚠️ 确认覆盖',
+                        body: `<p>导入将<strong>覆盖${nameHtml}</strong>，原进度会被替换且无法恢复。</p>${backupHtml}
+                               <p style="margin-top:8px;color:#9a8e7a;font-size:12px">导入后可随时在设置里重新导出新存档码。</p>`,
+                        footer: [
+                            { text: '确认导入', type: 'danger', action: async () => {
+                                const res = await SaveSystem.importSave(code, pw);
+                                if (!res.ok) {
+                                    if (res.error === 'BAD_PASSWORD') UI.toast('密码错误，无法解密', 'bad');
+                                    else if (res.error === 'VERSION') UI.toast('存档码版本不兼容，请用新版本重新导出', 'bad');
+                                    else UI.toast('存档码无效', 'bad');
+                                    return;
+                                }
+                                Game.player = res.player;
+                                Game.save();
+                                UI.hideModal();
+                                UI.renderAll();
+                                UI.toast('导入成功', 'good');
+                            }},
+                            { text: '取消', action: () => UI.hideModal() }
+                        ]
+                    });
+                });
+            };
             UI.showModal({
                 title: '导入存档',
                 body: `<p>粘贴存档码：</p>
-                       <textarea id="importCode" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px"></textarea>`,
+                       <textarea id="importCode" style="width:100%;height:120px;margin-top:10px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px"></textarea>
+                       <input type="password" id="importPw" maxlength="64" autocomplete="off" placeholder="此存档码已加密，请输入密码"
+                              style="display:none;width:100%;margin-top:10px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,0.45);border:1px solid #c9a96a;color:#e8e0d0;font-size:13px">
+                       <p id="importPwHint" style="display:none;margin-top:6px;color:#9a8e7a;font-size:12px">🔒 该存档码已加密，需输入导出时设置的密码。</p>`,
                 footer: [
-                    { text: '下一步', type: 'primary', action: () => {
+                    { text: '下一步', type: 'primary', action: async () => {
                         const code = (document.getElementById('importCode').value || '').trim();
                         if (!code) { UI.toast('请输入存档码', 'bad'); return; }
-                        const player = SaveSystem.importSave(code);
-                        if (!player) { UI.toast('存档码无效，或不是本游戏的存档', 'bad'); return; }
-                        // 二次确认 + 提供当前存档备份，避免误覆盖
-                        const cur = Game.player;
-                        const curCode = cur ? SaveSystem.exportSave(cur) : '';
-                        const backupHtml = curCode
-                            ? `<p style="margin-top:10px">建议先复制下面的<strong>当前存档码</strong>备份：</p>
-                               <textarea readonly onclick="this.select()" style="width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,0.4);border:1px solid #c9a96a;border-radius:6px;color:#e8e0d0;padding:8px;font-size:11px">${curCode}</textarea>`
-                            : '';
-                        const nameHtml = (cur && cur.name) ? `「${esc(cur.name)}」` : '当前存档';
-                        UI.showModal({
-                            title: '⚠️ 确认覆盖',
-                            body: `<p>导入将<strong>覆盖${nameHtml}</strong>，原进度会被替换且无法恢复。</p>${backupHtml}
-                                   <p style="margin-top:8px;color:#9a8e7a;font-size:12px">导入后可随时在设置里重新导出新存档码。</p>`,
-                            footer: [
-                                { text: '确认导入', type: 'danger', action: () => {
-                                    Game.player = player;
-                                    Game.save();
-                                    UI.hideModal();
-                                    UI.renderAll();
-                                    UI.toast('导入成功', 'good');
-                                }},
-                                { text: '取消', action: () => UI.hideModal() }
-                            ]
-                        });
+                        const parsed = SaveSystem.parseCode(code);
+                        if (parsed.status === 'invalid') { UI.toast('存档码无效，或不是本游戏的存档', 'bad'); return; }
+                        if (parsed.status === 'version-mismatch') {
+                            UI.toast(`存档码版本不兼容（${parsed.version || '?'} → ${curVersion}），请用新版本重新导出`, 'bad');
+                            return;
+                        }
+                        let pw = '';
+                        if (parsed.status === 'encrypted') {
+                            const pwEl = document.getElementById('importPw');
+                            const hint = document.getElementById('importPwHint');
+                            if (pwEl) pwEl.style.display = 'block';
+                            if (hint) hint.style.display = 'block';
+                            pw = (pwEl && pwEl.value || '').trim();
+                            if (!pw) { UI.toast('请输入密码', 'bad'); return; }
+                            const res = await SaveSystem.importSave(code, pw);
+                            if (!res.ok) {
+                                if (res.error === 'BAD_PASSWORD') { UI.toast('密码错误，无法解密', 'bad'); if (pwEl) pwEl.value = ''; }
+                                else { UI.toast('存档码无效', 'bad'); }
+                                return;
+                            }
+                            goConfirm(code, pw);
+                            return;
+                        }
+                        // 明文 / legacy：直接确认
+                        goConfirm(code, '');
                     }},
                     { text: '取消', action: () => UI.hideModal() }
                 ]

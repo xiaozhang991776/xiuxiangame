@@ -14,6 +14,7 @@ const DIFF = {
 };
 
 const GameConfig = {
+    saveVersion: 'v1',   // 存档码格式版本：跨大版本变更时旧码导入会被拒绝（需重新导出）
     /* ---------- 五行配置（相克：金克木 木克土 土克水 水克火 火克金） ---------- */
     elements: {
         metal: { name: '金', color: '#d4af37', counter: 'wood', desc: '攻伐凌厉' },
