@@ -84,8 +84,8 @@ const Cultivate = {
         // 当前大境界内，层数越高所需越多
         const layerProgress = (player.realmLayer - 1) / realm.layers;
         // 难度系数：突破所需战力 ×breakXiuMult（调难时 >1）
-        // 道祖(idx 12)之后的超脱系段位，突破难度统一 ×30
-        const postDaoguMult = player.realmIdx > 12 ? 30 : 1;
+        // 道祖(idx 12)之后的超脱系段位，突破难度统一 ×900（×30 基础上再×30）
+        const postDaoguMult = player.realmIdx > 12 ? 900 : 1;
         return Math.floor(realm.baseXiu * Math.pow(realm.xiuMult, player.realmLayer - 1) * postDaoguMult * (typeof DIFF !== 'undefined' ? DIFF.breakXiuMult : 1));
     },
 
@@ -95,8 +95,8 @@ const Cultivate = {
         const realm = getRealm(player.realmIdx);
         const seq = player.realmIdx * realm.layers + (player.realmLayer - 1);
         // 随坊市物价 ×10 同步上调，使突破灵石门槛与坊市（同为灵石支付）重新挂钩；难度系数再 ×breakStoneMult
-        // 道祖之后（realmIdx>12）段位难度 ×30，与突破战力门槛/斗法敌人强度一致
-        const overCap = player.realmIdx > 12 ? 30 : 1;
+        // 道祖之后（realmIdx>12）段位难度 ×900（×30 基础上再×30），与突破战力门槛/斗法敌人强度一致
+        const overCap = player.realmIdx > 12 ? 900 : 1;
         return Math.floor((2000 + seq * 400000) * overCap * (typeof DIFF !== 'undefined' ? DIFF.breakStoneMult : 1));
     },
 
@@ -242,16 +242,18 @@ const Cultivate = {
     WUXING_MAX: 100,           // 悟性上限（重）
     WUXING_TAP_PER: 15,     // 每重：每次点击修炼战力 +1500%（100重共×1501）；用户要求「悟性加成×100」（原 0.15）
     WUXING_RATE_PER: 15,     // 每重：修炼速率 +1500%（100重共×1501）；用户要求「悟性加成×100」（原 0.15）
-    // 顿悟成本增长：基底小、指数温和，确保 100 重全程被钳制在「战力上限 ZHANLI_CAP」与「灵石安全整数」内可达，不溢出
+    // 顿悟成本增长：基底小、指数温和，全程被钳制在「战力上限 ZHANLI_CAP」内可达，不溢出
+    // 注：曾被钳到 Number.MAX_SAFE_INTEGER(9e15) 导致高悟性（≈60重起）单级费用卡死在 9007.20兆不再增长；
+    //     现统一钳到 ZHANLI_CAP(1e30)，与「战力上限解除」「战力路径」保持一致，费用能持续、可见地增长
     WUXING_ZHANLI_BASE: 50000, WUXING_ZHANLI_GROWTH: 3,       // 战力路径：100 重单级被钳到 ZHANLI_CAP(1e30)
-    WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.7,  // 灵石路径：100 重单级被钳到 Number.MAX_SAFE_INTEGER(9e15)
+    WUXING_STONE_BASE: 5000, WUXING_STONE_GROWTH: 1.7,  // 灵石路径：100 重单级被钳到 ZHANLI_CAP(1e30)，与战力路径统一
     wuxingTapMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_TAP_PER; },
     wuxingRateMult(player) { return 1 + (player.wuxingLevel || 0) * this.WUXING_RATE_PER; },
     // 顿悟到下一级的资源成本（指数增长，门槛较高；双路径分别钳制，确保全程可达）
     enlightenCosts(player) {
         const lv = player.wuxingLevel || 0;
         return {
-            stone: Math.floor(Math.min(this.WUXING_STONE_BASE * Math.pow(this.WUXING_STONE_GROWTH, lv), Number.MAX_SAFE_INTEGER)),
+            stone: Math.floor(Math.min(this.WUXING_STONE_BASE * Math.pow(this.WUXING_STONE_GROWTH, lv), ZHANLI_CAP)),
             zhanli:   Math.floor(Math.min(this.WUXING_ZHANLI_BASE * Math.pow(this.WUXING_ZHANLI_GROWTH, lv), ZHANLI_CAP))
         };
     },
