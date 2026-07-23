@@ -3,26 +3,48 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+// 单实例锁：避免重复双击打开多个游戏窗口
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+  return;
+}
+app.on('second-instance', () => {
+  if (mainWin) {
+    if (mainWin.isMinimized()) mainWin.restore();
+    mainWin.focus();
+  }
+});
+
+let mainWin = null;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWin = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 1024,
     minHeight: 720,
+    center: true,
     title: '仙途·轮回诀',
-    icon: path.join(__dirname, 'wechat.png'),
     webPreferences: {
-      nodeIntegration: false,   // 不让网页拿到 Node 权限，安全
-      contextIsolation: true,    // 隔离上下文，避免 XSS 风险
+      nodeIntegration: false,        // 不让网页拿到 Node 权限，安全
+      contextIsolation: true,        // 隔离上下文，避免 XSS 风险
       partition: 'persist:xiantu-game' // 命名存储分区，保证存档(localStorage)跨启动保留
     }
   });
 
-  // 加载同目录下的游戏主页（相对路径，electron-builder 打包后会一并带上）
-  win.loadFile(path.join(__dirname, 'index.html'));
+  // 加载同目录下的游戏主页（相对路径，打包后会一并带上）
+  mainWin.loadFile(path.join(__dirname, 'index.html'));
 
-  // 隐藏菜单栏，更像原生游戏
-  win.setMenuBarVisibility(false);
+  // 彻底隐藏菜单栏，更像原生游戏（F12 仍可临时开开发者工具排查）
+  mainWin.removeMenu();
+
+  // 渲染进程崩溃/卡死时给个提示，而不是直接黑屏
+  mainWin.webContents.on('render-process-gone', (e, details) => {
+    console.error('[render-process-gone]', details);
+  });
+
+  mainWin.on('closed', () => { mainWin = null; });
 }
 
 app.whenReady().then(createWindow);

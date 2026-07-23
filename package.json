@@ -1,50 +1,31 @@
 {
   "name": "xiantu-lunhui",
   "version": "1.0.0",
+  "author": "xiaozhang",
   "private": true,
   "description": "仙途·轮回诀 - 修仙放置/养成游戏桌面版 (Electron wrapper)",
   "main": "electron-main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis"
+    "dist": "electron-packager"
   },
-  "build": {
-    "appId": "com.xiaozhang.xiantu",
-    "productName": "仙途·轮回诀",
-    "copyright": "Copyright © 2026 xiaozhang",
-    "files": [
-      "electron-main.js",
-      "index.html",
-      "style.css",
-      "wechat.png",
-      "config.js",
-      "save.js",
-      "inventory.js",
-      "cultivate.js",
-      "combat.js",
-      "explore.js",
-      "shop.js",
-      "friends.js",
-      "ui.js",
-      "main.js"
-    ],
-    "directories": {
-      "output": "dist",
-      "buildResources": "."
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "wechat.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+  "electronPackagerConfig": {
+    "name": "仙途轮回诀",
+    "dir": ".",
+    "platform": "win32",
+    "arch": "x64",
+    "out": "dist",
+    "overwrite": true,
+    "ignore": "(node_modules|test_|\\.git|dist|\\.workbuddy)",
+    "appCopyright": "Copyright © 2026 xiaozhang",
+    "win32metadata": {
+      "ProductName": "仙途轮回诀",
+      "InternalName": "xiantu",
+      "FileDescription": "仙途·轮回诀"
     }
   },
   "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron": "31.0.0",
+    "electron-packager": "^17.1.2"
   }
 }
