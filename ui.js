@@ -1237,7 +1237,7 @@ const UI = {
         const p = Game.player;
         const body = document.getElementById('xianluBody');
         if (!body) return;
-        if (p.realmIdx < 63) {
+        if (p.realmIdx < 32) {
             body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>大道</b> 境界方可踏入（当前：${getRealm(p.realmIdx).name}${cnNum(p.realmLayer)}层）</div>`;
             return;
         }

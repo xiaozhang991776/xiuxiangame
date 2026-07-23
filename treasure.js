@@ -5,7 +5,7 @@
    战斗效果（lifesteal/reflect/shield/firstStrike/trueDmg）由 Combat 接入
    ============================================ */
 const Treasure = {
-    UNLOCK_IDX: 63,
+    UNLOCK_IDX: 32, // 大道以上解锁（大道在 realms 数组中的真实 idx=32）
     MAX_LEVEL: 30,
     TYPES: [
         { id: 'sword',   name: '本命飞剑', icon: '🗡', perLvl: 0.30, effect: 'lifesteal',    effectDesc: '攻击回血 15%' },

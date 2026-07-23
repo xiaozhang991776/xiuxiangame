@@ -514,7 +514,7 @@ const Cultivate = {
         }
 
         // 大道+ 独立乘区：法则 × 法宝 × 洞天（互不稀释）
-        if (player.realmIdx >= 63) {
+        if (player.realmIdx >= 32) {
             const lawM = (typeof Laws !== 'undefined') ? Laws.totalMult(player) : 1;
             const trM  = (typeof Treasure !== 'undefined') ? Treasure.mult(player) : 1;
             const caM  = (typeof Cave !== 'undefined') ? Cave.totalMult(player) : 1;

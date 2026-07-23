@@ -4,7 +4,7 @@
    总 lawMult = ∏ 各法则乘数（独立乘区，不互相稀释）
    ============================================ */
 const Laws = {
-    UNLOCK_IDX: 63, // 大道以上才能升阶
+    UNLOCK_IDX: 32, // 大道以上才能升阶（大道在 realms 数组中的真实 idx=32）
     DEFS: [
         { id: 'sword',   name: '剑之法则', icon: '🗡', mults: [1, 1.10, 1.25, 1.50, 2.00], stone: [1e6, 1e7, 1e8, 1e9],  wuxingNeed: 5  },
         { id: 'dan',     name: '丹之法则', icon: '⚗', mults: [1, 1.08, 1.20, 1.40, 1.80], stone: [8e5, 8e6, 8e7, 8e8],  wuxingNeed: 5  },

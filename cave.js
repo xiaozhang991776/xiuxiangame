@@ -7,7 +7,7 @@
    caveMult = 1 + 0.08×灵脉 + 0.05×药田 + 0.10×悟道崖
    ============================================ */
 const Cave = {
-    UNLOCK_IDX: 63,
+    UNLOCK_IDX: 32, // 大道以上解锁（大道在 realms 数组中的真实 idx=32）
     MAX_LVL: 20,
     SUB: [
         { id: 'lingmai', name: '灵脉',   icon: '⛰', desc: '产出灵石/秒',      perLvl: 0.08, base: 100, exp: 1.5 },

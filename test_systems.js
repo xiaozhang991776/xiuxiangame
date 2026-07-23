@@ -203,7 +203,7 @@ console.log('\n[8c] 今生战力上线（原「境界天花板」已改为战力
     const pOver = bareAt(3, 5); pOver.rebirth = 0; pOver.zhanli = life * 10;
     ok('超线旧档：上线取 max(线,当前战力)，不回落', Cultivate.getLifeZhanliCap(pOver) === life * 10);
     // 终局解锁：达轮回上限 → 上线放开为 ZHANLI_CAP（大道+长尾成长不受限）
-    const pEnd = bareAt(63, 1); pEnd.rebirth = GameConfig.rebirth.maxRebirth; pEnd.zhanli = 0;
+    const pEnd = bareAt(63, 1); pEnd.rebirth = GameConfig.rebirth.maxRebirth; pEnd.zhanli = 0; // 任意 ≥ 大道(idx32) 的境界均可，idx=63 仅用作示例
     ok('达轮回上限后上线解除（=ZHANLI_CAP）', Cultivate.getLifeZhanliCap(pEnd) === sandbox.ZHANLI_CAP);
     // gainZhanli 统一入口：入账钳到上线，超出部分归零
     const pG = bareAt(3, 5); pG.rebirth = 0; pG.zhanli = 0;
@@ -363,7 +363,7 @@ console.log('\n[9] 突破觉醒天赋点');
         ok('Cave 模块加载', typeof Cave === 'object' && typeof Cave.totalMult === 'function');
         ok('Avatars 模块加载', typeof Avatars === 'object' && typeof Avatars.tick === 'function');
 
-        // 默认玩家（前/中期，realmIdx<63）所有新乘区为 1
+        // 默认玩家（前/中期，realmIdx<32）所有新乘区为 1
         const pMid = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
         pMid.stone = 1e15; pMid.wuxingLevel = 100; pMid.zhanli = 1e8; pMid.lifespan = 1e9;
         pMid.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
@@ -375,23 +375,23 @@ console.log('\n[9] 突破觉醒天赋点');
         const pLow = JSON.parse(JSON.stringify(pMid)); pLow.realmIdx = 10; pLow.realmLayer = 15;
         const statsLow = Cultivate.calcFinalStats(pLow);
         const sHigh = Cultivate.calcFinalStats(pMid);
-        // 大道(id=63)以下时新乘区不乘入（属性全等）
-        const pBelow = JSON.parse(JSON.stringify(pMid)); pBelow.realmIdx = 62; pBelow.realmLayer = 15;
+        // 大道(id=32)以下时新乘区不乘入（属性全等）
+        const pBelow = JSON.parse(JSON.stringify(pMid)); pBelow.realmIdx = 31; pBelow.realmLayer = 15;
         const statsBelow = Cultivate.calcFinalStats(pBelow);
         // 复制 pMid 但只把 laws/treasure/cave 设为最低状态，模拟"大道境界但未升过任何"
-        const pBase = JSON.parse(JSON.stringify(pMid)); pBase.realmIdx = 63; pBase.realmLayer = 1;
+        const pBase = JSON.parse(JSON.stringify(pMid)); pBase.realmIdx = 32; pBase.realmLayer = 1;
         pBase.laws = {}; pBase.treasure = { type: 'sword', level: 1 }; pBase.cave = { lingmai: 1, yaotian: 1, wudaoya: 1 };
         const statsBase = Cultivate.calcFinalStats(pBase);
         // 大道但未升任何新系统：乘区全=1，statsBase 应 ≈ pBase 但单倍字段接近
         ok('大道但未升新系统：法则×1', Laws.totalMult(pBase) === 1, Laws.totalMult(pBase));
         ok('大道但未升新系统：法宝×1', Treasure.mult(pBase) === 1, Treasure.mult(pBase));
         ok('大道但未升新系统：洞天×1.23(=1+0.08+0.05+0.10)', approx(Cave.totalMult(pBase), 1.23, 0.01), Cave.totalMult(pBase));
-        // 大道以下（idx62）：新乘区不乘入
-        const sBelowClone = JSON.parse(JSON.stringify(pBase)); sBelowClone.realmIdx = 62;
+        // 大道以下（idx31）：新乘区不乘入
+        const sBelowClone = JSON.parse(JSON.stringify(pBase)); sBelowClone.realmIdx = 31;
         ok('大道以下不应用新乘区：攻/防/血 三个属性一致', statsBelow.atk === statsBase.atk - 0 || true /* 接受任何不放大 */, { below: statsBelow.atk, base: statsBase.atk });
 
         // 升阶：大道境界 + 满灵石 → 可升至少一条法则
-        pMid.realmIdx = 63; pMid.realmLayer = 1;
+        pMid.realmIdx = 32; pMid.realmLayer = 1;
         const swordDef = Laws.DEFS.find(d => d.id === 'sword');
         const c1 = Laws.canUpgrade(pMid, swordDef);
         ok('剑之法则升阶可执行（满灵石满悟性+大道）', c1.ok === true, c1);

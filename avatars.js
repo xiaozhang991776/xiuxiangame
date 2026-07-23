@@ -5,7 +5,7 @@
    初始 rate 0.5%，随化身等级提升
    ============================================ */
 const Avatars = {
-    UNLOCK_IDX: 63,
+    UNLOCK_IDX: 32, // 大道以上解锁（大道在 realms 数组中的真实 idx=32）
     MAX_AVATARS: 3,
     BASE_RATE: 0.005,   // 0.5% 主修炼速率
     PER_LVL_RATE: 0.005, // 每级 +0.5%
