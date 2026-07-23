@@ -861,7 +861,7 @@ input { font-family: inherit; }
     border: 1px solid rgba(201,169,106,0.25);
     border-radius: var(--radius-sm);
     background: rgba(20,18,30,0.55);
-    color: var(--text);
+    color: var(--text-main);
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
@@ -1014,7 +1014,7 @@ input { font-family: inherit; }
 /* ---------- 仙途主线叙事弹窗 ---------- */
 .story-box { line-height: 1.9; }
 .story-realm { font-size: 13px; color: var(--jade); letter-spacing: 2px; margin-bottom: 10px; }
-.story-body { font-size: 15px; color: var(--text); opacity: 0.95; margin-bottom: 14px; text-indent: 2em; }
+.story-body { font-size: 15px; color: var(--text-main); opacity: 0.95; margin-bottom: 14px; text-indent: 2em; }
 .story-reward { font-size: 13px; color: var(--gold); padding: 8px 12px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-sm); }
 
 /* 右侧状态面板 */
@@ -1563,7 +1563,7 @@ input { font-family: inherit; }
     }
     .ex-input {
         flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px;
-        background: rgba(0,0,0,0.25); color: var(--text);
+        background: rgba(0,0,0,0.25); color: var(--text-main);
         border: 1px solid rgba(168,85,247,0.4); font-size: 14px; outline: none;
     }
     .ex-input::placeholder { color: var(--text-dim); }
@@ -1832,3 +1832,21 @@ input { font-family: inherit; }
 }
 .btn-buy-herb:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(125,211,192,0.35); }
 .btn-buy-herb:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== 境界图鉴面板 ===== */
+.realm-section { margin-bottom: 26px; }
+.realm-head { font-size: 16px; color: var(--jade); border-left: 3px solid var(--jade); padding-left: 10px; margin: 4px 0 10px; letter-spacing: 1px; }
+.realm-current { font-size: 14px; color: var(--text-main); background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; line-height: 1.6; }
+.realm-table { max-height: 320px; overflow-y: auto; border: 1px solid var(--border-gold); border-radius: 8px; background: rgba(0,0,0,0.18); }
+.realm-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.realm-row:last-child { border-bottom: none; }
+.realm-row .c-idx { flex: 0 0 48px; color: var(--text-dim); text-align: right; padding-right: 6px; }
+.realm-row .c-name { flex: 1 1 auto; color: var(--text-main); font-weight: 500; }
+.realm-row .c-layer { flex: 0 0 42px; text-align: center; color: var(--text-dim); }
+.realm-row .c-base { flex: 0 0 110px; text-align: right; color: var(--jade); }
+.realm-row .c-cost { flex: 0 0 150px; text-align: right; color: var(--gold-light); }
+.realm-headrow { position: sticky; top: 0; background: var(--bg-card); color: var(--text-dim); font-size: 12px; border-bottom: 1px solid var(--border-gold); z-index: 1; }
+.realm-headrow .c-base, .realm-headrow .c-cost, .realm-headrow .c-name, .realm-headrow .c-idx, .realm-headrow .c-layer { color: var(--text-dim); font-weight: 600; }
+.realm-row.current { background: linear-gradient(90deg, rgba(212,175,55,0.22), rgba(212,175,55,0.06)); border-left: 3px solid var(--gold-light); }
+.realm-row.current .c-name { color: var(--gold-light); font-weight: 700; }
+.realm-row.current .c-idx { color: var(--gold-light); }

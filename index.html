@@ -206,6 +206,9 @@
                 <button class="nav-btn" data-panel="xianlu" title="仙路（大道以上）">
                     <span class="nav-icon">道</span><span class="nav-label">仙路</span>
                 </button>
+                <button class="nav-btn" data-panel="realm" title="境界 · 轮回战力上限">
+                    <span class="nav-icon">境</span><span class="nav-label">境界</span>
+                </button>
             </nav>
 
             <!-- 内容区 -->
@@ -450,6 +453,24 @@
                     <h3 class="panel-title">仙路</h3>
                     <p class="panel-desc" id="xianluDesc">大道之上，开启四条新乘区——法则领悟、本命法宝、洞天福地、分身化身，互不稀释，逐步叠加。境界未达 <b>大道</b> 时本面板显示为锁定。</p>
                     <div id="xianluBody"><!-- 渲染时填充 --></div>
+                </div>
+
+                <!-- 境界图鉴面板 -->
+                <div class="panel" id="panel-realm">
+                    <h3 class="panel-title">境界图鉴</h3>
+                    <p class="panel-desc">修行全貌与轮回成长路线一览。金底高亮为<b>你当前</b>所处之境 / 当前轮回世数对应的战力上线。</p>
+
+                    <div class="realm-section">
+                        <h4 class="realm-head">一、全部境界（共 <span id="realmCount">0</span> 大境界 × 15 层）</h4>
+                        <div class="realm-current" id="realmCurrent"></div>
+                        <div class="realm-table" id="realmTable"><!-- 渲染时填充 --></div>
+                    </div>
+
+                    <div class="realm-section">
+                        <h4 class="realm-head">二、每世轮回的战力上线（免费轮回门槛 · 今生战力增长上限）</h4>
+                        <div class="realm-current" id="capCurrent"></div>
+                        <div class="realm-table" id="capTable"><!-- 渲染时填充 --></div>
+                    </div>
                 </div>
             </section>
 

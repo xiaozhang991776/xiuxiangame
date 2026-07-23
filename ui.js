@@ -1316,6 +1316,69 @@ const UI = {
             <p>${createBtn}</p>
         </div>`;
     },
+    /* ---------- 境界图鉴面板 ---------- */
+    renderRealmPanel() {
+        const p = Game.player;
+        if (!p) return;
+        const realms = GameConfig.realms;
+        const last = realms.length - 1;
+        const c = GameConfig.rebirth || {};
+        const maxR = c.maxRebirth || 100;
+        const baseR = c.baseRealm || 0;
+        const perR = c.realmPerRebirth || 1;
+
+        // ---- 一、全部境界 ----
+        const cntEl = document.getElementById('realmCount');
+        if (cntEl) cntEl.textContent = realms.length;
+        const curEl = document.getElementById('realmCurrent');
+        if (curEl) {
+            const cur = getRealm(p.realmIdx);
+            curEl.innerHTML = `你当前：<b>${cur.name}</b> 第 ${p.realmLayer}/${cur.layers} 层　（共 ${realms.length} 大境界 · ${realms.length * 15} 段）`;
+        }
+        const tbl = document.getElementById('realmTable');
+        if (tbl) {
+            let html = '<div class="realm-row realm-headrow"><span class="c-idx">#</span><span class="c-name">境界</span><span class="c-layer">层</span><span class="c-base">基础战力</span><span class="c-cost">满层突破成本</span></div>';
+            realms.forEach((r, i) => {
+                const cost = Cultivate.getBreakthroughCost({ realmIdx: i, realmLayer: r.layers });
+                const cls = (i === p.realmIdx) ? ' realm-row current' : ' realm-row';
+                html += `<div class="${cls.trim()}"><span class="c-idx">${i}</span><span class="c-name">${r.name}</span><span class="c-layer">${r.layers}</span><span class="c-base">${fmtNum(r.baseXiu)}</span><span class="c-cost">${fmtNum(cost)}</span></div>`;
+            });
+            tbl.innerHTML = html;
+        }
+
+        // ---- 二、每世轮回战力上线 ----
+        const capCur = document.getElementById('capCurrent');
+        const myCap = Cultivate.getLifeZhanliCap(p); // 当前世实际上线（含旧档不低于当前战力）
+        if (capCur) {
+            let txt = `你当前第 <b>${p.rebirth}</b> 世　本世战力上线：<b class="text-gold">${fmtNum(myCap)}</b>`;
+            if (myCap >= ZHANLI_CAP) txt += `　（已放开，无上限）`;
+            else {
+                const diff = myCap - (p.zhanli || 0);
+                txt += diff > 0 ? `　还差 <b class="text-gold">${fmtNum(diff)}</b> 即可免费轮回` : `　已达上线，可<b>免费轮回</b>提升下一世`;
+            }
+            capCur.innerHTML = txt;
+        }
+        const capTbl = document.getElementById('capTable');
+        if (capTbl) {
+            let html = '<div class="realm-row realm-headrow"><span class="c-idx">世</span><span class="c-name">需达境界(满层)</span><span class="c-cost">战力上线</span></div>';
+            for (let n = 0; n <= maxR; n++) {
+                const idx = Math.min(last, baseR + n * perR);
+                let realmName, cap, capTxt;
+                if (n >= maxR || idx >= last) {
+                    realmName = '—（终局）';
+                    cap = ZHANLI_CAP;
+                    capTxt = fmtNum(cap) + '（无上限）';
+                } else {
+                    realmName = realms[idx].name + '（满层）';
+                    cap = Cultivate.getRebirthZhanliCap({ rebirth: n });
+                    capTxt = fmtNum(cap);
+                }
+                const cls = (n === p.rebirth) ? ' realm-row current' : ' realm-row';
+                html += `<div class="${cls.trim()}"><span class="c-idx">${n}</span><span class="c-name">${realmName}</span><span class="c-cost">${capTxt}</span></div>`;
+            }
+            capTbl.innerHTML = html;
+        }
+    },
     _xianluLawUpgrade(defId) {
         const def = Laws.DEFS.find(d => d.id === defId); if (!def) return;
         const r = Laws.upgrade(Game.player, def);
@@ -1387,6 +1450,7 @@ const UI = {
         else if (name === 'friends') this.renderFriends();
         else if (name === 'reincarnate') this.renderReincarnate();
         else if (name === 'xianlu') this.renderXianluPanel();
+        else if (name === 'realm') this.renderRealmPanel();
     },
 
     /* ---------- 新手教程 ---------- */
@@ -1408,6 +1472,7 @@ const UI = {
         { title: '天赋', body: '「<b>天赋</b>」是贯穿道途的长线成长：每<b>突破大境界</b>觉醒天赋点（每满 5 小境界再得 1 点）。在<b>修炼区·天赋</b>子标签修习六系天赋（攻伐/守御/长生/悟道/御兽/天命），永久增益攻击、防御、修炼、灵石、斗法与渡劫。', panel: 'cultivate', sub: 'talent', target: '#cultSubTalent' },
         { title: '境界全貌', body: '修行之路共 <b>103 大境界 ×15 层</b>：自练气一路攀至 <b>道祖</b>；道祖之后更有 <b>道君→道尊→道圣→…→太一→…→太寥</b> 等超脱系境界，越往后越近大道本源。※ 道祖之后段位难度（突破战力/灵石门槛、斗法敌人强度）统一 <b>×900</b>，需海量战力方能登顶。达 <b>大乘（大成）期</b> 以上，诸般「<b>绝学重宝</b>」方现世间——坊市解锁 <b>太清宝塔·诸天鼎·无衡镜</b> 等仙界法宝、神通现 <b>太清剑诀→道·无上</b> 诸绝学、灵宠得 <b>麒麟王·祖龙太初</b>，更可飞升 <b>九重天·诸天战场</b> 绝境夺造化。', panel: 'cultivate' },
         { title: '仙路（大道+）', body: '达 <b>大道</b> 境界后，侧栏「<b>道</b>」图标亮起，进入「<b>仙路</b>」面板可逐步解锁四条<b>独立乘区</b>，叠加在 境界/装备/灵宠/轮回/天赋 之后，<b>互不稀释</b>——<br>• <b>法则领悟</b>：六条法则（剑/丹/阵/时空/因果/轮回）各 5 阶，每阶给一个独立乘数，阶升 = 永久乘区<br>• <b>本命法宝</b>：5 种法宝、30 级，含独特战斗效果（吸血/反弹/护盾/先手/真伤）<br>• <b>洞天福地</b>：灵脉/药田/悟道崖 3 块 20 级，被动产出灵石/悟性经验，乘区独立<br>• <b>分身化身</b>：最多 3 个化身（一气化三清），按主修炼速率比例向 zhanli 池注水（不进战斗属性）<br>※ 这是后期的核心成长路径，按你 <b>灵石</b> 节奏逐项升即可。', panel: 'xianlu' },
+        { title: '境界图鉴', body: '侧栏「<b>境</b>」图标进入「<b>境界图鉴</b>」面板，可一览<b>全部 103 大境界</b>（每层基础战力与满层突破成本）与<b>每世轮回的战力上线</b>（免费轮回门槛、今生战力增长上限）——你当前所处之境、当前世数对应的上限都会<b>金底高亮</b>，一眼看清离下一世还差多少。', panel: 'realm' },
         { title: '道途恒长', body: '「<b>任务</b>」指引方向，右下「<b>打赏</b>」可助作者问道。仙途漫漫，善自珍重，去罢！', panel: 'quest', target: '#rewardFab' }
     ],
     tutorialIndex: 0,
