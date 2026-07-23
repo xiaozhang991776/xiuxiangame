@@ -24,7 +24,7 @@ const GameConfig = {
         earth: { name: '土', color: '#c4955a', counter: 'water', desc: '厚重如山' }
     },
 
-    /* ---------- 境界配置（83大境界 × 15层小境界 = 1245段） ---------- */
+    /* ---------- 境界配置（103大境界 × 15层小境界 = 1545段） ---------- */
     realms: [
         { name: '练气', layers: 15, baseXiu: 100,    xiuMult: 1.25, atkBonus: 2,      defBonus: 1,      hpBonus: 20,      lingBonus: 10,       breakthroughRate: 0.95 },
         { name: '筑基', layers: 15, baseXiu: 1200,   xiuMult: 1.30, atkBonus: 8,      defBonus: 5,      hpBonus: 80,      lingBonus: 30,       breakthroughRate: 0.80 },
@@ -111,6 +111,26 @@ const GameConfig = {
         { name: '无碍', layers: 15, baseXiu: 3.21e15, xiuMult: 1.60, atkBonus: 5144914694, defBonus: 3601439893, hpBonus: 51449146940, lingBonus: 32155716248, breakthroughRate: 0.0060 },
         { name: '无为', layers: 15, baseXiu: 3.69e15, xiuMult: 1.60, atkBonus: 5911506983, defBonus: 4138054437, hpBonus: 59115069834, lingBonus: 36946917969, breakthroughRate: 0.0055 },
         { name: '太一', layers: 15, baseXiu: 4.24e15, xiuMult: 1.60, atkBonus: 6792321524, defBonus: 4754624548, hpBonus: 67923215240, lingBonus: 42452008747, breakthroughRate: 0.0050 },
+        { name: '太苍', layers: 15, baseXiu: 4.87e15, xiuMult: 1.60, atkBonus: 7804559520, defBonus: 5463191664, hpBonus: 78045595200, lingBonus: 48766317600, breakthroughRate: 0.0048 },
+        { name: '太渊', layers: 15, baseXiu: 5.60e15, xiuMult: 1.60, atkBonus: 8967438888, defBonus: 6277207222, hpBonus: 89674388885, lingBonus: 56032498922, breakthroughRate: 0.0046 },
+        { name: '太真', layers: 15, baseXiu: 6.43e15, xiuMult: 1.60, atkBonus: 10303587283, defBonus: 7212511098, hpBonus: 103035872829, lingBonus: 64381341262, breakthroughRate: 0.0044 },
+        { name: '太元', layers: 15, baseXiu: 7.39e15, xiuMult: 1.60, atkBonus: 11838821788, defBonus: 8287175252, hpBonus: 118388217880, lingBonus: 73974161110, breakthroughRate: 0.0042 },
+        { name: '太明', layers: 15, baseXiu: 8.49e15, xiuMult: 1.60, atkBonus: 13602806234, defBonus: 9521964364, hpBonus: 136028062344, lingBonus: 84996311115, breakthroughRate: 0.0040 },
+        { name: '太光', layers: 15, baseXiu: 9.76e15, xiuMult: 1.60, atkBonus: 15629624363, defBonus: 10940737054, hpBonus: 156296243634, lingBonus: 97660761471, breakthroughRate: 0.0038 },
+        { name: '太宁', layers: 15, baseXiu: 1.12e16, xiuMult: 1.60, atkBonus: 17958438393, defBonus: 12570906875, hpBonus: 179584383935, lingBonus: 112212214931, breakthroughRate: 0.0036 },
+        { name: '太安', layers: 15, baseXiu: 1.29e16, xiuMult: 1.60, atkBonus: 20634245714, defBonus: 14443972000, hpBonus: 206342457141, lingBonus: 128931834955, breakthroughRate: 0.0034 },
+        { name: '太恒', layers: 15, baseXiu: 1.48e16, xiuMult: 1.60, atkBonus: 23708748326, defBonus: 16596123828, hpBonus: 237087483255, lingBonus: 148142678364, breakthroughRate: 0.0032 },
+        { name: '太润', layers: 15, baseXiu: 1.70e16, xiuMult: 1.60, atkBonus: 27241351826, defBonus: 19068946278, hpBonus: 272413518260, lingBonus: 170215937440, breakthroughRate: 0.0030 },
+        { name: '太白', layers: 15, baseXiu: 1.95e16, xiuMult: 1.60, atkBonus: 31300313248, defBonus: 21910219274, hpBonus: 313003132481, lingBonus: 195578112118, breakthroughRate: 0.0028 },
+        { name: '太阿', layers: 15, baseXiu: 2.24e16, xiuMult: 1.60, atkBonus: 35964059922, defBonus: 25174841945, hpBonus: 359640599221, lingBonus: 224719250824, breakthroughRate: 0.0026 },
+        { name: '太皇', layers: 15, baseXiu: 2.58e16, xiuMult: 1.60, atkBonus: 41322704850, defBonus: 28925893395, hpBonus: 413227048505, lingBonus: 258202419197, breakthroughRate: 0.0024 },
+        { name: '太衍', layers: 15, baseXiu: 2.96e16, xiuMult: 1.60, atkBonus: 47479787873, defBonus: 33235851511, hpBonus: 474797878732, lingBonus: 296674579657, breakthroughRate: 0.0022 },
+        { name: '太昭', layers: 15, baseXiu: 3.41e16, xiuMult: 1.60, atkBonus: 54554276266, defBonus: 38187993386, hpBonus: 545542762663, lingBonus: 340879092026, breakthroughRate: 0.0020 },
+        { name: '太曦', layers: 15, baseXiu: 3.91e16, xiuMult: 1.60, atkBonus: 62682863430, defBonus: 43878004401, hpBonus: 626828634300, lingBonus: 391670076738, breakthroughRate: 0.0018 },
+        { name: '太华', layers: 15, baseXiu: 4.50e16, xiuMult: 1.60, atkBonus: 72022610081, defBonus: 50415827057, hpBonus: 720226100810, lingBonus: 450028918172, breakthroughRate: 0.0016 },
+        { name: '太岳', layers: 15, baseXiu: 5.17e16, xiuMult: 1.60, atkBonus: 82753978983, defBonus: 57927785288, hpBonus: 827539789831, lingBonus: 517083226979, breakthroughRate: 0.0014 },
+        { name: '太溟', layers: 15, baseXiu: 5.94e16, xiuMult: 1.60, atkBonus: 95084321852, defBonus: 66559025296, hpBonus: 950843218516, lingBonus: 594128627799, breakthroughRate: 0.0012 },
+        { name: '太寥', layers: 15, baseXiu: 6.82e16, xiuMult: 1.60, atkBonus: 109251885807, defBonus: 76476320065, hpBonus: 1092518858075, lingBonus: 682653793341, breakthroughRate: 0.0010 },
     ],
 
     /* ---------- 品质配置 ---------- */

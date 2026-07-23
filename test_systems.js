@@ -222,7 +222,7 @@ for (let i = 0; i < GameConfig.realms.length; i++) {
     if (c <= prev) mono = false;
     prev = c;
 }
-ok('全 83 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×900）', safe);
+ok('全 103 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×900）', safe);
 ok('境界难度随境界单调递增', mono);
 
 // —— 段位提升难度三块一致：道祖之后（realmIdx>12）战力/灵石门槛/斗法敌人强度均 ×900（×30 基础上再×30）——
