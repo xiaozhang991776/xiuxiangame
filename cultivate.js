@@ -591,7 +591,7 @@ const Cultivate = {
     },
     /* ---------- 轮回战力上线 ---------- */
     // 第 n 世可免费轮回所需的战力阈值 = 今生天花板境界(baseRealm + n*realmPerRebirth)满层突破成本
-    // 道祖之后(idx>12)的战力上线自动含 ×15 难度系数（getBreakthroughCost 内已处理）
+    // 道祖之后(idx>12)的战力上线自动含 ×900 难度系数（getBreakthroughCost 内已处理）
     getRebirthZhanliCap(player) {
         const n = (player && player.rebirth) || 0;
         const c = (typeof GameConfig !== 'undefined' && GameConfig.rebirth) ? GameConfig.rebirth : {};
