@@ -14,7 +14,7 @@
     };
     let pendingSlotId = 1; // 待创建的存档槽
     let ccBound = false;   // 角色创建事件是否已绑定（防重复）
-    let overlayBound = false; // 全局遮罩(弹窗/打赏)点击监听是否已绑定（防 enterGame 重复叠加）
+    let overlayBound = false; // 全局遮罩(弹窗)点击监听是否已绑定（防 enterGame 重复叠加）
     // 文本转义（防止存档名破坏 HTML）
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -424,19 +424,6 @@
         document.getElementById('settingsClose').onclick = () => {
             document.getElementById('settings-screen').classList.add('hidden');
         };
-        // 打赏弹窗
-        document.getElementById('rewardFab').onclick = () => {
-            document.getElementById('reward-screen').classList.remove('hidden');
-        };
-        document.getElementById('rewardClose').onclick = () => {
-            document.getElementById('reward-screen').classList.add('hidden');
-        };
-        if (!window.__rewardBound) {
-            window.__rewardBound = true;
-            document.getElementById('reward-screen').addEventListener('click', e => {
-                if (e.target.id === 'reward-screen') document.getElementById('reward-screen').classList.add('hidden');
-            });
-        }
         // 选择存档（入道飞升 / 切换道途）
         document.getElementById('slotSelectBtn').onclick = () => {
             Game.save();
@@ -501,8 +488,7 @@
             const blocked = !document.getElementById('modal-overlay').classList.contains('hidden')
                 || !document.getElementById('event-screen').classList.contains('hidden')
                 || !document.getElementById('battle-screen').classList.contains('hidden')
-                || !document.getElementById('settings-screen').classList.contains('hidden')
-                || !document.getElementById('reward-screen').classList.contains('hidden');
+                || !document.getElementById('settings-screen').classList.contains('hidden');
             if (blocked) return;
             const keyMap = { '1': 'cultivate', '2': 'combat', '3': 'explore', '4': 'inventory', '5': 'skill', '6': 'shop', '7': 'quest', '8': 'friends', '9': 'reincarnate', '0': 'talent', 'p': 'pet', 'v': 'xianlu' };
             if (keyMap[e.key]) UI.switchPanel(keyMap[e.key]);
