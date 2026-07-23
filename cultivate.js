@@ -562,9 +562,11 @@ const Cultivate = {
         const credited = this.gainZhanli(player, gain); // 达今生上线后实际入账为 0
         // 任务进度
         if (typeof Quests !== 'undefined') Quests.tickProgress('zhanli_total', player.stats.totalZhanli);
-        // 视觉反馈（显示实际入账，达线后 +0 提示玩家该轮回了）
+        // 视觉反馈：实际入账>0 显示「战力 +X」；达「今生上线」后点击不显示「战力 +0」（那像 bug），
+        // 改为飘「已达今生上线」明确提示玩家该轮回了
         if (typeof UI !== 'undefined') {
-            UI.showTapGain(credited, this.tapCombo > 1 ? this.tapCombo : 0);
+            const capped = (credited === 0 && gain > 0);
+            UI.showTapGain(capped ? 0 : credited, this.tapCombo > 1 ? this.tapCombo : 0, capped);
             UI.updateResourceBar();
             UI.updateCultivationBar();
         }

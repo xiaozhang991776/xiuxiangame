@@ -717,6 +717,7 @@ input { font-family: inherit; }
 }
 .tap-gain.combo-hot { color: var(--gold-light); text-shadow: 0 0 12px rgba(212,175,55,0.8); font-size: 20px; }
 .tap-combo { font-size: 12px; color: #ff9d5c; margin-left: 4px; }
+.tap-gain.cap-full { color: #9aa4b2; font-size: 15px; font-weight: 600; text-shadow: 0 0 8px rgba(154,164,178,0.5); }
 @keyframes tapFloat {
     0% { opacity: 0; transform: translate(-50%, -20%) scale(0.8); }
     20% { opacity: 1; transform: translate(-50%, -60%) scale(1.1); }

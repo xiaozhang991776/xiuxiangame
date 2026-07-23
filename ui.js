@@ -144,19 +144,24 @@ const UI = {
     },
 
     /* ---------- 手动修炼飘字反馈 ---------- */
-    showTapGain(gain, combo) {
+    showTapGain(gain, combo, capped) {
         const btn = document.getElementById('cultivateTap');
         if (!btn) return;
         // 按钮按压反馈
         btn.classList.remove('tap-pulse');
         void btn.offsetWidth; // 强制重绘以重启动画
         btn.classList.add('tap-pulse');
-        // 飘字
+        // 飘字：达「今生上线」后点击不显示「战力 +0」（那像 bug），改为明确提示
         const rect = btn.getBoundingClientRect();
         const float = document.createElement('div');
-        float.className = 'tap-gain' + (combo >= 5 ? ' combo-hot' : '');
-        let txt = '战力 +' + fmtNum(gain);
-        if (combo >= 2) txt += ` <span class="tap-combo">连击×${combo}</span>`;
+        float.className = 'tap-gain' + (combo >= 5 ? ' combo-hot' : '') + (capped ? ' cap-full' : '');
+        let txt;
+        if (capped) {
+            txt = '已达今生上线';
+        } else {
+            txt = '战力 +' + fmtNum(gain);
+            if (combo >= 2) txt += ` <span class="tap-combo">连击×${combo}</span>`;
+        }
         float.innerHTML = txt;
         float.style.left = (rect.left + rect.width / 2) + 'px';
         float.style.top = (rect.top - 6) + 'px';

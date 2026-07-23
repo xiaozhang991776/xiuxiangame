@@ -309,6 +309,28 @@ const afterXiu = Math.min(beforeXiu + tapGain, sandbox.ZHANLI_CAP);
 ok('终局(道祖满层)点击修炼战力能越过旧上限 9e15（不再卡死 9007.20兆）', afterXiu > beforeXiu, afterXiu);
 ok('fmtNum(1e30) 用大单位(穰/沟)显示而非裸数字', /[稳秸沟穰京兆亿]/.test(sandbox.fmtNum(1e30)), sandbox.fmtNum(1e30));
 
+console.log('\n[10c] 达「今生上线」后点击修炼显示「已达上线」而非「战力 +0」');
+{
+    const pC = bareAt(3, 5); pC.rebirth = 0; pC.zhanli = 0;
+    Cultivate.gainZhanli(pC, Cultivate.getLifeZhanliCap(pC)); // 先到上线
+    let lastArgs = null;
+    const _stg = sandbox.UI.showTapGain;
+    sandbox.UI.showTapGain = (gain, combo, capped) => { lastArgs = { gain, combo, capped }; };
+    try {
+        Cultivate.manualCultivate(pC); // 达 cap 后点击
+        ok('达上线后点击：showTapGain 收到 capped=true（显示「已达今生上线」）', !!lastArgs && lastArgs.capped === true, lastArgs);
+        ok('达上线后点击：不再把 gain=0 当「战力 +0」飘出', !!(lastArgs && lastArgs.capped === true), lastArgs);
+    } finally { sandbox.UI.showTapGain = _stg; }
+    // 对照：未达上线时点击仍显示「战力 +X」
+    const pN = bareAt(3, 5); pN.rebirth = 0; pN.zhanli = 0;
+    let lastArgs2 = null;
+    sandbox.UI.showTapGain = (gain, combo, capped) => { lastArgs2 = { gain, combo, capped }; };
+    try {
+        Cultivate.manualCultivate(pN);
+        ok('未达上线点击：capped=false 且 gain>0（正常「战力 +X」）', !!lastArgs2 && lastArgs2.capped === false && lastArgs2.gain > 0, lastArgs2);
+    } finally { sandbox.UI.showTapGain = _stg; }
+}
+
 console.log('\n[11] 大成期(大乘)以上解锁内容（realmReq 门禁）');
 ok('高阶功法 太清紫极功 需大乘(7)', !!GameConfig.gongfas.find(g => g.id === 'g_taiqing' && g.realmReq === 7));
 ok('高阶神通 太清剑诀 需大乘(7)', !!GameConfig.skills.find(s => s.id === 's_taiqing' && s.realmReq === 7));
