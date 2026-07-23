@@ -221,7 +221,7 @@ for (let i = 0; i < GameConfig.realms.length; i++) {
     if (c <= prev) mono = false;
     prev = c;
 }
-ok('全 33 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×15）', safe);
+ok('全 33 境界满层成本均 < 1e29（不撞 ZHANLI_CAP 量级，道祖之后×30）', safe);
 ok('境界难度随境界单调递增', mono);
 
 // —— 段位提升难度三块一致：道祖之后（realmIdx>12）战力/灵石门槛/斗法敌人强度均 ×15 ——
@@ -233,7 +233,7 @@ ok('道祖之后突破灵石门槛 ×15（三块难度一致）', stoneJun >= st
 if (typeof Explore !== 'undefined') {
     const eDao = Explore._scaleEnemy({ realmIdx: 12, realmLayer: 1 });
     const eJun = Explore._scaleEnemy({ realmIdx: 13, realmLayer: 1 });
-    ok('道祖之后斗法敌人强度 ×15（hp 22.5倍=1.5*15）', approx(eJun.hp / eDao.hp, 22.5, 1.0), { dao: eDao.hp, jun: eJun.hp, ratio: +(eJun.hp / eDao.hp).toFixed(2) });
+    ok('道祖之后斗法敌人强度 ×30（hp 45倍=1.5*30）', approx(eJun.hp / eDao.hp, 45.0, 1.0), { dao: eDao.hp, jun: eJun.hp, ratio: +(eJun.hp / eDao.hp).toFixed(2) });
 } else {
     ok('道祖之后斗法敌人强度 ×15（探索模块未加载，跳过）', true);
 }
@@ -241,11 +241,11 @@ if (typeof Explore !== 'undefined') {
 // 后期满配速率绝不可逼近安全整数上限（不应“应顶/超模”）
 const pFull = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
 pFull.realmIdx = 12; pFull.realmLayer = 15;
-pFull.wuxingLevel = 30;
+pFull.wuxingLevel = 100;
 pFull.gongfa = 'g_daodao';
 pFull.equipped = { weapon: { baseId: 'w_chaos_sword' }, armor: { baseId: 'a_chaos_robe' }, accessory: { baseId: 'ac_chaos_pearl' }, fabao: { baseId: 'f_taiqing_ta' } };
 const rateFull = SaveSystem.calcCultivateRate(pFull);
-ok('道祖L15 满配(悟性30+无上道经+顶配装备) 修炼速率受控(<1e15, 远小于ZHANLI_CAP 1e30, 不爆表)', rateFull < 1e15, rateFull);
+ok('道祖L15 满配(悟性100+无上道经+顶配装备) 修炼速率受控(<1e16, 远小于ZHANLI_CAP 1e30, 不爆表)', rateFull < 1e16, rateFull);
 const rateBareDz = SaveSystem.calcCultivateRate(bareAt(12, 15));
 ok('道祖L15 裸境界速率 < 1e8（基础值受控）', rateBareDz < 1e8, rateBareDz);
 
@@ -296,7 +296,7 @@ console.log('\n[9] 突破觉醒天赋点');
         // [13] 闭关边际递减：后期闭关不再指数碾压突破（回归#闭关超模）
         {
             const sp = JSON.parse(JSON.stringify(GameConfig.defaultPlayer));
-            sp.realmIdx = 12; sp.realmLayer = 15; sp.wuxingLevel = 30; // 道祖满层 + 满悟性（最极端后期）
+            sp.realmIdx = 12; sp.realmLayer = 15; sp.wuxingLevel = 100; // 道祖满层 + 满悟性(100级，最极端后期)
             sp.lifespan = 1e9;
             sp.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
             const sRes = Cultivate.seclude(sp, 100);
@@ -315,7 +315,7 @@ console.log('\n[9] 突破觉醒天赋点');
                 q.equipped = { weapon:null, armor:null, accessory:null, fabao:null };
                 return q;
             };
-            const cases = [['前期 练气', mk(0,1,0), 100], ['后期 道祖满层·满悟性', mk(12,15,30), 100]];
+            const cases = [['前期 练气', mk(0,1,0), 100], ['后期 道祖满层·满悟性(100级)', mk(12,15,100), 100]];
             for (const [name, base, yrs] of cases) {
                 const prev = Cultivate.previewSeclude(JSON.parse(JSON.stringify(base)), yrs);
                 const real = Cultivate.seclude(JSON.parse(JSON.stringify(base)), yrs);

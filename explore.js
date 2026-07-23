@@ -287,8 +287,8 @@ const Explore = {
         }, GameConfig.enemies[0]);
         if (!base) base = GameConfig.enemies[0];
         const gap = Math.max(0, player.realmIdx - base.realmIdx);
-        // 道祖之后（realmIdx>12）段位难度 ×15，与突破战力/灵石门槛一致
-        const overCap = player.realmIdx > 12 ? 15 : 1;
+        // 道祖之后（realmIdx>12）段位难度 ×30，与突破战力/灵石门槛一致
+        const overCap = player.realmIdx > 12 ? 30 : 1;
         const scale = Math.pow(hard ? 2.0 : 1.5, gap) * (1 + (player.realmLayer - 1) * 0.05) * overCap;
         const prefix = player.realmIdx < 5 ? base.name : getRealm(player.realmIdx).name + '·化身';
         return {
