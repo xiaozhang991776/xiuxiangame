@@ -352,7 +352,8 @@ const SaveSystem = {
     },
     _updateIndex(slotId, player) {
         const idx = this._readIndex();
-        idx.slots['' + slotId] = this.metaFromPlayer(player);
+        const meta = this.metaFromPlayer(player);
+        idx.slots['' + slotId] = meta;
         idx.current = slotId;
         this._writeIndex(idx);
     },
@@ -425,14 +426,13 @@ const Game = {
     cultivating: true,  // 是否正在修炼
     lastTickTime: 0,
 
-    /* 初始化游戏 */
+    /* 初始化游戏（读取当前槽位并应用离线收益） */
     init() {
-        // 尝试读取存档
-        let player = SaveSystem.load();
+        const player = SaveSystem.load();
         if (player) {
-            // 应用离线收益
             const offline = SaveSystem.applyOfflineReward(player);
             this.player = player;
+            this.currentSlotId = SaveSystem._currentSlotId();
             this.offlineReward = offline;
         }
     },
@@ -441,9 +441,9 @@ const Game = {
     newGame(custom, slotId) {
         this.player = SaveSystem.createNew(custom);
         slotId = slotId || 1;
-        SaveSystem.save(this.player, slotId);
         this.currentSlotId = slotId;
         this.offlineReward = { zhanli: 0, time: 0 };
+        SaveSystem.save(this.player, slotId);
     },
 
     /* 切换到指定槽位（中途切换道途，不结算离线收益） */
@@ -462,8 +462,8 @@ const Game = {
 
     /* 立即存档 */
     save() {
-        if (this.player) return SaveSystem.save(this.player);
-        return false;
+        if (!this.player) return false;
+        return SaveSystem.save(this.player, this.currentSlotId);
     },
 
     /* 启动自动存档 */
