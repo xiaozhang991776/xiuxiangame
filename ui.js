@@ -1200,7 +1200,7 @@ const UI = {
         if (!p) return;
         const doIt = () => { Cultivate.reincarnate(p, mode); };
         if (mode === 'free') {
-            this.showConfirm('确认免费轮回？', '散功重修：境界、装备、寿元将重置归零，但你的<b>战力</b>予以保留、劫后余韵、悟性、永久属性等加成全部保留，可凭存留战力更快重登仙途。', doIt);
+            this.showConfirm('确认免费轮回？', '散功重修：境界、<b>战力</b>、装备、寿元将重置归零，重踏仙途从零修炼；但你的气血/攻击永久加成、修炼收益、悟性、劫后余韵等全部保留，凭存留根基更快重登仙途。', doIt);
         } else {
             const cfg = GameConfig.rebirth;
             const have = (p.inventory.material && p.inventory.material[cfg.herbId]) || 0;

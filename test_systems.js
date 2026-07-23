@@ -157,29 +157,32 @@ ok('化形丹在 materials（供灵宠面板购买）', !!GameConfig.materials.f
 ok('坊市不再设「材料」分类（shopItems.material 为空）', Array.isArray(GameConfig.shopItems.material) && GameConfig.shopItems.material.length === 0);
 ok('轮回草在 materials（供转世面板购买）', !!GameConfig.materials.find(m=>m.id==='m_rebirth_herb'));
 
-console.log('\n[8b] 轮回草轮回保留境界（战力不降），免费轮回重置境界');
+console.log('\n[8b] 轮回后战力归零（两种轮回皆重置战力，构成成长闭环）');
 {
     const UIbk = {};
     for (const k of ['toast', 'addLog', 'renderAll']) { UIbk[k] = sandbox.UI[k]; sandbox.UI[k] = () => {}; }
     try {
         const p = bareAt(7, 5);                 // 大乘 L5
         p.rebirth = 2;
+        p.zhanli = 1e12;                        // 高战力
         p.inventory = p.inventory || {};
         p.inventory.material = p.inventory.material || {};
         p.inventory.material['m_rebirth_herb'] = 100;   // herbCost=100
         const beforeIdx = p.realmIdx, beforeLayer = p.realmLayer;
         const r = Cultivate.reincarnate(p, 'pill');
         ok('轮回草轮回成功(usedPill)', r.ok === true && r.usedPill === true, r);
-        ok('轮回草轮回保留境界 realmIdx 不变（战力不降）', p.realmIdx === beforeIdx, `前${beforeIdx}→后${p.realmIdx}`);
+        ok('轮回草轮回保留境界 realmIdx 不变', p.realmIdx === beforeIdx, `前${beforeIdx}→后${p.realmIdx}`);
         ok('轮回草轮回保留层序 realmLayer 不变', p.realmLayer === beforeLayer, `前${beforeLayer}→后${p.realmLayer}`);
+        ok('轮回草轮回战力归零', p.zhanli === 0, p.zhanli);
         ok('轮回草轮回转世层数 +1', p.rebirth === 3, p.rebirth);
-        // 对照：免费轮回应重置境界
+        // 对照：免费轮回同样重置战力，并重置境界
         const p2 = bareAt(12, 15);              // 道祖满层
         p2.rebirth = 2;
         p2.zhanli = Cultivate.getRebirthZhanliCap(p2); // 战力达上线（等价原"达境界天花板"）
         const r2 = Cultivate.reincarnate(p2, 'free');
         ok('免费轮回成功（战力达上线）', r2.ok === true, r2);
         ok('免费轮回重置境界 realmIdx→0', p2.realmIdx === 0, p2.realmIdx);
+        ok('免费轮回战力归零', p2.zhanli === 0, p2.zhanli);
         // 战力不足时免费轮回应被锁
         const p3 = bareAt(0, 1); p3.rebirth = 0; p3.zhanli = 0;
         const r3 = Cultivate.reincarnate(p3, 'free');
