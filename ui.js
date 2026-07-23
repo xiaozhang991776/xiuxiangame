@@ -1243,7 +1243,7 @@ const UI = {
         const body = document.getElementById('xianluBody');
         if (!body) return;
         if (p.realmIdx < 32) {
-            body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>大道</b> 境界方可踏入（当前：${getRealm(p.realmIdx).name}${cnNum(p.realmLayer)}层）</div>`;
+            body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>大道</b> 境界方可踏入（当前：${getRealm(p.realmIdx).name}${cnNum(p.realmLayer)}层）<br><span class="muted">查看全部境界与每世轮回战力上限，请点左下「境」</span></div>`;
             return;
         }
         // 1. 法则
@@ -1456,7 +1456,16 @@ const UI = {
             else if (name === 'friends') this.renderFriends();
             else if (name === 'reincarnate') this.renderReincarnate();
             else if (name === 'xianlu') this.renderXianluPanel();
-            else if (name === 'realm') this.renderRealmPanel();
+            else if (name === 'realm') {
+                // 防御：若浏览器缓存了旧 ui.js（无 renderRealmPanel 方法），给明确提示而非静默空白
+                if (typeof this.renderRealmPanel === 'function') this.renderRealmPanel();
+                else {
+                    const t = document.getElementById('realmTable');
+                    if (t) t.innerHTML = '<div class="muted" style="padding:24px">境界图鉴模块未加载，请按 <b>Ctrl+Shift+R</b> 硬刷新页面</div>';
+                    const c = document.getElementById('capTable');
+                    if (c) c.innerHTML = '';
+                }
+            }
         } catch (e) { if (typeof console !== 'undefined') console.error('[switchPanel '+name+']', e && (e.stack || e.message)); }
     },
 

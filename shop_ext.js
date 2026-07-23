@@ -125,8 +125,4 @@
         { id: 'pet_zulong_tc', name: '祖龙·太初', icon: '龙', elem: 'water', realmReq: 10, atk: 1500, def: 900, hp: 12000, skill: 'pet_roar', price: 120000000, desc: '龙族太初始祖的本源血脉，龙吟镇万灵、吐息溺星河，太乙天尊方能驭使。' }
     ];
     newPets.forEach(p => { C.pets.push(p); C.shopItems.pet.push(p.id); });
-
-    if (typeof UI !== 'undefined' && UI.log) {
-        // 静默，不喧宾夺主
-    }
 })();
