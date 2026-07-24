@@ -18,7 +18,7 @@ const Combat = {
         // 检查境界要求
         if (player.realmIdx < enemyTpl.realmIdx ||
             (player.realmIdx === enemyTpl.realmIdx && player.realmLayer < enemyTpl.realmLayer)) {
-            if (typeof UI !== 'undefined') UI.toast(`境界不足，无法挑战此敌人`, 'bad');
+            if (typeof UI !== 'undefined') UI.toast(T('toast.noRealm', '境界不足，无法挑战此敌人'), 'bad');
             return false;
         }
 
@@ -108,12 +108,12 @@ const Combat = {
         const st = this.state.player;
         // 冷却检查
         if ((st.skillCd[skillId] || 0) > 0) {
-            if (typeof UI !== 'undefined') UI.toast(`${skill.name}冷却中`, 'bad');
+            if (typeof UI !== 'undefined') UI.toast((CUR_LANG === 'en' ? skill.name + ' on cooldown' : skill.name + '冷却中'), 'bad');
             return;
         }
         // 灵力检查
         if (st.ling < skill.cost) {
-            if (typeof UI !== 'undefined') UI.toast('灵力不足', 'bad');
+            if (typeof UI !== 'undefined') UI.toast(T('toast.noLing', '灵力不足'), 'bad');
             return;
         }
 
@@ -172,7 +172,7 @@ const Combat = {
         const player = this.state.player;
         if (!player.fabao) return;
         if (player.fabaoCd > 0) {
-            if (typeof UI !== 'undefined') UI.toast('法宝冷却中', 'bad');
+            if (typeof UI !== 'undefined') UI.toast(T('toast.treasureCd', '法宝冷却中'), 'bad');
             return;
         }
         const skillId = player.fabao.skill;
@@ -181,7 +181,7 @@ const Combat = {
 
         // 灵力校验，避免扣成负数
         if (player.ling < fs.cost) {
-            if (typeof UI !== 'undefined') UI.toast('灵力不足', 'bad');
+            if (typeof UI !== 'undefined') UI.toast(T('toast.noLing', '灵力不足'), 'bad');
             return;
         }
         player.ling -= fs.cost;

@@ -8,7 +8,7 @@ Math.random = () => 0.001;
 
 const DIR = __dirname;
 const ORDER = [
-    'config.js', 'shop_ext.js', 'talents.js', 'pets.js',
+    'config.js', 'lang.js', 'shop_ext.js', 'talents.js', 'pets.js',
     'save.js', 'inventory.js', 'cultivate.js',
     'laws.js', 'treasure.js', 'cave.js', 'avatars.js',
     'combat.js', 'explore.js', 'shop.js', 'friends.js', 'ui.js', 'main.js'

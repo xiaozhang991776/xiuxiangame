@@ -259,6 +259,11 @@
         document.getElementById('autoSaveToggle').checked = s.autoSave;
         document.getElementById('animToggle').checked = s.anim;
         document.getElementById('soundToggle').checked = s.sound;
+        // 语言：以存档设置为准
+        if (s.lang && s.lang !== CUR_LANG) CUR_LANG = s.lang;
+        const langSel = document.getElementById('langToggle');
+        if (langSel) langSel.value = CUR_LANG;
+        if (typeof applyI18N === 'function') applyI18N();
         // 渲染所有
         UI.renderAll();
         // 边界：载入的道途寿元已尽（如死亡弹窗未确认即刷新），直接进入羽化流程
@@ -446,6 +451,12 @@
             Game.player.settings.sound = e.target.checked;
             Game.save();
         };
+        // 语言切换
+        document.getElementById('langToggle').onchange = e => { setLang(e.target.value); };
+        document.addEventListener('langchange', () => {
+            const sel = document.getElementById('langToggle');
+            if (sel) sel.value = getLang();
+        });
         // 通用 UI 点击音效（战斗面板与突破/修炼按钮已有专属音效，跳过以免重复）
         document.addEventListener('click', e => {
             const b = e.target.closest('#battlePanel button, .tab-btn, .settings-btn, .modal-btn, .shop-item, .quest-claim');
@@ -453,7 +464,7 @@
             if (b.id === 'breakBtn' || b.id === 'cultivateTap' || b.dataset.sfxSkip) return;
             if (typeof Sound !== 'undefined') Sound.play('click');
         });
-        document.getElementById('manualSaveBtn').onclick = () => doSave('手动存档');
+        document.getElementById('manualSaveBtn').onclick = () => doSave(T('manualSave', '手动存档'));
         document.getElementById('resetBtn').onclick = () => {
             UI.showModal({
                 title: '⚠️ 重置游戏',
@@ -474,7 +485,7 @@
                         document.querySelectorAll('.cc-avatar').forEach(e => e.classList.remove('active'));
                         document.querySelector('.cc-avatar[data-avatar="0"]').classList.add('active');
                         showSaveSelect(false);
-                        UI.toast('游戏已重置', 'good');
+                        UI.toast(T('toast.reset', '游戏已重置'), 'good');
                     }},
                     { text: '取消', action: () => UI.hideModal() }
                 ]

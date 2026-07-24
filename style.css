@@ -1771,3 +1771,18 @@ input { font-family: inherit; }
 .realm-row.current { background: linear-gradient(90deg, rgba(212,175,55,0.22), rgba(212,175,55,0.06)); border-left: 3px solid var(--gold-light); }
 .realm-row.current .c-name { color: var(--gold-light); font-weight: 700; }
 .realm-row.current .c-idx { color: var(--gold-light); }
+
+/* ---------- 语言切换下拉 ---------- */
+.lang-select {
+    background: rgba(0,0,0,0.35);
+    color: var(--text-main);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+.lang-select:focus { border-color: var(--gold-light); }
+.lang-select option { background: #1a1426; color: var(--text-main); }
+

@@ -174,12 +174,12 @@ const UI = {
         const p = Game.player;
         if (!p) return;
         document.getElementById('topName').textContent = p.name;
-        document.getElementById('topRealm').textContent = Cultivate.getRealmName(p);
+        document.getElementById('topRealm').textContent = realmLabel(p);
         // 段位显示（当前层 / 本境界总层）
         const layerNow = p.realmLayer;
         const layerMax = getRealm(p.realmIdx).layers;
         const topDuan = document.getElementById('topDuan');
-        if (topDuan) topDuan.textContent = `段位 ${layerNow} / ${layerMax}`;
+        if (topDuan) topDuan.textContent = (CUR_LANG === 'en' ? 'Layer ' : '段位 ') + layerNow + ' / ' + layerMax;
         const duanVal = document.getElementById('duanValue');
         if (duanVal) duanVal.textContent = `${layerNow} / ${layerMax}`;
         const duanFill = document.getElementById('duanBarFill');
@@ -291,7 +291,7 @@ const UI = {
                 <div class="scene-icon">${s.icon}</div>
                 <div class="scene-name">${s.name}</div>
                 <div class="scene-desc">${s.desc}</div>
-                ${locked ? `<div class="scene-req">需${getRealm(s.realmReq).name}境界</div>` : ''}
+                ${locked ? `<div class="scene-req">需${DN(getRealm(s.realmReq))}境界</div>` : ''}
             `;
             if (!locked) {
                 card.onclick = () => Explore.enterScene(s.id);
@@ -456,7 +456,7 @@ const UI = {
             const canLearn = realmOk && xiuOk;
             // 未解锁时给出明确门槛提示，避免误以为只是战力不够
             let lockTip = '';
-            if (!learned && !realmOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">需${getRealm(s.realmReq).name}境界方可修习</div>`;
+            if (!learned && !realmOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">需${DN(getRealm(s.realmReq))}境界方可修习</div>`;
             else if (!learned && !xiuOk) lockTip = `<div class="skill-cost" style="color:#f43f5e">战力不足，尚缺${fmtNum(s.learnCost - p.zhanli)}</div>`;
             const card = document.createElement('div');
             card.className = 'skill-card' + (learned ? '' : ' locked');
@@ -471,7 +471,7 @@ const UI = {
                 <div class="skill-cost">灵力消耗：${s.cost} ${s.cd ? '· 冷却：' + s.cd + '回合' : ''}</div>
                 ${learned
                     ? `<button class="skill-upgrade" ${lvl >= 100 ? 'disabled' : ''} onclick="UI.upgradeSkill('${s.id}')">升级 (消耗${fmtNum(upCost)}战力)</button>`
-                    : `<button class="skill-upgrade" ${canLearn ? '' : 'disabled'} onclick="UI.learnSkill('${s.id}')">${realmOk ? '学习 (消耗' + fmtNum(s.learnCost) + '战力)' : '需' + getRealm(s.realmReq).name + '境界'}</button>`
+                    : `<button class="skill-upgrade" ${canLearn ? '' : 'disabled'} onclick="UI.learnSkill('${s.id}')">${realmOk ? '学习 (消耗' + fmtNum(s.learnCost) + '战力)' : '需' + DN(getRealm(s.realmReq)) + '境界'}</button>`
                 }
                 ${lockTip}
             `;
@@ -689,8 +689,8 @@ const UI = {
             let statusHtml, btnHtml;
             if (!ch.unlocked) {
                 card.className = 'quest-card locked';
-                statusHtml = `<span class="quest-reward">🔒 未解锁（需${ch.realmName}境界）</span>`;
-                btnHtml = '<button class="quest-claim" disabled>未达境界</button>';
+                statusHtml = `<span class="quest-reward">🔒 未解锁（需${TS(ch.realmName)}境界）</span>`;
+                btnHtml = '<button class="quest-claim" disabled>' + T('notReached', '未达境界') + '</button>';
             } else if (!ch.seen) {
                 card.className = 'quest-card';
                 statusHtml = `<span class="quest-reward">✦ 新章待阅</span>`;
@@ -712,7 +712,7 @@ const UI = {
                     <span class="quest-name">${ch.title}</span>
                     ${statusHtml}
                 </div>
-                <div class="quest-desc">${ch.unlocked ? (ch.body.length > 48 ? ch.body.slice(0, 48) + '…' : ch.body) : '突破至' + ch.realmName + '境界后解锁此章。'}</div>
+                <div class="quest-desc">${ch.unlocked ? (ch.body.length > 48 ? ch.body.slice(0, 48) + '…' : ch.body) : '突破至' + TS(ch.realmName) + '境界后解锁此章。'}</div>
                 ${rewardStr ? `<div class="quest-progress">解锁奖励：${rewardStr}</div>` : ''}
                 ${btnHtml}
             `;
@@ -720,7 +720,7 @@ const UI = {
         });
         // 当前境界提示
         const tip = document.getElementById('mainStoryTip');
-        if (tip) tip.textContent = `当前境界：${curRealm}（共 ${chapters.filter(c => c.unlocked).length}/${chapters.length} 章已解锁）`;
+        if (tip) tip.textContent = T('currentRealm', '当前境界：') + DN(getRealm(p.realmIdx)) + '（共 ' + chapters.filter(c => c.unlocked).length + '/' + chapters.length + ' ' + T('chaptersUnlocked', '章已解锁') + '）';
     },
 
     replayStory(id) {
@@ -792,7 +792,7 @@ const UI = {
                         <span class="friend-power">战力 ${fmtNum(f.power)}</span>
                         ${f.isMe ? '' : `<button class="friend-del" onclick="UI.removeFriend('${f.name.replace(/'/g, "\\'")}')">删除</button>`}
                     </div>
-                    <div class="friend-meta">${f.realmName || ''} ${f.realmLayer ? f.realmLayer + '层' : ''} · 攻${fmtNum(f.atk)} 防${fmtNum(f.def)} 血${fmtNum(f.hp)} 灵${fmtNum(f.ling)}</div>
+                    <div class="friend-meta">${TS(f.realmName) || ''} ${f.realmLayer ? f.realmLayer + '层' : ''} · 攻${fmtNum(f.atk)} 防${fmtNum(f.def)} 血${fmtNum(f.hp)} 灵${fmtNum(f.ling)}</div>
                     <div class="friend-bonus">渡劫加成：修炼+${Math.round((f.tXi || 0) * 100)}% 灵石+${Math.round((f.tSt || 0) * 100)}%</div>
                 </div>`).join('') || '<p class="friend-empty">尚无道友，把档案码发给好友吧～</p>';
         }
@@ -1243,7 +1243,7 @@ const UI = {
         const body = document.getElementById('xianluBody');
         if (!body) return;
         if (p.realmIdx < 32) {
-            body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>大道</b> 境界方可踏入（当前：${getRealm(p.realmIdx).name}${cnNum(p.realmLayer)}层）<br><span class="muted">查看全部境界与每世轮回战力上限，请点左下「境」</span></div>`;
+            body.innerHTML = `<div class="xianlu-locked">🔒 仙路未开<br>需达 <b>${DN(getRealm(32))}</b> 境界方可踏入（当前：${DN(getRealm(p.realmIdx))}${cnNum(p.realmLayer)}层）<br><span class="muted">查看全部境界与每世轮回战力上限，请点左下「境」</span></div>`;
             return;
         }
         // 1. 法则
@@ -1333,13 +1333,13 @@ const UI = {
         const curEl = document.getElementById('realmCurrent');
         if (curEl && p) {
             const cur = getRealm(p.realmIdx);
-            curEl.innerHTML = `你当前：<b>${cur.name}</b> 第 ${p.realmLayer}/${cur.layers} 层　（共 ${realms.length} 大境界 · ${realms.length * 15} 段）`;
+            curEl.innerHTML = `你当前：<b>${DN(cur)}</b> 第 ${p.realmLayer}/${cur.layers} 层　（共 ${realms.length} 大境界 · ${realms.length * 15} 段）`;
         } else if (curEl) {
             curEl.innerHTML = `<span class="muted">尚未创建角色</span>`;
         }
         const tbl = document.getElementById('realmTable');
         if (tbl && p) {
-            let html = '<div class="realm-row realm-headrow"><span class="c-idx">#</span><span class="c-name">境界</span><span class="c-layer">层</span><span class="c-base">基础战力</span><span class="c-cost">满层突破成本</span></div>';
+            let html = '<div class="realm-row realm-headrow"><span class="c-idx">#</span><span class="c-name">' + T('realmHeader', '境界') + '</span><span class="c-layer">' + T('layer', '层') + '</span><span class="c-base">' + T('baseHeader', '基础战力') + '</span><span class="c-cost">' + T('costHeader', '满层突破成本') + '</span></div>';
             realms.forEach((r, i) => {
                 const cost = Cultivate.getBreakthroughCost({ realmIdx: i, realmLayer: r.layers });
                 const cls = (i === p.realmIdx) ? ' realm-row current' : ' realm-row';
@@ -1364,16 +1364,16 @@ const UI = {
         }
         const capTbl = document.getElementById('capTable');
         if (capTbl && p) {
-            let html = '<div class="realm-row realm-headrow"><span class="c-idx">世</span><span class="c-name">需达境界(满层)</span><span class="c-cost">战力上线</span></div>';
+            let html = '<div class="realm-row realm-headrow"><span class="c-idx">世</span><span class="c-name">' + T('reqRealmMax', '需达境界(满层)') + '</span><span class="c-cost">' + T('capHeader', '战力上线') + '</span></div>';
             for (let n = 0; n <= maxR; n++) {
                 const idx = Math.min(last, baseR + n * perR);
                 let realmName, cap, capTxt;
                 if (n >= maxR || idx >= last) {
-                    realmName = '—（终局）';
+                    realmName = T('final', '—（终局）');
                     cap = ZHANLI_CAP;
                     capTxt = fmtNum(cap) + '（无上限）';
                 } else {
-                    realmName = realms[idx].name + '（满层）';
+                    realmName = DN(realms[idx]) + '（满层）';
                     cap = Cultivate.getRebirthZhanliCap({ rebirth: n });
                     capTxt = fmtNum(cap);
                 }
@@ -1435,6 +1435,13 @@ const UI = {
     },
 
     /* ---------- 切换面板 ---------- */
+    /* ---------- 语言切换后整体重渲染 ---------- */
+    refreshAll() {
+        try { this.updateResourceBar(); } catch (e) {}
+        if (typeof Game !== 'undefined' && Game.currentPanel) { try { this.switchPanel(Game.currentPanel); } catch (e) {} }
+        if (typeof applyI18N === 'function') applyI18N();
+    },
+
     switchPanel(name) {
         // 灵宠/天赋已并入修炼区子标签，快捷键与教程经此统一路由
         if (name === 'pet' || name === 'talent') { try { this.switchCultSub(name); } catch (e) { if (typeof console !== 'undefined') console.error('[switchPanel '+name+']', e && (e.stack || e.message)); } return; }
